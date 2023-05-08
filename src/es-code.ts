@@ -1,4 +1,5 @@
 import { EsPrintable, EsPrinter } from './es-printer.js';
+import { EsEmitter, EsFragment, EsSource } from './es-source.js';
 import { collectLines } from './impl/collect-lines.js';
 
 export class EsCode implements EsEmitter {
@@ -138,18 +139,6 @@ export class EsCode implements EsEmitter {
   }
 
 }
-
-export interface EsEmitter {
-  emit(): string | EsPrintable | PromiseLike<string | EsPrintable>;
-}
-
-export type EsBuilder = (this: void, code: EsCode) => void | PromiseLike<void>;
-
-export interface EsFragment {
-  toCode(): EsSource;
-}
-
-export type EsSource = string | EsPrintable | EsEmitter | EsFragment | EsBuilder;
 
 function isEsPrintable(source: EsSource): source is EsEmitter {
   return typeof source === 'object' && 'emit' in source && typeof source.emit === 'function';
