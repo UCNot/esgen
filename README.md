@@ -13,9 +13,9 @@
 [npm-url]: https://www.npmjs.com/package/esgen
 [build-status-img]: https://github.com/run-z/esgen/workflows/Build/badge.svg
 [build-status-link]: https://github.com/run-z/esgen/actions?query=workflow:Build
-[quality-img]: https://app.codacy.com/project/badge/Grade/e0cde60880cf434f8e46f63334d86b1e
-[quality-link]: https://www.codacy.com/gh/run-z/esgen/dashboard?utm_source=github.com&utm_medium=referral&utm_content=run-z/esgen&utm_campaign=Badge_Grade
-[coverage-img]: https://app.codacy.com/project/badge/Coverage/e0cde60880cf434f8e46f63334d86b1e
+[quality-img]: https://app.codacy.com/project/badge/Grade/da92c27a5c3445c58dfa346b1307cb85
+[quality-link]: https://app.codacy.com/gh/run-z/esgen/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
+[coverage-img]: https://app.codacy.com/project/badge/Coverage/da92c27a5c3445c58dfa346b1307cb85
 [coverage-link]: https://www.codacy.com/gh/run-z/esgen/dashboard?utm_source=github.com&utm_medium=referral&utm_content=run-z/esgen&utm_campaign=Badge_Coverage
 [github-image]: https://img.shields.io/static/v1?logo=github&label=GitHub&message=project&color=informational
 [github-url]: https://github.com/run-z/esgen
