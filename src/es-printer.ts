@@ -74,6 +74,10 @@ export class EsPrinter implements EsPrintable {
   }
 
   #appendLines(lines: string[], from: EsPrinter): void {
+    if (!lines.length) {
+      return;
+    }
+
     const prefix = this.#indent + from.#indent;
 
     if (this.#nl) {
