@@ -1,5 +1,6 @@
+import { EsEmission, EsEmitter } from './es-emission.js';
 import { EsPrintable, EsPrinter } from './es-printer.js';
-import { EsEmitter, EsFragment, EsSource } from './es-source.js';
+import { EsFragment, EsSource } from './es-source.js';
 import { collectLines } from './impl/collect-lines.js';
 
 export class EsCode implements EsEmitter {
@@ -10,15 +11,17 @@ export class EsCode implements EsEmitter {
 
   readonly #parent: EsCode | undefined;
   readonly #parts: EsEmitter[] = [];
-  #addPart: (part: EsEmitter) => void;
+  readonly #emissions = new Map<EsEmission, EsEmission.Span>();
 
   constructor(parent?: EsCode) {
     this.#parent = parent;
-    this.#addPart = this.#doAddPart;
   }
 
-  #doAddPart(part: EsEmitter): void {
+  #addPart(part: EsEmitter): void {
     this.#parts.push(part);
+    for (const { emit } of this.#emissions.values()) {
+      emit(part);
+    }
   }
 
   write(...fragments: EsSource[]): this {
@@ -89,51 +92,48 @@ export class EsCode implements EsEmitter {
     return this;
   }
 
-  async emit(): Promise<EsPrintable> {
-    const extraRecords: (string | EsPrintable)[] = [];
-    let whenEmitted: Promise<unknown> = Promise.resolve();
+  async emit(emission?: EsEmission): Promise<EsPrintable> {
+    let codeEmission: EsEmission;
 
-    this.#addPart = part => {
-      this.#doAddPart(part);
+    if (emission) {
+      const existingSpan = this.#emissions.get(emission);
 
-      whenEmitted = Promise.all([
-        whenEmitted,
-        (async () => {
-          extraRecords.push(await part.emit());
-        })(),
-      ]);
-    };
+      if (existingSpan) {
+        return existingSpan.result;
+      }
 
-    const records = await Promise.all(this.#parts.map(async part => await part.emit()));
+      codeEmission = emission;
+    } else {
+      codeEmission = new EsEmission();
+    }
 
-    return Promise.resolve({
-      printTo: async span => {
-        this.#addPart = () => {
-          throw new TypeError('Code printed already');
-        };
+    const span = codeEmission.emit(...this.#parts);
 
-        await whenEmitted;
+    this.#emissions.set(codeEmission, span);
 
-        if (records.length) {
-          span.print(...records);
-        }
-        if (extraRecords.length) {
-          span.print(...extraRecords);
-        }
-      },
-    });
+    if (emission) {
+      codeEmission.whenDone().finally(() => {
+        this.#emissions.delete(codeEmission);
+      });
+    } else {
+      await codeEmission.done().finally(() => {
+        this.#emissions.delete(codeEmission);
+      });
+    }
+
+    return span.result;
   }
 
-  async *lines(): AsyncIterableIterator<string> {
-    yield* new EsPrinter().print(await this.emit()).lines();
+  async *lines(emission?: EsEmission): AsyncIterableIterator<string> {
+    yield* new EsPrinter().print(await this.emit(emission)).lines();
   }
 
-  async toLines(): Promise<string[]> {
-    return await collectLines(this.lines());
+  async toLines(emission?: EsEmission): Promise<string[]> {
+    return await collectLines(this.lines(emission));
   }
 
-  async toText(): Promise<string> {
-    const lines = await this.toLines();
+  async toText(emission?: EsEmission): Promise<string> {
+    const lines = await this.toLines(emission);
 
     return lines.join('');
   }
