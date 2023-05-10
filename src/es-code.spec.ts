@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import { EsBundle } from './es-bundle.js';
 import { EsCode } from './es-code.js';
-import { EsEmission } from './es-emission.js';
 import { EsOutput } from './es-output.js';
 
 describe('EsCode', () => {
@@ -133,38 +133,40 @@ describe('EsCode', () => {
     it('emits the same code more than once', async () => {
       code.write('first();');
 
-      const emission = new EsEmission();
-      const record1 = await code.emit(emission);
-      const record2 = await code.emit(emission);
+      const bundle = new EsBundle();
+      const record1 = await code.emit(bundle);
+      const record2 = await code.emit(bundle);
 
       expect(record1).toBe(record2);
 
       await expect(new EsOutput().print(record1).toText()).resolves.toBe('first();\n');
-      await emission.done();
+      await bundle.done();
     });
     it('allows inserting code after call', async () => {
       code.write('first();');
 
-      const emission = new EsEmission();
+      const bundle = new EsBundle();
+      const emission = bundle.spawn();
       const record = await code.emit(emission);
 
       code.write('second();');
 
       await expect(new EsOutput().print(record).toText()).resolves.toBe('first();\nsecond();\n');
       await expect(new EsOutput().print(record).toText()).resolves.toBe('first();\nsecond();\n');
-      await emission.done();
+      await bundle.done();
+      await emission.whenDone();
     });
     it('prevents inserting code after print', async () => {
       code.write('first();');
 
-      const emission = new EsEmission();
-      const record = await code.emit(emission);
+      const bundle = new EsBundle();
+      const record = await code.emit(bundle);
 
       await expect(new EsOutput().print(record).toText()).resolves.toBe('first();\n');
 
       expect(() => code.write('second();')).toThrow(new TypeError('Code printed already'));
 
-      await emission.done();
+      await bundle.done();
     });
   });
 });

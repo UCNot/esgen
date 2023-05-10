@@ -1,6 +1,7 @@
 /**
  * @module esgen
  */
+export * from './es-bundle.js';
 export * from './es-code.js';
 export * from './es-emission.js';
 export * from './es-output.js';

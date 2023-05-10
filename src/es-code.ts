@@ -1,3 +1,4 @@
+import { EsBundle } from './es-bundle.js';
 import { EsEmission, EsEmitter } from './es-emission.js';
 import { EsOutput, EsPrinter } from './es-output.js';
 import { EsFragment, EsSource } from './es-source.js';
@@ -92,36 +93,38 @@ export class EsCode implements EsEmitter {
     return this;
   }
 
-  async emit(emission?: EsEmission): Promise<EsPrinter> {
-    let codeEmission: EsEmission;
+  async emit(emission?: EsEmission): Promise<EsPrinter>;
+  async emit(explicitEmission?: EsEmission): Promise<EsPrinter> {
+    let bundle: EsBundle | undefined;
+    let emission: EsEmission;
 
-    if (emission) {
-      const existingSpan = this.#emissions.get(emission);
+    if (explicitEmission) {
+      const existingSpan = this.#emissions.get(explicitEmission);
 
       if (existingSpan) {
-        return existingSpan.result;
+        return existingSpan.printer;
       }
 
-      codeEmission = emission;
+      emission = explicitEmission;
     } else {
-      codeEmission = new EsEmission();
+      emission = bundle = new EsBundle();
     }
 
-    const span = codeEmission.emit(...this.#parts);
+    const span = emission.span(...this.#parts);
 
-    this.#emissions.set(codeEmission, span);
+    this.#emissions.set(emission, span);
 
-    if (emission) {
-      codeEmission.whenDone().finally(() => {
-        this.#emissions.delete(codeEmission);
+    if (bundle) {
+      await bundle.done().finally(() => {
+        this.#emissions.delete(emission);
       });
     } else {
-      await codeEmission.done().finally(() => {
-        this.#emissions.delete(codeEmission);
+      emission.whenDone().finally(() => {
+        this.#emissions.delete(emission);
       });
     }
 
-    return span.result;
+    return span.printer;
   }
 
   async *lines(emission?: EsEmission): AsyncIterableIterator<string> {

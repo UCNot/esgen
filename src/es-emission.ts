@@ -1,131 +1,104 @@
-import { EveryPromiseResolver, PromiseResolver } from '@proc7ts/async';
+import { EsBundle } from './es-bundle.js';
 import { EsPrinter } from './es-output.js';
+import { EsNamespace } from './symbols/es-namespace.js';
 
-export class EsEmission {
+/**
+ * Code emission control.
+ *
+ * Ensures that all code {@link EsCode#emit emitted} before the code printed.
+ *
+ * Code emitted in multiple {@link EsEmission.Span spans} in arbitrary order.
+ *
+ * Emissions may {@link spawn} more emissions, e.g. for nested namespaces.
+ */
+export interface EsEmission {
+  /**
+   * Bundling control that {@link spawn spawned} this emission.
+   */
+  get bundle(): EsBundle;
 
-  readonly #parent: EsEmission | undefined;
-  readonly #state: [EsEmission$State];
+  /**
+   * Namespace to {@link EsNamespace#bindSymbol bind local symbols} to.
+   */
+  get ns(): EsNamespace;
 
-  constructor(parent?: EsEmission) {
-    this.#parent = parent;
-    this.#state = parent
-      ? parent.#state
-      : [new EsEmission$ActiveState(newState => (this.#state[0] = newState))];
-  }
+  /**
+   * Checks whether the emission is still active.
+   *
+   * @returns `true` if emission is in process, or `false` if emission is {@link EsBundle#done completed}.
+   */
+  isActive(): boolean;
 
-  isActive(): boolean {
-    return this.#state[0].isActive();
-  }
+  /**
+   * Spawns another emission.
+   *
+   * @param init - Nested emission options.
+   *
+   * @returns New emission instance.
+   */
+  spawn(init?: EsEmission.Init): EsEmission;
 
-  emit(...emitters: EsEmitter[]): EsEmission.Span {
-    return this.#state[0].emit(this, ...emitters);
-  }
+  /**
+   * Starts new emission span.
+   *
+   * @param emitters - Code emitters to emit the code into the span.
+   *
+   * @returns New code emission span.
+   */
+  span(...emitters: EsEmitter[]): EsEmission.Span;
 
-  async done(): Promise<void> {
-    if (!this.#parent) {
-      await this.#state[0].done();
-    }
-  }
-
-  async whenDone(): Promise<void> {
-    await this.#state[0].whenDone();
-  }
-
+  /**
+   * Awaits for all code emissions completed.
+   *
+   * @returns Promise resolved when all code emission completes.
+   */
+  whenDone(): Promise<void>;
 }
 
 export namespace EsEmission {
+  /**
+   * Initialization options for {@link EsEmission#spawn spawned} code emission.
+   */
+  export interface Init {
+    /**
+     * Initialization options for {@link EsNamespace#nest nested namespace}.
+     */
+    readonly ns?: Omit<EsNamespace.Init, 'enclosing'> | undefined;
+  }
+
+  /**
+   * Code emission span used to {@link emit} additional code and to {@link printer print} it then.
+   */
   export interface Span {
-    readonly result: EsPrinter;
+    /**
+     * Emitted code printer.
+     */
+    readonly printer: EsPrinter;
+
+    /**
+     * Emits additional code.
+     *
+     * Can be called before the emitted code {@link printer printed}.
+     *
+     * @param emitters - Additional code emitters.
+     */
     emit(this: void, ...emitters: EsEmitter[]): void;
   }
 }
 
+/**
+ * Code emitter invoked prior the code print.
+ *
+ * Multiple code emissions may be active at the same time. More code emissions may be initiated while emitting the code.
+ * However, all code emissions has to complete _before_ the emitted code printed.
+ */
 export interface EsEmitter {
+  /**
+   * Emits the code during code `emission`.
+   *
+   * @param emission - Code emission control.
+   *
+   * @returns Either printed string, emitted code printer, or a promise-like instance of the one of the above.
+   */
   emit(emission: EsEmission): string | EsPrinter | PromiseLike<string | EsPrinter>;
 }
-
-interface EsEmission$State {
-  isActive(): boolean;
-  emit(emission: EsEmission, ...emitters: EsEmitter[]): EsEmission.Span;
-  done(): Promise<void>;
-  whenDone(): Promise<void>;
-}
-
-class EsEmission$ActiveState implements EsEmission$State {
-
-  readonly #change: (newState: EsEmission$State) => void;
-  readonly #done = new PromiseResolver();
-  readonly #resolver = new EveryPromiseResolver<unknown>(this.#done.whenDone());
-
-  constructor(change: (newState: EsEmission$State) => void) {
-    this.#change = change;
-  }
-
-  isActive(): boolean {
-    return true;
-  }
-
-  emit(emission: EsEmission, ...emitters: EsEmitter[]): EsEmission.Span {
-    const { add, whenDone } = new EveryPromiseResolver<string | EsPrinter>();
-
-    let emit = (...emitters: EsEmitter[]): void => {
-      add(...emitters.map(emitter => emitter.emit(emission)));
-    };
-
-    emit(...emitters);
-    this.#resolver.add(whenDone());
-
-    return {
-      result: {
-        printTo: async span => {
-          emit = () => {
-            throw new TypeError('Code printed already');
-          };
-
-          const records = await whenDone();
-
-          if (records.length) {
-            span.print(...records);
-          }
-        },
-      },
-      emit(...emitters) {
-        emit(...emitters);
-      },
-    };
-  }
-
-  async done(): Promise<void> {
-    this.#done.resolve();
-    this.#change(EsEmission$emittedState);
-
-    return this.whenDone();
-  }
-
-  async whenDone(): Promise<void> {
-    await this.#resolver.whenDone();
-  }
-
-}
-
-class EsEmission$EmittedState implements EsEmission$State {
-
-  isActive(): boolean {
-    return false;
-  }
-
-  emit(_emission: EsEmission): never {
-    throw new TypeError(`All code emitted already`);
-  }
-
-  async done(): Promise<void> {
-    await this.whenDone();
-  }
-
-  whenDone(): Promise<void> {
-    return Promise.resolve();
-  }
-
-}
-
-const EsEmission$emittedState = /*#__PURE__*/ new EsEmission$EmittedState();

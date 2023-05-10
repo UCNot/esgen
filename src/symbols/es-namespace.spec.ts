@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 import { EsNamespace } from './es-namespace.js';
 import { EsSymbol } from './es-symbol.js';
 
-describe('UccNamespace', () => {
+describe('EsNamespace', () => {
   let ns: EsNamespace;
 
   beforeEach(() => {
