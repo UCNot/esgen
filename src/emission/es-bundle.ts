@@ -1,5 +1,6 @@
 import { EveryPromiseResolver, PromiseResolver } from '@proc7ts/async';
-import { EsPrinter } from '../es-output.js';
+import { lazyValue } from '@proc7ts/primitives';
+import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsEmission, EsEmitter } from './es-emission.js';
@@ -74,6 +75,85 @@ export class EsBundle implements EsEmission {
     await this.#state[0].done();
   }
 
+  /**
+   * Bundles emitted code.
+   *
+   * @param emitters - Code emitters.
+   *
+   * @returns Bundling result in appropriate {@link format}.
+   */
+  emit(...emitters: EsEmitter[]): EsBundle.Result {
+    const { printer } = this.span(...emitters);
+    const toText = lazyValue(async () => {
+      const output = new EsOutput();
+
+      await this.#print(printer, output);
+
+      return await output.toText();
+    });
+
+    return {
+      printTo: async out => {
+        await this.#print(printer, out);
+      },
+      toText,
+      toExports: this.#toExports(toText),
+    };
+  }
+
+  async #print(printer: EsPrinter, out: EsOutput): Promise<void> {
+    await this.done();
+
+    const body = this.#printBody(printer);
+
+    switch (this.format) {
+      case EsBundleFormat.IIFE:
+        out
+          .print(`return (async () => {`)
+          .indent(out => out.print(body, /* TODO Add exports instead */ 'return {};'))
+          .print(`})();`);
+
+        break;
+      case EsBundleFormat.ES2015:
+        out.print(body);
+
+        break;
+    }
+  }
+
+  #printBody(printer: EsPrinter): EsPrinter {
+    return {
+      printTo: out => {
+        // TODO Add imports here.
+        // TODO Add declarations here.
+        out.print(printer);
+        // TODO Add exports here.
+      },
+    };
+  }
+
+  #toExports(toText: () => Promise<string>): () => Promise<Record<string, unknown>> {
+    const { format } = this;
+
+    if (format !== EsBundleFormat.IIFE) {
+      return this.#doNotExport.bind(this);
+    }
+
+    return async () => await this.#export(toText);
+  }
+
+  async #export(toText: () => Promise<string>): Promise<Record<string, unknown>> {
+    const text = await toText();
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    const factory = Function(text) as () => Promise<Record<string, unknown>>;
+
+    return await factory();
+  }
+
+  #doNotExport(): Promise<never> {
+    return Promise.reject(new TypeError(`Can not export from ${this.format} bundle`));
+  }
+
 }
 
 export namespace EsBundle {
@@ -96,6 +176,29 @@ export namespace EsBundle {
      * @defaultValue New namespace instance.
      */
     readonly ns?: EsNamespace | undefined;
+  }
+
+  /**
+   * Result of code {@link EsBundle#bundle bundling}.
+   *
+   * Accessing the result would {@link EsBundle#done stop} code emission.
+   */
+  export interface Result extends EsPrinter {
+    /**
+     * Prints the bundled code as text.
+     *
+     * @returns Promise resolved to printed text.
+     */
+    toText(this: void): Promise<string>;
+
+    /**
+     * Builds code exports.
+     *
+     * Can be called only for {@link EsBundleFormat.IIFE IIFE}.
+     *
+     * @returns Promise resolved to record containing exported declarations.
+     */
+    toExports(): Promise<Record<string, unknown>>;
   }
 }
 
@@ -178,7 +281,7 @@ class EsEmission$ActiveState implements EsEmission$State {
 
     return {
       printer: {
-        printTo: async span => {
+        printTo: async out => {
           emit = () => {
             throw new TypeError('Code printed already');
           };
@@ -186,7 +289,7 @@ class EsEmission$ActiveState implements EsEmission$State {
           const records = await whenDone();
 
           if (records.length) {
-            span.print(...records);
+            out.print(...records);
           }
         },
       },

@@ -32,16 +32,16 @@ export class EsOutput implements EsPrinter {
     }
   }
 
-  async #print(print: EsPrinter): Promise<string[]> {
-    const span = new EsOutput();
+  async #print(printer: EsPrinter): Promise<string[]> {
+    const out = new EsOutput();
 
-    span.#nl = this.#nl;
-    await print.printTo(span);
+    out.#nl = this.#nl;
+    await printer.printTo(out);
 
-    return await span.toLines();
+    return await out.toLines();
   }
 
-  inline(print: (span: EsOutput) => void): this {
+  inline(print: (out: EsOutput) => void): this {
     const inline = new EsOutput();
 
     inline.#nl = '';
@@ -51,7 +51,7 @@ export class EsOutput implements EsPrinter {
     return this;
   }
 
-  indent(print: (span: EsOutput) => void, indent = '  '): this {
+  indent(print: (out: EsOutput) => void, indent = '  '): this {
     const indented = new EsOutput();
 
     indented.#indent = indent;
@@ -61,16 +61,16 @@ export class EsOutput implements EsPrinter {
     return this;
   }
 
-  printTo(span: EsOutput): void {
+  printTo(out: EsOutput): void {
     if (this.#records.length) {
-      span.print({
+      out.print({
         printTo: this.#printTo.bind(this),
       });
     }
   }
 
-  async #printTo(span: EsOutput): Promise<void> {
-    span.#appendLines(await this.toLines(), this);
+  async #printTo(out: EsOutput): Promise<void> {
+    out.#appendLines(await this.toLines(), this);
   }
 
   #appendLines(lines: string[], from: EsOutput): void {
@@ -150,8 +150,19 @@ export class EsOutput implements EsPrinter {
 
 }
 
+/**
+ * Code printer.
+ */
 export interface EsPrinter {
-  printTo(span: EsOutput): void | PromiseLike<void>;
+  /**
+   * Prints code to the `output`.
+   *
+   * @param out - Target code output.
+   *
+   * @returns Either none if code printed synchronously, or promise-like instance resolved when code printed
+   * asynchronously.
+   */
+  printTo(out: EsOutput): void | PromiseLike<void>;
 }
 
 type EsPrintRecord = string[] | Promise<string[]>;

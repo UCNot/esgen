@@ -13,7 +13,7 @@ describe('EsOutput', () => {
       await expect(
         output
           .print('{')
-          .indent(span => span.print())
+          .indent(out => out.print())
           .print('}')
           .toText(),
       ).resolves.toBe('{\n\n}\n');
@@ -22,7 +22,7 @@ describe('EsOutput', () => {
       await expect(
         output
           .print('{')
-          .indent(span => span.print('').print('').print(''))
+          .indent(out => out.print('').print('').print(''))
           .print('}')
           .toText(),
       ).resolves.toBe('{\n\n}\n');
@@ -39,7 +39,7 @@ describe('EsOutput', () => {
       await expect(
         output
           .print('{')
-          .indent(span => span.print('abc').print('').print('').print().print('def'))
+          .indent(out => out.print('abc').print('').print('').print().print('def'))
           .print('}')
           .toText(),
       ).resolves.toBe('{\n  abc\n\n  def\n}\n');
@@ -54,9 +54,9 @@ describe('EsOutput', () => {
       await expect(
         output
           .print('{')
-          .indent(span => span
+          .indent(out => out
               .print('{')
-              .indent(span => span.inline(span => span.print('foo();', 'bar();')))
+              .indent(out => out.inline(out => out.print('foo();', 'bar();')))
               .print('}'))
           .print('}')
           .toText(),
@@ -68,11 +68,11 @@ describe('EsOutput', () => {
     it('respects outer indentation', async () => {
       output
         .print('{')
-        .indent(span => {
-          span.inline(span => {
-            span
+        .indent(out => {
+          out.inline(out => {
+            out
               .print('foo(')
-              .indent(span => span.print('a,', 'b,', 'c,', ''))
+              .indent(out => out.print('a,', 'b,', 'c,', ''))
               .print(');');
           });
         })
@@ -87,9 +87,9 @@ describe('EsOutput', () => {
       await expect(
         output
           .print('{')
-          .indent(span => span
+          .indent(out => out
               .print('{')
-              .indent(span => span.print('foo();', 'bar();'), '/* indent */ ')
+              .indent(out => out.print('foo();', 'bar();'), '/* indent */ ')
               .print('}'))
           .print('}')
           .toText(),
