@@ -84,50 +84,52 @@ export class EsBundle implements EsEmission {
    */
   emit(...emitters: EsEmitter[]): EsBundle.Result {
     const { printer } = this.span(...emitters);
-    const toText = lazyValue(async () => {
-      const output = new EsOutput();
-
-      await this.#print(printer, output);
-
-      return await output.toText();
-    });
+    const toText = lazyValue(
+      async () => await new EsOutput().print(await this.#printBundle(printer)).toText(),
+    );
 
     return {
       printTo: async out => {
-        await this.#print(printer, out);
+        out.print(await this.#printBundle(printer));
       },
       toText,
       toExports: this.#toExports(toText),
     };
   }
 
-  async #print(printer: EsPrinter, out: EsOutput): Promise<void> {
+  async #printBundle(body: EsPrinter): Promise<EsPrinter> {
     await this.done();
 
-    const body = this.#printBody(printer);
+    const content = this.#printContent(body);
 
     switch (this.format) {
       case EsBundleFormat.IIFE:
-        out
-          .print(`return (async () => {`)
-          .indent(out => out.print(body, /* TODO Add exports instead */ 'return {};'))
-          .print(`})();`);
-
-        break;
+        return this.#printIIFE(content);
       case EsBundleFormat.ES2015:
-        out.print(body);
-
-        break;
+        return content;
     }
   }
 
-  #printBody(printer: EsPrinter): EsPrinter {
+  #printContent(body: EsPrinter): EsPrinter {
     return {
       printTo: out => {
         // TODO Add imports here.
         // TODO Add declarations here.
-        out.print(printer);
+        out.print(body);
         // TODO Add exports here.
+      },
+    };
+  }
+
+  #printIIFE(content: EsPrinter): EsPrinter {
+    return {
+      printTo: out => {
+        out.inline(out => {
+          out
+            .print(`(async () => {`)
+            .indent(out => out.print(content, /* TODO Add exports instead */ 'return {};', ''))
+            .print('', `})()`);
+        });
       },
     };
   }
@@ -139,13 +141,16 @@ export class EsBundle implements EsEmission {
       return this.#doNotExport.bind(this);
     }
 
-    return async () => await this.#export(toText);
+    return async () => await this.#returnExports(toText);
   }
 
-  async #export(toText: () => Promise<string>): Promise<Record<string, unknown>> {
+  async #returnExports(toText: () => Promise<string>): Promise<Record<string, unknown>> {
     const text = await toText();
+
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
-    const factory = Function(text) as () => Promise<Record<string, unknown>>;
+    const factory = Function(`return ${text.slice(0, -1)};`) as () => Promise<
+      Record<string, unknown>
+    >;
 
     return await factory();
   }
