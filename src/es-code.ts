@@ -1,5 +1,5 @@
-import { EsBundle } from './es-bundle.js';
-import { EsEmission, EsEmitter } from './es-emission.js';
+import { EsBundle } from './emission/es-bundle.js';
+import { EsEmission, EsEmitter } from './emission/es-emission.js';
 import { EsOutput, EsPrinter } from './es-output.js';
 import { EsFragment, EsSource } from './es-source.js';
 import { collectLines } from './impl/collect-lines.js';

@@ -1,5 +1,5 @@
+import { EsEmitter } from './emission/es-emission.js';
 import { EsCode } from './es-code.js';
-import { EsEmitter } from './es-emission.js';
 import { EsPrinter } from './es-output.js';
 
 export type EsSource = string | EsPrinter | EsEmitter | EsFragment | EsBuilder;

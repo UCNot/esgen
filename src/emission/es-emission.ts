@@ -1,6 +1,7 @@
+import { EsPrinter } from '../es-output.js';
+import { EsNamespace } from '../symbols/es-namespace.js';
+import { EsBundleFormat } from './es-bundle-format.js';
 import { EsBundle } from './es-bundle.js';
-import { EsPrinter } from './es-output.js';
-import { EsNamespace } from './symbols/es-namespace.js';
 
 /**
  * Code emission control.
@@ -13,9 +14,14 @@ import { EsNamespace } from './symbols/es-namespace.js';
  */
 export interface EsEmission {
   /**
-   * Bundling control that {@link spawn spawned} this emission.
+   * Code bundle control that {@link spawn spawned} this emission.
    */
   get bundle(): EsBundle;
+
+  /**
+   * Format of the bundled code.
+   */
+  get format(): EsBundleFormat;
 
   /**
    * Namespace to {@link EsNamespace#bindSymbol bind local symbols} to.

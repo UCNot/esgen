@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import { EsNamespace } from '../symbols/es-namespace.js';
+import { EsBundleFormat } from './es-bundle-format.js';
 import { EsBundle } from './es-bundle.js';
-import { EsNamespace } from './symbols/es-namespace.js';
 
 describe('EsBundle', () => {
   let bundle: EsBundle;
@@ -15,6 +16,20 @@ describe('EsBundle', () => {
     });
     it('refers spawning bundle', () => {
       expect(bundle.spawn().spawn().bundle).toBe(bundle);
+    });
+  });
+
+  describe('format', () => {
+    it('is ES2015 by default', () => {
+      expect(bundle.format).toBe(EsBundleFormat.ES2015);
+      expect(bundle.spawn().format).toBe(EsBundleFormat.ES2015);
+    });
+    it('is accepted as initialization option', () => {
+      const format = EsBundleFormat.IIFE;
+      const bundle = new EsBundle({ format });
+
+      expect(bundle.format).toBe(format);
+      expect(bundle.spawn().format).toBe(format);
     });
   });
 

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsBundle } from './es-bundle.js';
+import { EsBundle } from './emission/es-bundle.js';
 import { EsCode } from './es-code.js';
 import { EsOutput } from './es-output.js';
 

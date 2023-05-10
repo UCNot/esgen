@@ -1,16 +1,18 @@
 import { EveryPromiseResolver, PromiseResolver } from '@proc7ts/async';
+import { EsPrinter } from '../es-output.js';
+import { EsNamespace } from '../symbols/es-namespace.js';
+import { EsBundleFormat } from './es-bundle-format.js';
 import { EsEmission, EsEmitter } from './es-emission.js';
-import { EsPrinter } from './es-output.js';
-import { EsNamespace } from './symbols/es-namespace.js';
 
 /**
- * Code bundling control.
+ * Code bundle control.
  *
- * Controls the emission of the code supposed to be placed to the same bundle (module, file, etc.).
+ * Controls the emission of the code supposed to be placed to the same bundle (i.e. module, file, etc.).
  */
 export class EsBundle implements EsEmission {
 
   readonly #state: [EsEmission$State];
+  readonly #format: EsBundleFormat;
   readonly #ns: EsNamespace;
 
   /**
@@ -19,7 +21,11 @@ export class EsBundle implements EsEmission {
    * @param init - Bundle emission initialization options.
    */
   constructor(init?: EsBundle.Init);
-  constructor({ ns = new EsNamespace({ comment: 'Bundle' }) }: EsBundle.Init = {}) {
+  constructor({
+    format = EsBundleFormat.Default,
+    ns = new EsNamespace({ comment: 'Bundle' }),
+  }: EsBundle.Init = {}) {
+    this.#format = format;
     this.#ns = ns;
     this.#state = [new EsEmission$ActiveState(newState => (this.#state[0] = newState))];
   }
@@ -31,6 +37,10 @@ export class EsBundle implements EsEmission {
     return this;
   }
 
+  get format(): EsBundleFormat {
+    return this.#format;
+  }
+
   get ns(): EsNamespace {
     return this.#ns;
   }
@@ -40,7 +50,7 @@ export class EsBundle implements EsEmission {
   }
 
   spawn(init?: EsEmission.Init): EsEmission {
-    return new NestedEsEmission(
+    return new SpawnedEsEmission(
       this,
       this.#state,
       new EsNamespace({ ...init?.ns, enclosing: this.ns }),
@@ -69,8 +79,17 @@ export class EsBundle implements EsEmission {
 export namespace EsBundle {
   /**
    * Initialization options for bundle emission.
+   *
+   * @typeParam TFormat - Supported bundled code format.
    */
-  export interface Init {
+  export interface Init<out TFormat extends EsBundleFormat = EsBundleFormat> {
+    /**
+     * Format of the bundled code.
+     *
+     * @defaultValue {@link EsBundleFormat.Default}.
+     */
+    readonly format?: TFormat | undefined;
+
     /**
      * Top-level namespace to use.
      *
@@ -80,7 +99,7 @@ export namespace EsBundle {
   }
 }
 
-class NestedEsEmission implements EsEmission {
+class SpawnedEsEmission implements EsEmission {
 
   readonly #bundle: EsBundle;
   readonly #state: [EsEmission$State];
@@ -96,6 +115,10 @@ class NestedEsEmission implements EsEmission {
     return this.#bundle;
   }
 
+  get format(): EsBundleFormat {
+    return this.bundle.format;
+  }
+
   get ns(): EsNamespace {
     return this.#ns;
   }
@@ -105,7 +128,7 @@ class NestedEsEmission implements EsEmission {
   }
 
   spawn(init?: EsEmission.Init): EsEmission {
-    return new NestedEsEmission(
+    return new SpawnedEsEmission(
       this.bundle,
       this.#state,
       new EsNamespace({ ...init?.ns, enclosing: this.ns }),
