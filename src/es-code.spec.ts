@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { EsCode } from './es-code.js';
 import { EsEmission } from './es-emission.js';
-import { EsPrinter } from './es-printer.js';
+import { EsOutput } from './es-output.js';
 
 describe('EsCode', () => {
   let code: EsCode;
@@ -139,7 +139,7 @@ describe('EsCode', () => {
 
       expect(record1).toBe(record2);
 
-      await expect(new EsPrinter().print(record1).toText()).resolves.toBe('first();\n');
+      await expect(new EsOutput().print(record1).toText()).resolves.toBe('first();\n');
       await emission.done();
     });
     it('allows inserting code after call', async () => {
@@ -150,8 +150,8 @@ describe('EsCode', () => {
 
       code.write('second();');
 
-      await expect(new EsPrinter().print(record).toText()).resolves.toBe('first();\nsecond();\n');
-      await expect(new EsPrinter().print(record).toText()).resolves.toBe('first();\nsecond();\n');
+      await expect(new EsOutput().print(record).toText()).resolves.toBe('first();\nsecond();\n');
+      await expect(new EsOutput().print(record).toText()).resolves.toBe('first();\nsecond();\n');
       await emission.done();
     });
     it('prevents inserting code after print', async () => {
@@ -160,7 +160,7 @@ describe('EsCode', () => {
       const emission = new EsEmission();
       const record = await code.emit(emission);
 
-      await expect(new EsPrinter().print(record).toText()).resolves.toBe('first();\n');
+      await expect(new EsOutput().print(record).toText()).resolves.toBe('first();\n');
 
       expect(() => code.write('second();')).toThrow(new TypeError('Code printed already'));
 

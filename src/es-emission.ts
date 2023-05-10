@@ -1,5 +1,5 @@
 import { EveryPromiseResolver, PromiseResolver } from '@proc7ts/async';
-import { EsPrintable } from './es-printer.js';
+import { EsPrinter } from './es-output.js';
 
 export class EsEmission {
 
@@ -35,13 +35,13 @@ export class EsEmission {
 
 export namespace EsEmission {
   export interface Span {
-    readonly result: EsPrintable;
+    readonly result: EsPrinter;
     emit(this: void, ...emitters: EsEmitter[]): void;
   }
 }
 
 export interface EsEmitter {
-  emit(emission: EsEmission): string | EsPrintable | PromiseLike<string | EsPrintable>;
+  emit(emission: EsEmission): string | EsPrinter | PromiseLike<string | EsPrinter>;
 }
 
 interface EsEmission$State {
@@ -66,7 +66,7 @@ class EsEmission$ActiveState implements EsEmission$State {
   }
 
   emit(emission: EsEmission, ...emitters: EsEmitter[]): EsEmission.Span {
-    const { add, whenDone } = new EveryPromiseResolver<string | EsPrintable>();
+    const { add, whenDone } = new EveryPromiseResolver<string | EsPrinter>();
 
     let emit = (...emitters: EsEmitter[]): void => {
       add(...emitters.map(emitter => emitter.emit(emission)));

@@ -1,12 +1,12 @@
 import { collectLines } from './impl/collect-lines.js';
 
-export class EsPrinter implements EsPrintable {
+export class EsOutput implements EsPrinter {
 
   #indent = '';
   #nl = '\n';
   readonly #records: EsPrintRecord[] = [];
 
-  print(...records: (string | EsPrintable)[]): this {
+  print(...records: (string | EsPrinter)[]): this {
     if (records.length) {
       for (const record of records) {
         if (typeof record === 'string') {
@@ -32,17 +32,17 @@ export class EsPrinter implements EsPrintable {
     }
   }
 
-  async #print(printable: EsPrintable): Promise<string[]> {
-    const span = new EsPrinter();
+  async #print(print: EsPrinter): Promise<string[]> {
+    const span = new EsOutput();
 
     span.#nl = this.#nl;
-    await printable.printTo(span);
+    await print.printTo(span);
 
     return await span.toLines();
   }
 
-  inline(print: (span: EsPrinter) => void): this {
-    const inline = new EsPrinter();
+  inline(print: (span: EsOutput) => void): this {
+    const inline = new EsOutput();
 
     inline.#nl = '';
     print(inline);
@@ -51,8 +51,8 @@ export class EsPrinter implements EsPrintable {
     return this;
   }
 
-  indent(print: (span: EsPrinter) => void, indent = '  '): this {
-    const indented = new EsPrinter();
+  indent(print: (span: EsOutput) => void, indent = '  '): this {
+    const indented = new EsOutput();
 
     indented.#indent = indent;
     print(indented);
@@ -61,7 +61,7 @@ export class EsPrinter implements EsPrintable {
     return this;
   }
 
-  printTo(span: EsPrinter): void {
+  printTo(span: EsOutput): void {
     if (this.#records.length) {
       span.print({
         printTo: this.#printTo.bind(this),
@@ -69,11 +69,11 @@ export class EsPrinter implements EsPrintable {
     }
   }
 
-  async #printTo(span: EsPrinter): Promise<void> {
+  async #printTo(span: EsOutput): Promise<void> {
     span.#appendLines(await this.toLines(), this);
   }
 
-  #appendLines(lines: string[], from: EsPrinter): void {
+  #appendLines(lines: string[], from: EsOutput): void {
     if (!lines.length) {
       return;
     }
@@ -150,8 +150,8 @@ export class EsPrinter implements EsPrintable {
 
 }
 
-export interface EsPrintable {
-  printTo(span: EsPrinter): void | PromiseLike<void>;
+export interface EsPrinter {
+  printTo(span: EsOutput): void | PromiseLike<void>;
 }
 
 type EsPrintRecord = string[] | Promise<string[]>;

@@ -1,5 +1,5 @@
 import { EsEmission, EsEmitter } from './es-emission.js';
-import { EsPrintable, EsPrinter } from './es-printer.js';
+import { EsOutput, EsPrinter } from './es-output.js';
 import { EsFragment, EsSource } from './es-source.js';
 import { collectLines } from './impl/collect-lines.js';
 
@@ -41,13 +41,13 @@ export class EsCode implements EsEmitter {
       const code = new EsCode(this);
 
       this.#addPart({
-        async emit(): Promise<EsPrintable> {
+        async emit(): Promise<EsPrinter> {
           await fragment(code);
 
           return await code.emit();
         },
       });
-    } else if (isEsPrintable(fragment)) {
+    } else if (isEsPrinter(fragment)) {
       if (fragment instanceof EsCode && fragment.#contains(this)) {
         throw new TypeError('Can not insert code fragment into itself');
       }
@@ -92,7 +92,7 @@ export class EsCode implements EsEmitter {
     return this;
   }
 
-  async emit(emission?: EsEmission): Promise<EsPrintable> {
+  async emit(emission?: EsEmission): Promise<EsPrinter> {
     let codeEmission: EsEmission;
 
     if (emission) {
@@ -125,7 +125,7 @@ export class EsCode implements EsEmitter {
   }
 
   async *lines(emission?: EsEmission): AsyncIterableIterator<string> {
-    yield* new EsPrinter().print(await this.emit(emission)).lines();
+    yield* new EsOutput().print(await this.emit(emission)).lines();
   }
 
   async toLines(emission?: EsEmission): Promise<string[]> {
@@ -140,7 +140,7 @@ export class EsCode implements EsEmitter {
 
 }
 
-function isEsPrintable(source: EsSource): source is EsEmitter {
+function isEsPrinter(source: EsSource): source is EsEmitter {
   return typeof source === 'object' && 'emit' in source && typeof source.emit === 'function';
 }
 
@@ -154,13 +154,13 @@ function EsCode$none(_code: EsCode): void {
 
 class EsCode$Record implements EsEmitter {
 
-  readonly #record: EsPrintable | string;
+  readonly #record: EsPrinter | string;
 
-  constructor(record: EsPrintable | string) {
+  constructor(record: EsPrinter | string) {
     this.#record = record;
   }
 
-  emit(): string | EsPrintable {
+  emit(): string | EsPrinter {
     return this.#record;
   }
 
@@ -172,7 +172,7 @@ class EsCode$NewLine$ implements EsEmitter {
     return this;
   }
 
-  printTo(lines: EsPrinter): void {
+  printTo(lines: EsOutput): void {
     lines.print();
   }
 
@@ -188,7 +188,7 @@ class EsCode$Inline implements EsEmitter {
     this.#code = code;
   }
 
-  async emit(): Promise<EsPrintable> {
+  async emit(): Promise<EsPrinter> {
     const record = await this.#code.emit();
 
     return {
@@ -210,7 +210,7 @@ class EsCode$Indented implements EsEmitter {
     this.#indent = indent;
   }
 
-  async emit(): Promise<EsPrintable> {
+  async emit(): Promise<EsPrinter> {
     const record = await this.#code.emit();
 
     return {
