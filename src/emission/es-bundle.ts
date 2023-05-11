@@ -1,6 +1,8 @@
 import { EveryPromiseResolver, PromiseResolver } from '@proc7ts/async';
 import { lazyValue } from '@proc7ts/primitives';
+import { EsCode } from '../es-code.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
+import { EsSource } from '../es-source.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsEmission, EsEmitter } from './es-emission.js';
@@ -84,12 +86,12 @@ export class EsBundle implements EsEmission {
    *
    * Signals code bundling to {@link done stop}.
    *
-   * @param emitters - Code emitters.
+   * @param sources - Code sources to emit code from.
    *
    * @returns Bundling result in appropriate {@link format}.
    */
-  emit(...emitters: EsEmitter[]): EsBundle.Result {
-    const { printer } = this.span(...emitters);
+  emit(...sources: EsSource[]): EsBundle.Result {
+    const { printer } = this.span(new EsCode().write(...sources));
 
     this.done();
 
