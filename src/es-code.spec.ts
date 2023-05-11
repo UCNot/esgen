@@ -14,7 +14,7 @@ describe('EsCode', () => {
     it('produces no code', async () => {
       code.write(EsCode.none);
 
-      await expect(new EsBundle().emit(code).toText()).resolves.toBe('');
+      await expect(new EsBundle().emit(code).asText()).resolves.toBe('');
     });
   });
 
@@ -27,7 +27,7 @@ describe('EsCode', () => {
         })
         .write('}');
 
-      await expect(new EsBundle().emit(code).toText()).resolves.toBe('{\n}\n');
+      await expect(new EsBundle().emit(code).asText()).resolves.toBe('{\n}\n');
     });
     it('appends at most one new line', async () => {
       code
@@ -37,7 +37,7 @@ describe('EsCode', () => {
         })
         .write('}');
 
-      await expect(new EsBundle().emit(code).toText()).resolves.toBe('{\n\n}\n');
+      await expect(new EsBundle().emit(code).asText()).resolves.toBe('{\n\n}\n');
     });
     it('accepts another code fragment', async () => {
       code.write({
@@ -48,19 +48,19 @@ describe('EsCode', () => {
         },
       });
 
-      await expect(new EsBundle().emit(code).toText()).resolves.toBe('foo();\n');
+      await expect(new EsBundle().emit(code).asText()).resolves.toBe('foo();\n');
     });
     it('accepts another EsCode instance', async () => {
       code.write(new EsCode().write('foo();'));
 
-      await expect(new EsBundle().emit(code).toText()).resolves.toBe('foo();\n');
+      await expect(new EsBundle().emit(code).asText()).resolves.toBe('foo();\n');
     });
     it('prevents adding code fragment to itself', async () => {
       code.write(inner => {
         inner.write(code);
       });
 
-      await expect(new EsBundle().emit(code).toText()).rejects.toThrow(
+      await expect(new EsBundle().emit(code).asText()).rejects.toThrow(
         new TypeError(`Can not insert code fragment into itself`),
       );
     });
@@ -82,7 +82,7 @@ describe('EsCode', () => {
         })
         .write('}');
 
-      await expect(new EsBundle().emit(code).toText()).resolves.toBe(
+      await expect(new EsBundle().emit(code).asText()).resolves.toBe(
         '{\n  {\n    foo();bar();\n  }\n}\n',
       );
     });
@@ -104,7 +104,7 @@ describe('EsCode', () => {
         })
         .write('};');
 
-      await expect(new EsBundle().emit(code).toText()).resolves.toBe(
+      await expect(new EsBundle().emit(code).asText()).resolves.toBe(
         'const test = {\n  a: {\n    foo: 1,\n    bar: 2,\n  },\n};\n',
       );
     });
@@ -126,7 +126,7 @@ describe('EsCode', () => {
         })
         .write('};');
 
-      await expect(new EsBundle().emit(code).toText()).resolves.toBe(
+      await expect(new EsBundle().emit(code).asText()).resolves.toBe(
         'const test = {\n  a: {foo: 1,\n  bar: 2},\n};\n',
       );
     });
@@ -142,7 +142,7 @@ describe('EsCode', () => {
 
       expect(record1).toBe(record2);
 
-      await expect(new EsOutput().print(record1).toText()).resolves.toBe('first();\n');
+      await expect(new EsOutput().print(record1).asText()).resolves.toBe('first();\n');
 
       await bundle.done().whenDone();
     });
@@ -155,8 +155,8 @@ describe('EsCode', () => {
 
       code.write('second();');
 
-      await expect(new EsOutput().print(printer).toText()).resolves.toBe('first();\nsecond();\n');
-      await expect(new EsOutput().print(printer).toText()).resolves.toBe('first();\nsecond();\n');
+      await expect(new EsOutput().print(printer).asText()).resolves.toBe('first();\nsecond();\n');
+      await expect(new EsOutput().print(printer).asText()).resolves.toBe('first();\nsecond();\n');
 
       bundle.done();
       await emission.whenDone();
@@ -167,7 +167,7 @@ describe('EsCode', () => {
       const bundle = new EsBundle();
       const printer = code.emit(bundle);
 
-      await expect(new EsOutput().print(printer).toText()).resolves.toBe('first();\n');
+      await expect(new EsOutput().print(printer).asText()).resolves.toBe('first();\n');
 
       expect(() => code.write('second();')).toThrow(new TypeError('Code printed already'));
 

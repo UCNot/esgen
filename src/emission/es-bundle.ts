@@ -93,31 +93,37 @@ export class EsBundle implements EsEmission {
 
     this.done();
 
-    const toText = lazyValue(
-      async (): Promise<string> => await new EsOutput().print(await this.#printBundle(printer)).toText(),
+    const printBundle = lazyValue(() => this.#printBundle(printer));
+    const asText = lazyValue(
+      async (): Promise<string> => await new EsOutput().print(this.#printBundle(printer)).asText(),
     );
-    const printBundle = lazyValue(async () => await this.#printBundle(printer));
 
     return {
-      printTo: async out => {
-        out.print(await printBundle());
+      printTo: out => {
+        out.print(printBundle());
       },
-      toText,
-      toExports: lazyValue(this.#toExports(toText)),
+      asText,
+      asExports: lazyValue(this.#asExports(printBundle)),
     };
   }
 
-  async #printBundle(body: EsPrinter): Promise<EsPrinter> {
-    await this.whenDone();
+  #printBundle(body: EsPrinter): EsPrinter {
+    return {
+      printTo: async out => {
+        await this.whenDone();
 
-    const content = this.#printContent(body);
+        const content = this.#printContent(body);
 
-    switch (this.format) {
-      case EsBundleFormat.IIFE:
-        return this.#printIIFE(content);
-      case EsBundleFormat.ES2015:
-        return content;
-    }
+        switch (this.format) {
+          case EsBundleFormat.IIFE:
+            out.print(this.#printIIFE(content));
+
+            break;
+          case EsBundleFormat.ES2015:
+            out.print(content);
+        }
+      },
+    };
   }
 
   #printContent(body: EsPrinter): EsPrinter {
@@ -144,23 +150,21 @@ export class EsBundle implements EsEmission {
     };
   }
 
-  #toExports(toText: () => Promise<string>): () => Promise<Record<string, unknown>> {
+  #asExports(printBundle: () => EsPrinter): () => Promise<unknown> {
     const { format } = this;
 
     if (format !== EsBundleFormat.IIFE) {
       return this.#doNotExport.bind(this);
     }
 
-    return async () => await this.#returnExports(toText);
+    return async () => await this.#returnExports(printBundle());
   }
 
-  async #returnExports(toText: () => Promise<string>): Promise<Record<string, unknown>> {
-    const text = await toText();
+  async #returnExports(bundle: EsPrinter): Promise<unknown> {
+    const text = await new EsOutput().inline(out => out.print('return ', bundle, ';')).asText();
 
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
-    const factory = Function(`return ${text.slice(0, -1)};`) as () => Promise<
-      Record<string, unknown>
-    >;
+    const factory = Function(text);
 
     return await factory();
   }
@@ -196,20 +200,20 @@ export namespace EsBundle {
    */
   export interface Result extends EsPrinter {
     /**
-     * Prints the bundled code as text.
+     * Represents bundled code as text.
      *
      * @returns Promise resolved to printed text.
      */
-    toText(this: void): Promise<string>;
+    asText(this: void): Promise<string>;
 
     /**
-     * Builds code exports.
+     * Represents bundled code as exports.
      *
-     * Can be called only for {@link EsBundleFormat.IIFE IIFE}.
+     * Works only for {@link EsBundleFormat.IIFE IIFE} format.
      *
-     * @returns Promise resolved to record containing exported declarations.
+     * @returns Promise resolved to bundle exports.
      */
-    toExports(): Promise<Record<string, unknown>>;
+    asExports(): Promise<unknown>;
   }
 }
 

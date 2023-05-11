@@ -38,7 +38,7 @@ export class EsOutput implements EsPrinter {
     out.#nl = this.#nl;
     await printer.printTo(out);
 
-    return await out.toLines();
+    return await out.asLines();
   }
 
   inline(print: (out: EsOutput) => void): this {
@@ -70,7 +70,7 @@ export class EsOutput implements EsPrinter {
   }
 
   async #printTo(out: EsOutput): Promise<void> {
-    out.#appendLines(await this.toLines(), this);
+    out.#appendLines(await this.asLines(), this);
   }
 
   #appendLines(lines: string[], from: EsOutput): void {
@@ -138,12 +138,12 @@ export class EsOutput implements EsPrinter {
     }
   }
 
-  async toLines(): Promise<string[]> {
+  async asLines(): Promise<string[]> {
     return await collectLines(this.lines());
   }
 
-  async toText(): Promise<string> {
-    const lines = await this.toLines();
+  async asText(): Promise<string> {
+    const lines = await this.asLines();
 
     return lines.join('');
   }

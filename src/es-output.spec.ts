@@ -15,7 +15,7 @@ describe('EsOutput', () => {
           .print('{')
           .indent(out => out.print())
           .print('}')
-          .toText(),
+          .asText(),
       ).resolves.toBe('{\n\n}\n');
     });
     it('appends new line without indentation instead of empty line', async () => {
@@ -24,16 +24,16 @@ describe('EsOutput', () => {
           .print('{')
           .indent(out => out.print('').print('').print(''))
           .print('}')
-          .toText(),
+          .asText(),
       ).resolves.toBe('{\n\n}\n');
     });
     it('removes all leading newlines', async () => {
       await expect(
-        output.print().print('').print('').print().print().print('text').toText(),
+        output.print().print('').print('').print().print().print('text').asText(),
       ).resolves.toBe('\ntext\n');
     });
     it('leaves single newline for empty output', async () => {
-      await expect(output.print().print('').print('').print().print().toText()).resolves.toBe('\n');
+      await expect(output.print().print('').print('').print().print().asText()).resolves.toBe('\n');
     });
     it('appends at most one new line', async () => {
       await expect(
@@ -41,11 +41,11 @@ describe('EsOutput', () => {
           .print('{')
           .indent(out => out.print('abc').print('').print('').print().print('def'))
           .print('}')
-          .toText(),
+          .asText(),
       ).resolves.toBe('{\n  abc\n\n  def\n}\n');
     });
     it('does not append empty output', async () => {
-      await expect(output.print('abc', new EsOutput(), 'def').toText()).resolves.toBe('abc\ndef\n');
+      await expect(output.print('abc', new EsOutput(), 'def').asText()).resolves.toBe('abc\ndef\n');
     });
   });
 
@@ -59,7 +59,7 @@ describe('EsOutput', () => {
               .indent(out => out.inline(out => out.print('foo();', 'bar();')))
               .print('}'))
           .print('}')
-          .toText(),
+          .asText(),
       ).resolves.toBe('{\n  {\n    foo();bar();\n  }\n}\n');
     });
   });
@@ -78,7 +78,7 @@ describe('EsOutput', () => {
         })
         .print('}');
 
-      await expect(output.toText()).resolves.toBe(`{\n  foo(\n    a,\n    b,\n    c,\n  );\n}\n`);
+      await expect(output.asText()).resolves.toBe(`{\n  foo(\n    a,\n    b,\n    c,\n  );\n}\n`);
     });
   });
 
@@ -92,7 +92,7 @@ describe('EsOutput', () => {
               .indent(out => out.print('foo();', 'bar();'), '/* indent */ ')
               .print('}'))
           .print('}')
-          .toText(),
+          .asText(),
       ).resolves.toBe('{\n  {\n  /* indent */ foo();\n  /* indent */ bar();\n  }\n}\n');
     });
   });

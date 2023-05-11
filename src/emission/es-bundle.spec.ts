@@ -112,22 +112,22 @@ describe('EsBundle', () => {
   describe('emit', () => {
     it('emits module', async () => {
       const result = bundle.emit(new EsCode().write(`const a = 'test';`));
-      const text = await result.toText();
+      const text = await result.asText();
 
       expect(text).toBe(`const a = 'test';\n`);
-      await expect(new EsOutput().print(result).toText()).resolves.toBe(text);
-      await expect(result.toExports()).rejects.toThrow(
+      await expect(new EsOutput().print(result).asText()).resolves.toBe(text);
+      await expect(result.asExports()).rejects.toThrow(
         new TypeError(`Can not export from ES2015 bundle`),
       );
     });
     it('emits IIFE code', async () => {
       const bundle = new EsBundle({ format: EsBundleFormat.IIFE });
       const result = bundle.emit(new EsCode().write(`const a = 'test';`));
-      const text = await result.toText();
+      const text = await result.asText();
 
       expect(text).toBe(`(async () => {\n  const a = 'test';\n  return {};\n})()\n`);
-      await expect(new EsOutput().print(result).toText()).resolves.toBe(text);
-      await expect(result.toExports()).resolves.toEqual({});
+      await expect(new EsOutput().print(result).asText()).resolves.toBe(text);
+      await expect(result.asExports()).resolves.toEqual({});
     });
   });
 });
