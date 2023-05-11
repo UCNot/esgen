@@ -16,7 +16,7 @@
 <li><a href="EsOutput.html">EsOutput</a></li></ul>
 <h1>Class EsOutput</h1></div>
 <section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>Code printer.</p>
+<div class="tsd-comment tsd-typography"><p>Code output collects <a href="EsOutput.html#print" class="tsd-kind-method">printed</a> code. The printed code can be <a href="EsOutput.html#asText" class="tsd-kind-method">() serialized</a> then.</p>
 </div></section>
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
@@ -27,7 +27,7 @@
 <ul class="tsd-hierarchy">
 <li><a href="../interfaces/EsPrinter.html" class="tsd-signature-type tsd-kind-interface">EsPrinter</a></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/83b4400/src/es-output.ts#L3">es-output.ts:3</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/3eb738a/src/es-output.ts#L6">es-output.ts:6</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -62,27 +62,38 @@
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="asLines.asLines-1"><span class="tsd-kind-call-signature">as<wbr/>Lines</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#asLines.asLines-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography"><p>Represents this output as lines of code.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>Promise resolved to array of lines.</p>
+<aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/83b4400/src/es-output.ts#L141">es-output.ts:141</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/3eb738a/src/es-output.ts#L187">es-output.ts:187</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="asText" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>as<wbr/>Text</span><a href="#asText" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="asText.asText-1"><span class="tsd-kind-call-signature">as<wbr/>Text</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><a href="#asText.asText-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography"><p>Represents this output as text.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4><p>Promise resolved to printed text.</p>
+<aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/83b4400/src/es-output.ts#L145">es-output.ts:145</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/3eb738a/src/es-output.ts#L196">es-output.ts:196</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="indent" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>indent</span><a href="#indent" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="indent.indent-1"><span class="tsd-kind-call-signature">indent</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">print</span>, <span class="tsd-kind-parameter">indent</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a><a href="#indent.indent-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Prints indented code records.</p>
+<p>Always places each record on a new line, and prepends it with indentation symbols. Even for <a href="EsOutput.html#inline" class="tsd-kind-method">inline</a> output.</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
 <h5><span class="tsd-kind-parameter">print</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">out</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></h5>
+<div class="tsd-comment tsd-typography"><p>A function that receives an indented output to print the records to.</p>
+</div>
 <ul class="tsd-parameters">
 <li class="tsd-parameter-signature">
 <ul class="tsd-signatures">
@@ -95,20 +106,28 @@
 <h5><span class="tsd-kind-parameter">out</span>: <a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li>
 <li>
-<h5><span class="tsd-kind-parameter">indent</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &#39;  &#39;</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a></h4><aside class="tsd-sources">
+<h5><span class="tsd-kind-parameter">indent</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &#39;  &#39;</span></h5>
+<div class="tsd-comment tsd-typography"><p>Indentation symbols. Two spaces by default.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a></h4><p><code>this</code> instance.</p>
+<aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/83b4400/src/es-output.ts#L54">es-output.ts:54</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/3eb738a/src/es-output.ts#L85">es-output.ts:85</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="inline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>inline</span><a href="#inline" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="inline.inline-1"><span class="tsd-kind-call-signature">inline</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">print</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a><a href="#inline.inline-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Prints inline code records.</p>
+<p>Unlike print, the records are placed on the same line.</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
 <h5><span class="tsd-kind-parameter">print</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">out</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></h5>
+<div class="tsd-comment tsd-typography"><p>A function that receives an inline output to print the records to.</p>
+</div>
 <ul class="tsd-parameters">
 <li class="tsd-parameter-signature">
 <ul class="tsd-signatures">
@@ -120,36 +139,46 @@
 <li>
 <h5><span class="tsd-kind-parameter">out</span>: <a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a></h4><aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a></h4><p><code>this</code> instance.</p>
+<aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/83b4400/src/es-output.ts#L44">es-output.ts:44</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/3eb738a/src/es-output.ts#L65">es-output.ts:65</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="lines" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>lines</span><a href="#lines" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="lines.lines-1"><span class="tsd-kind-call-signature">lines</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><a href="#lines.lines-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography"><p>Iterates over printed lines of code.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4><p>Asynchronous iterable iterator over all printed lines.</p>
+<aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/83b4400/src/es-output.ts#L111">es-output.ts:111</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/3eb738a/src/es-output.ts#L152">es-output.ts:152</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="print" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>print</span><a href="#print" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="print.print-1"><span class="tsd-kind-call-signature">print</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">records</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a><a href="#print.print-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Prints code records.</p>
+<p>Each record is placed on a new line, unless this is an <a href="EsOutput.html#inline" class="tsd-kind-method">inline</a> output.</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">records</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/EsPrinter.html" class="tsd-signature-type tsd-kind-interface">EsPrinter</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a></h4><aside class="tsd-sources">
+<h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">records</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/EsPrinter.html" class="tsd-signature-type tsd-kind-interface">EsPrinter</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></h5>
+<div class="tsd-comment tsd-typography"><p>Written code records, either strings or <a href="../interfaces/EsPrinter.html" class="tsd-kind-interface">code printers</a>.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a></h4><p><code>this</code> instance.</p>
+<aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/83b4400/src/es-output.ts#L9">es-output.ts:9</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/3eb738a/src/es-output.ts#L21">es-output.ts:21</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="printTo" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>print<wbr/>To</span><a href="#printTo" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="printTo.printTo-1"><span class="tsd-kind-call-signature">print<wbr/>To</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">out</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#printTo.printTo-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Prints code to the <code>output</code>.</p>
+<div class="tsd-comment tsd-typography"><p>Prints collected code to another output.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -158,12 +187,10 @@
 <h5><span class="tsd-kind-parameter">out</span>: <a href="EsOutput.html" class="tsd-signature-type tsd-kind-class">EsOutput</a></h5>
 <div class="tsd-comment tsd-typography"><p>Target code output.</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><p>Either none if code printed synchronously, or promise-like instance resolved when code printed
-asynchronously.</p>
-<aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <p>Implementation of <a href="../interfaces/EsPrinter.html">EsPrinter</a>.<a href="../interfaces/EsPrinter.html#printTo">printTo</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/83b4400/src/es-output.ts#L64">es-output.ts:64</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/3eb738a/src/es-output.ts#L100">es-output.ts:100</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
