@@ -1,97 +1,165 @@
 import { noop } from '@proc7ts/primitives';
 import { EsEmission, EsEmitter } from './emission/es-emission.js';
 import { EsOutput, EsPrinter } from './es-output.js';
-import { EsFragment, EsSource } from './es-source.js';
+import { EsProducer, EsSource } from './es-source.js';
 
+/**
+ * Writable fragment of code.
+ *
+ * By default, represents a {@link block} of code, where each written code source is placed on a new line.
+ * When {@link inline}, the written code sources placed without new lines between them.
+ */
 export class EsCode implements EsEmitter {
 
+  /**
+   * Source of no code.
+   */
   static get none(): EsSource {
     return EsCode$none;
   }
 
-  readonly #parent: EsCode | undefined;
-  readonly #parts: EsEmitter[] = [];
+  readonly #enclosing: EsCode | undefined;
+  readonly #emitters: EsEmitter[] = [];
   readonly #emissions = new Map<EsEmission, EsEmission.Span>();
 
-  constructor(parent?: EsCode) {
-    this.#parent = parent;
+  /**
+   * Constructs code fragment.
+   *
+   * @param enclosing - Enclosing code fragment. Used to prevent inserting code fragments into themselves.
+   */
+  constructor(enclosing?: EsCode) {
+    this.#enclosing = enclosing;
   }
 
-  #addPart(part: EsEmitter): void {
-    this.#parts.push(part);
-    for (const { emit } of this.#emissions.values()) {
-      emit(part);
-    }
-  }
-
-  write(...fragments: EsSource[]): this {
-    if (fragments.length) {
-      for (const fragment of fragments) {
-        this.#addFragment(fragment);
+  /**
+   * Writes code to this fragment.
+   *
+   * Writes a new line without `sources` specified, unless this is an {@link inline} code fragment.
+   *
+   * Places each source on a new line, unless this is an {@link inline} code fragment.
+   *
+   * @param sources - Written code sources.
+   *
+   * @returns `this` instance.
+   */
+  write(...sources: EsSource[]): this {
+    if (sources.length) {
+      for (const source of sources) {
+        this.#addSource(source);
       }
     } else {
-      fragments.push(EsCode$NewLine);
+      sources.push(EsCode$NewLine);
     }
 
     return this;
   }
 
-  #addFragment(fragment: EsSource): void {
-    if (typeof fragment === 'function') {
+  #addSource(source: EsSource): void {
+    if (typeof source === 'function') {
       const code = new EsCode(this);
 
-      this.#addPart({
+      this.#addEmitter({
         async emit(emission: EsEmission): Promise<EsPrinter> {
-          await fragment(code, emission);
+          await source(code, emission);
 
           return code.emit(emission);
         },
       });
-    } else if (isEsPrinter(fragment)) {
-      if (fragment instanceof EsCode && fragment.#contains(this)) {
+    } else if (isEsPrinter(source)) {
+      if (source instanceof EsCode && source.#contains(this)) {
         throw new TypeError('Can not insert code fragment into itself');
       }
-      this.#addPart(fragment);
-    } else if (isEsFragment(fragment)) {
-      this.#addFragment(fragment.toCode());
-    } else if (fragment === '') {
-      this.#addPart(EsCode$NewLine);
+      this.#addEmitter(source);
+    } else if (isEsProducer(source)) {
+      this.#addSource(source.toCode());
+    } else if (source === '') {
+      this.#addEmitter(EsCode$NewLine);
     } else {
-      this.#addPart(new EsCode$Record(fragment));
+      this.#addEmitter(new EsCode$Record(source));
     }
   }
 
-  #contains(fragment: EsCode): boolean {
+  #addEmitter(emitter: EsEmitter): void {
+    this.#emitters.push(emitter);
+    for (const { emit } of this.#emissions.values()) {
+      emit(emitter);
+    }
+  }
+
+  #contains(other: EsCode): boolean {
     for (;;) {
-      if (fragment === this) {
+      if (other === this) {
         return true;
       }
-      if (!fragment.#parent) {
+      if (!other.#enclosing) {
         return false;
       }
 
-      fragment = fragment.#parent;
+      other = other.#enclosing;
     }
   }
 
-  inline(...fragments: EsSource[]): this {
-    this.#addPart(new EsCode$Inline(new EsCode(this).write(...fragments)));
+  /**
+   * Writes inline code to this fragment.
+   *
+   * Unlike {@like write}, the sources a placed on the same line.
+   *
+   * @param sources - Inline code sources.
+   *
+   * @returns `this` instance.
+   */
+  inline(...sources: EsSource[]): this {
+    this.#addEmitter(new EsCode$Inline(new EsCode(this).write(...sources)));
 
     return this;
   }
 
-  indent(...fragments: EsSource[]): this {
-    this.#addPart(new EsCode$Indented(new EsCode(this).write(...fragments)));
+  /**
+   * Writes indented code to this fragment.
+   *
+   * Always places each source on a new line, and prepends it with indentation symbols. Even for {@link inline}
+   * code fragment.
+   *
+   * Indentations may be nested. Nested indentations adjust enclosing ones.
+   *
+   * @param sources - Indented code sources.
+   *
+   * @returns `this` instance.
+   */
+  indent(...sources: EsSource[]): this {
+    this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...sources)));
 
     return this;
   }
 
-  block(...fragments: EsSource[]): this {
-    this.#addPart(new EsCode$Indented(new EsCode(this).write(...fragments), ''));
+  /**
+   * Writes block of code to this fragment.
+   *
+   * Always places each source on a new line. Even for {@link inline} code fragment. Unlike {@link indent}, does not
+   * adjust indentation.
+   *
+   * @param sources - Block code sources.
+   *
+   * @returns `this` instance.
+   */
+  block(...sources: EsSource[]): this {
+    this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...sources), ''));
 
     return this;
   }
 
+  /**
+   * Emits the written code.
+   *
+   * It is possible to {@link write} more code until emitted code is not printed. It is an error to write the once the
+   * code printing started.
+   *
+   * It is possible to issue multiple code emissions at the same time.
+   *
+   * @param emission - Code emission control.
+   *
+   * @returns Emitted code printer.
+   */
   emit(emission: EsEmission): EsPrinter {
     const existingSpan = this.#emissions.get(emission);
 
@@ -99,7 +167,7 @@ export class EsCode implements EsEmitter {
       return existingSpan.printer;
     }
 
-    const span = emission.span(...this.#parts);
+    const span = emission.span(...this.#emitters);
 
     this.#emissions.set(emission, span);
 
@@ -119,7 +187,7 @@ function isEsPrinter(source: EsSource): source is EsEmitter {
   return typeof source === 'object' && 'emit' in source && typeof source.emit === 'function';
 }
 
-function isEsFragment(source: EsSource): source is EsFragment {
+function isEsProducer(source: EsSource): source is EsProducer {
   return typeof source === 'object' && 'toCode' in source && typeof source.toCode === 'function';
 }
 
