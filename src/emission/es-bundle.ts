@@ -59,7 +59,7 @@ export class EsBundle implements EsEmission {
   }
 
   span(...emitters: EsEmitter[]): EsEmission.Span {
-    return this.#state[0].emit(this, ...emitters);
+    return this.#state[0].span(this, ...emitters);
   }
 
   async whenDone(): Promise<void> {
@@ -67,16 +67,22 @@ export class EsBundle implements EsEmission {
   }
 
   /**
-   * Stops code emission.
+   * Signals code bundling to stop.
    *
-   * @returns Promise resolved when pending code emissions completed.
+   * Invoke {@link whenDone} to wait for bundling to complete.
+   *
+   * @returns `this` instance.
    */
-  async done(): Promise<void> {
-    await this.#state[0].done();
+  done(): this {
+    this.#state[0].done();
+
+    return this;
   }
 
   /**
    * Bundles emitted code.
+   *
+   * Signals code bundling to {@link done stop}.
    *
    * @param emitters - Code emitters.
    *
@@ -84,21 +90,25 @@ export class EsBundle implements EsEmission {
    */
   emit(...emitters: EsEmitter[]): EsBundle.Result {
     const { printer } = this.span(...emitters);
+
+    this.done();
+
     const toText = lazyValue(
-      async () => await new EsOutput().print(await this.#printBundle(printer)).toText(),
+      async (): Promise<string> => await new EsOutput().print(await this.#printBundle(printer)).toText(),
     );
+    const printBundle = lazyValue(async () => await this.#printBundle(printer));
 
     return {
       printTo: async out => {
-        out.print(await this.#printBundle(printer));
+        out.print(await printBundle());
       },
       toText,
-      toExports: this.#toExports(toText),
+      toExports: lazyValue(this.#toExports(toText)),
     };
   }
 
   async #printBundle(body: EsPrinter): Promise<EsPrinter> {
-    await this.done();
+    await this.whenDone();
 
     const content = this.#printContent(body);
 
@@ -164,16 +174,14 @@ export class EsBundle implements EsEmission {
 export namespace EsBundle {
   /**
    * Initialization options for bundle emission.
-   *
-   * @typeParam TFormat - Supported bundled code format.
    */
-  export interface Init<out TFormat extends EsBundleFormat = EsBundleFormat> {
+  export interface Init {
     /**
      * Format of the bundled code.
      *
      * @defaultValue {@link EsBundleFormat.Default}.
      */
-    readonly format?: TFormat | undefined;
+    readonly format?: EsBundleFormat | undefined;
 
     /**
      * Top-level namespace to use.
@@ -185,8 +193,6 @@ export namespace EsBundle {
 
   /**
    * Result of code {@link EsBundle#bundle bundling}.
-   *
-   * Accessing the result would {@link EsBundle#done stop} code emission.
    */
   export interface Result extends EsPrinter {
     /**
@@ -244,7 +250,7 @@ class SpawnedEsEmission implements EsEmission {
   }
 
   span(...emitters: EsEmitter[]): EsEmission.Span {
-    return this.#state[0].emit(this, ...emitters);
+    return this.#state[0].span(this, ...emitters);
   }
 
   async whenDone(): Promise<void> {
@@ -255,30 +261,36 @@ class SpawnedEsEmission implements EsEmission {
 
 interface EsEmission$State {
   isActive(): boolean;
-  emit(emission: EsEmission, ...emitters: EsEmitter[]): EsEmission.Span;
-  done(): Promise<void>;
+  span(emission: EsEmission, ...emitters: EsEmitter[]): EsEmission.Span;
+  done(): void;
   whenDone(): Promise<void>;
 }
 
 class EsEmission$ActiveState implements EsEmission$State {
 
-  readonly #change: (newState: EsEmission$State) => void;
   readonly #done = new PromiseResolver();
   readonly #resolver = new EveryPromiseResolver<unknown>(this.#done.whenDone());
+  readonly whenDone: () => Promise<void>;
 
   constructor(change: (newState: EsEmission$State) => void) {
-    this.#change = change;
+    this.whenDone = lazyValue(async () => {
+      try {
+        await this.#resolver.whenDone();
+      } finally {
+        change(new EsEmission$EmittedState(this.whenDone));
+      }
+    });
   }
 
   isActive(): boolean {
     return true;
   }
 
-  emit(emission: EsEmission, ...emitters: EsEmitter[]): EsEmission.Span {
+  span(emission: EsEmission, ...emitters: EsEmitter[]): EsEmission.Span {
     const { add, whenDone } = new EveryPromiseResolver<string | EsPrinter>();
 
     let emit = (...emitters: EsEmitter[]): void => {
-      add(...emitters.map(emitter => emitter.emit(emission)));
+      add(...emitters.map(async emitter => await emitter.emit(emission)));
     };
 
     emit(...emitters);
@@ -304,37 +316,26 @@ class EsEmission$ActiveState implements EsEmission$State {
     };
   }
 
-  async done(): Promise<void> {
+  done(): void {
     this.#done.resolve();
-    this.#change(EsEmission$emittedState);
-
-    return this.whenDone();
-  }
-
-  async whenDone(): Promise<void> {
-    await this.#resolver.whenDone();
   }
 
 }
 
 class EsEmission$EmittedState implements EsEmission$State {
 
+  constructor(readonly whenDone: () => Promise<void>) {}
+
   isActive(): boolean {
     return false;
   }
 
-  emit(_emission: EsEmission): never {
+  span(_emission: EsEmission): never {
     throw new TypeError(`All code emitted already`);
   }
 
-  async done(): Promise<void> {
-    await this.whenDone();
-  }
-
-  whenDone(): Promise<void> {
-    return Promise.resolve();
+  done(): void {
+    // Do nothing.
   }
 
 }
-
-const EsEmission$emittedState = /*#__PURE__*/ new EsEmission$EmittedState();

@@ -1,8 +1,7 @@
-import { EsBundle } from './emission/es-bundle.js';
+import { noop } from '@proc7ts/primitives';
 import { EsEmission, EsEmitter } from './emission/es-emission.js';
 import { EsOutput, EsPrinter } from './es-output.js';
 import { EsFragment, EsSource } from './es-source.js';
-import { collectLines } from './impl/collect-lines.js';
 
 export class EsCode implements EsEmitter {
 
@@ -42,10 +41,10 @@ export class EsCode implements EsEmitter {
       const code = new EsCode(this);
 
       this.#addPart({
-        async emit(): Promise<EsPrinter> {
-          await fragment(code);
+        async emit(emission: EsEmission): Promise<EsPrinter> {
+          await fragment(code, emission);
 
-          return await code.emit();
+          return code.emit(emission);
         },
       });
     } else if (isEsPrinter(fragment)) {
@@ -93,52 +92,25 @@ export class EsCode implements EsEmitter {
     return this;
   }
 
-  async emit(emission?: EsEmission): Promise<EsPrinter>;
-  async emit(explicitEmission?: EsEmission): Promise<EsPrinter> {
-    let bundle: EsBundle | undefined;
-    let emission: EsEmission;
+  emit(emission: EsEmission): EsPrinter {
+    const existingSpan = this.#emissions.get(emission);
 
-    if (explicitEmission) {
-      const existingSpan = this.#emissions.get(explicitEmission);
-
-      if (existingSpan) {
-        return existingSpan.printer;
-      }
-
-      emission = explicitEmission;
-    } else {
-      emission = bundle = new EsBundle();
+    if (existingSpan) {
+      return existingSpan.printer;
     }
 
     const span = emission.span(...this.#parts);
 
     this.#emissions.set(emission, span);
 
-    if (bundle) {
-      await bundle.done().finally(() => {
+    emission
+      .whenDone()
+      .catch(noop)
+      .finally(() => {
         this.#emissions.delete(emission);
       });
-    } else {
-      emission.whenDone().finally(() => {
-        this.#emissions.delete(emission);
-      });
-    }
 
     return span.printer;
-  }
-
-  async *lines(emission?: EsEmission): AsyncIterableIterator<string> {
-    yield* new EsOutput().print(await this.emit(emission)).lines();
-  }
-
-  async toLines(emission?: EsEmission): Promise<string[]> {
-    return await collectLines(this.lines(emission));
-  }
-
-  async toText(emission?: EsEmission): Promise<string> {
-    const lines = await this.toLines(emission);
-
-    return lines.join('');
   }
 
 }
@@ -191,12 +163,12 @@ class EsCode$Inline implements EsEmitter {
     this.#code = code;
   }
 
-  async emit(): Promise<EsPrinter> {
-    const record = await this.#code.emit();
+  emit(emission: EsEmission): EsPrinter {
+    const record = this.#code.emit(emission);
 
     return {
-      printTo: span => {
-        span.inline(span => span.print(record));
+      printTo: out => {
+        out.inline(span => span.print(record));
       },
     };
   }
@@ -213,12 +185,12 @@ class EsCode$Indented implements EsEmitter {
     this.#indent = indent;
   }
 
-  async emit(): Promise<EsPrinter> {
-    const record = await this.#code.emit();
+  emit(emission: EsEmission): EsPrinter {
+    const printer = this.#code.emit(emission);
 
     return {
       printTo: span => {
-        span.indent(span => span.print(record), this.#indent);
+        span.indent(out => out.print(printer), this.#indent);
       },
     };
   }

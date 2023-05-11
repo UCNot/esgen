@@ -70,41 +70,42 @@ describe('EsBundle', () => {
     });
     it('returns false when done', async () => {
       const emission = bundle.spawn();
-      const whenDone = bundle.done();
+
+      await bundle.done().whenDone();
 
       expect(bundle.isActive()).toBe(false);
       expect(emission.isActive()).toBe(false);
 
-      await whenDone;
+      await bundle.whenDone();
     });
   });
 
   describe('span', () => {
     it('prevents emission when done', async () => {
-      const whenDone = bundle.done();
+      await bundle.done().whenDone();
 
       expect(() => bundle.span()).toThrow(new TypeError(`All code emitted already`));
 
-      await whenDone;
+      await bundle.whenDone();
     });
   });
 
   describe('done', () => {
     it('does nothing on subsequent calls', async () => {
-      await bundle.done();
-      await bundle.done();
-      await bundle.whenDone();
+      await bundle.done().done().whenDone();
+      await bundle.done().whenDone();
 
       expect(bundle.isActive()).toBe(false);
     });
     it('completes spawned emission', async () => {
       const spawned = bundle.spawn();
-      const whenDone = bundle.done();
+
+      await bundle.done().whenDone();
 
       expect(spawned.isActive()).toBe(false);
       expect(bundle.isActive()).toBe(false);
 
-      await whenDone;
+      await bundle.whenDone();
     });
   });
 
