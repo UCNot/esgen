@@ -1,11 +1,23 @@
 import { collectLines } from './impl/collect-lines.js';
 
+/**
+ * Code output collects {@link print printed} code. The printed code can be {@link asText() serialized} then.
+ */
 export class EsOutput implements EsPrinter {
 
   #indent = '';
   #nl = '\n';
   readonly #records: EsPrintRecord[] = [];
 
+  /**
+   * Prints code records.
+   *
+   * Each record is placed on a new line, unless this is an {@link inline} output.
+   *
+   * @param records - Written code records, either strings or {@link EsPrinter code printers}.
+   *
+   * @returns `this` instance.
+   */
   print(...records: (string | EsPrinter)[]): this {
     if (records.length) {
       for (const record of records) {
@@ -41,6 +53,15 @@ export class EsOutput implements EsPrinter {
     return await out.asLines();
   }
 
+  /**
+   * Prints inline code records.
+   *
+   * Unlike {@link print}, the records are placed on the same line.
+   *
+   * @param print - A function that receives an inline output to print the records to.
+   *
+   * @returns `this` instance.
+   */
   inline(print: (out: EsOutput) => void): this {
     const inline = new EsOutput();
 
@@ -51,6 +72,16 @@ export class EsOutput implements EsPrinter {
     return this;
   }
 
+  /**
+   * Prints indented code records.
+   *
+   * Always places each record on a new line, and prepends it with indentation symbols. Even for {@link inline} output.
+   *
+   * @param print - A function that receives an indented output to print the records to.
+   * @param indent - Indentation symbols. Two spaces by default.
+   *
+   * @returns `this` instance.
+   */
   indent(print: (out: EsOutput) => void, indent = '  '): this {
     const indented = new EsOutput();
 
@@ -61,6 +92,11 @@ export class EsOutput implements EsPrinter {
     return this;
   }
 
+  /**
+   * Prints collected code to another output.
+   *
+   * @param out - Target code output.
+   */
   printTo(out: EsOutput): void {
     if (this.#records.length) {
       out.print({
@@ -108,6 +144,11 @@ export class EsOutput implements EsPrinter {
     );
   }
 
+  /**
+   * Iterates over printed lines of code.
+   *
+   * @returns Asynchronous iterable iterator over all printed lines.
+   */
   async *lines(): AsyncIterableIterator<string> {
     const records = await Promise.all(this.#records);
     let prevNL = false;
@@ -138,10 +179,20 @@ export class EsOutput implements EsPrinter {
     }
   }
 
+  /**
+   * Represents this output as lines of code.
+   *
+   * @returns Promise resolved to array of lines.
+   */
   async asLines(): Promise<string[]> {
     return await collectLines(this.lines());
   }
 
+  /**
+   * Represents this output as text.
+   *
+   * @returns Promise resolved to printed text.
+   */
   async asText(): Promise<string> {
     const lines = await this.asLines();
 
@@ -155,7 +206,7 @@ export class EsOutput implements EsPrinter {
  */
 export interface EsPrinter {
   /**
-   * Prints code to the `output`.
+   * Prints code to the given output.
    *
    * @param out - Target code output.
    *

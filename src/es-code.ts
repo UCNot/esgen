@@ -102,7 +102,7 @@ export class EsCode implements EsEmitter {
   /**
    * Writes inline code to this fragment.
    *
-   * Unlike {@link write}, the sources a placed on the same line.
+   * Unlike {@link write}, the sources are placed on the same line.
    *
    * @param sources - Inline code sources.
    *
