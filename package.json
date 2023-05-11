@@ -23,7 +23,7 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@proc7ts/async": "^1.1.0",
+    "@proc7ts/async": "^1.1.1",
     "@proc7ts/primitives": "^4.0.0",
     "httongue": "^3.0.0"
   },
