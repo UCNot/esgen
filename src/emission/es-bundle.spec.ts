@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { EsCode } from '../es-code.js';
 import { EsOutput } from '../es-output.js';
+import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsBundle } from './es-bundle.js';
@@ -35,6 +36,22 @@ describe('EsBundle', () => {
     });
   });
 
+  describe('imports', () => {
+    it('constructed by default', () => {
+      expect(bundle.imports).toBeInstanceOf(EsImports);
+    });
+    it('is accepted as initialization option', () => {
+      expect(new EsBundle({ imports: bundle => new TestImports(bundle) }).imports).toBeInstanceOf(
+        TestImports,
+      );
+    });
+    it('is derived by spawned emission', () => {
+      const emission = bundle.spawn();
+
+      expect(emission.imports).toBe(bundle.imports);
+    });
+  });
+
   describe('ns', () => {
     it('is constructed by default', () => {
       expect(bundle.ns.toString()).toBe(`/* Bundle */`);
@@ -44,13 +61,13 @@ describe('EsBundle', () => {
 
       expect(new EsBundle({ ns }).ns).toBe(ns);
     });
-    it('is nested withing namespace of spawning bundle', () => {
+    it('is nested within namespace of spawning bundle', () => {
       const emission = bundle.spawn({ ns: { comment: 'Spawned' } });
 
       expect(emission.ns.toString()).toBe('/* Spawned */');
       expect(bundle.ns.encloses(emission.ns)).toBe(true);
     });
-    it('is nested withing namespace of spawning emission', () => {
+    it('is nested within namespace of spawning emission', () => {
       const emission1 = bundle.spawn();
       const emission2 = emission1.spawn({ ns: { comment: 'Spawned' } });
 
@@ -131,3 +148,5 @@ describe('EsBundle', () => {
     });
   });
 });
+
+class TestImports extends EsImports {}
