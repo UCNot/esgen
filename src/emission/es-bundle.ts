@@ -3,6 +3,7 @@ import { lazyValue } from '@proc7ts/primitives';
 import { EsCode } from '../es-code.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsSource } from '../es-source.js';
+import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsEmission, EsEmitter } from './es-emission.js';
@@ -16,6 +17,7 @@ export class EsBundle implements EsEmission {
 
   readonly #state: [EsEmission$State];
   readonly #format: EsBundleFormat;
+  readonly #imports: EsImports;
   readonly #ns: EsNamespace;
 
   /**
@@ -27,9 +29,11 @@ export class EsBundle implements EsEmission {
   constructor({
     format = EsBundleFormat.Default,
     ns = new EsNamespace({ comment: 'Bundle' }),
+    imports = bundle => new EsImports(bundle),
   }: EsBundle.Init = {}) {
     this.#format = format;
     this.#ns = ns;
+    this.#imports = imports(this);
     this.#state = [new EsEmission$ActiveState(newState => (this.#state[0] = newState))];
   }
 
@@ -42,6 +46,10 @@ export class EsBundle implements EsEmission {
 
   get format(): EsBundleFormat {
     return this.#format;
+  }
+
+  get imports(): EsImports {
+    return this.#imports;
   }
 
   get ns(): EsNamespace {
@@ -91,13 +99,13 @@ export class EsBundle implements EsEmission {
    * @returns Bundling result in appropriate {@link format}.
    */
   emit(...sources: EsSource[]): EsBundle.Result {
-    const { printer } = this.span(new EsCode().write(...sources));
+    const { printer } = this.span(new EsCode().write(this.#imports, ...sources));
 
     this.done();
 
     const printBundle = lazyValue(() => this.#printBundle(printer));
     const asText = lazyValue(
-      async (): Promise<string> => await new EsOutput().print(this.#printBundle(printer)).asText(),
+      async (): Promise<string> => await new EsOutput().print(printBundle()).asText(),
     );
 
     return {
@@ -114,27 +122,14 @@ export class EsBundle implements EsEmission {
       printTo: async out => {
         await this.whenDone();
 
-        const content = this.#printContent(body);
-
         switch (this.format) {
           case EsBundleFormat.IIFE:
-            out.print(this.#printIIFE(content));
+            out.print(this.#printIIFE(body));
 
             break;
           case EsBundleFormat.ES2015:
-            out.print(content);
+            out.print(body);
         }
-      },
-    };
-  }
-
-  #printContent(body: EsPrinter): EsPrinter {
-    return {
-      printTo: out => {
-        // TODO Add imports here.
-        // TODO Add declarations here.
-        out.print(body);
-        // TODO Add exports here.
       },
     };
   }
@@ -190,11 +185,18 @@ export namespace EsBundle {
     readonly format?: EsBundleFormat | undefined;
 
     /**
-     * Top-level namespace to use.
+     * Top-level bundle namespace to use.
      *
      * @defaultValue New namespace instance.
      */
     readonly ns?: EsNamespace | undefined;
+
+    /**
+     * Bundle imports collection factory.
+     *
+     * @defaultValue New imports collection factory.
+     */
+    readonly imports?: ((this: void, bundle: EsBundle) => EsImports) | undefined;
   }
 
   /**
@@ -239,12 +241,16 @@ class SpawnedEsEmission implements EsEmission {
     return this.bundle.format;
   }
 
+  get imports(): EsImports {
+    return this.bundle.imports;
+  }
+
   get ns(): EsNamespace {
     return this.#ns;
   }
 
   isActive(): boolean {
-    return this.#bundle.isActive();
+    return this.bundle.isActive();
   }
 
   spawn(init?: EsEmission.Init): EsEmission {

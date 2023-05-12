@@ -1,4 +1,5 @@
 import { EsPrinter } from '../es-output.js';
+import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsBundle } from './es-bundle.js';
@@ -22,6 +23,11 @@ export interface EsEmission {
    * Format of the bundled code.
    */
   get format(): EsBundleFormat;
+
+  /**
+   * Imports of the {@link bundle}.
+   */
+  get imports(): EsImports;
 
   /**
    * Namespace to {@link EsNamespace#bindSymbol bind local symbols} to.
@@ -90,6 +96,13 @@ export namespace EsEmission {
      */
     emit(this: void, ...emitters: EsEmitter[]): void;
   }
+
+  /**
+   * Code {@link EsEmitter#emit emission} result.
+   *
+   * Either printed string, emitted code printer, or a promise-like instance of the one of the above.
+   */
+  export type Result = string | EsPrinter | PromiseLike<string | EsPrinter>;
 }
 
 /**
@@ -104,7 +117,7 @@ export interface EsEmitter {
    *
    * @param emission - Code emission control.
    *
-   * @returns Either printed string, emitted code printer, or a promise-like instance of the one of the above.
+   * @returns Emission result.
    */
-  emit(emission: EsEmission): string | EsPrinter | PromiseLike<string | EsPrinter>;
+  emit(emission: EsEmission): EsEmission.Result;
 }

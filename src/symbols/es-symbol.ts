@@ -1,4 +1,5 @@
 import { jsStringLiteral } from 'httongue';
+import { EsEmission, EsEmitter } from '../emission/es-emission.js';
 import { EsNamespace } from './es-namespace.js';
 
 /**
@@ -9,7 +10,7 @@ import { EsNamespace } from './es-namespace.js';
  * the symbol becomes {@link EsNamespace#findSymbol visible} under its actual {@link EsNamespace#symbolName name} within
  * target namespace and its nested namespaces.
  */
-export class EsSymbol {
+export class EsSymbol implements EsEmitter {
 
   readonly #requestedName: string;
   readonly #comment: string | undefined;
@@ -37,6 +38,17 @@ export class EsSymbol {
    */
   get comment(): string | undefined {
     return this.#comment;
+  }
+
+  /**
+   * Emits the name of the symbol visible to {@link EsEmission#ns emission namespace}.
+   *
+   * @param emission - Code emission control.
+   *
+   * @returns Emission result.
+   */
+  emit(emission: EsEmission): EsEmission.Result {
+    return emission.ns.symbolName(this);
   }
 
   toString(): string {

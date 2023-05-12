@@ -208,7 +208,7 @@ export interface EsPrinter {
   /**
    * Prints code to the given output.
    *
-   * @param out - Target code output.
+   * @param out - Code output.
    *
    * @returns Either none if code printed synchronously, or promise-like instance resolved when code printed
    * asynchronously.
