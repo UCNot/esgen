@@ -160,9 +160,9 @@ describe('EsBundle', () => {
       const result = bundle.emit(new EsCode().write(`const a = 'test';`));
       const text = await result.asText();
 
-      expect(text).toBe(`(async () => {\n  const a = 'test';\n  return {};\n})()\n`);
+      expect(text).toBe(`(async () => {\n  const a = 'test';\n})()\n`);
       await expect(new EsOutput().print(result).asText()).resolves.toBe(text);
-      await expect(result.asExports()).resolves.toEqual({});
+      await expect(result.asExports()).resolves.toBeUndefined();
     });
   });
 });

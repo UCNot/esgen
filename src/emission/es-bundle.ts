@@ -103,7 +103,14 @@ export class EsBundle implements EsEmission {
    * @returns Bundling result in appropriate {@link format}.
    */
   emit(...sources: EsSource[]): EsBundle.Result {
-    const { printer } = this.span(new EsCode().write(this.imports, ...sources));
+    const { printer } = this.span(
+      new EsCode().write(
+        this.imports,
+        this.declarations.body,
+        ...sources,
+        this.declarations.exports,
+      ),
+    );
 
     this.done();
 
@@ -144,8 +151,8 @@ export class EsBundle implements EsEmission {
         out.inline(out => {
           out
             .print(`(async () => {`)
-            .indent(out => out.print(content, /* TODO Add exports instead */ 'return {};', ''))
-            .print('', `})()`);
+            .indent(out => out.print(content, ''))
+            .print(`})()`);
         });
       },
     };
