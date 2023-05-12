@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import { EsDeclarations } from '../declarations/es-declarations.js';
 import { EsCode } from '../es-code.js';
 import { EsOutput } from '../es-output.js';
 import { EsImports } from '../symbols/es-imports.js';
@@ -49,6 +50,23 @@ describe('EsBundle', () => {
       const emission = bundle.spawn();
 
       expect(emission.imports).toBe(bundle.imports);
+    });
+  });
+
+  describe('declarations', () => {
+    it('constructed by default', () => {
+      expect(bundle.declarations).toBeInstanceOf(EsDeclarations);
+      expect(bundle.declarations.bundle).toBe(bundle);
+    });
+    it('is accepted as initialization option', () => {
+      expect(
+        new EsBundle({ declarations: bundle => new TestDeclarations(bundle) }).declarations,
+      ).toBeInstanceOf(TestDeclarations);
+    });
+    it('is derived by spawned emission', () => {
+      const emission = bundle.spawn();
+
+      expect(emission.declarations).toBe(bundle.declarations);
     });
   });
 
@@ -142,13 +160,15 @@ describe('EsBundle', () => {
       const result = bundle.emit(new EsCode().write(`const a = 'test';`));
       const text = await result.asText();
 
-      expect(text).toBe(`(async () => {\n  const a = 'test';\n  return {};\n})()\n`);
+      expect(text).toBe(`(async () => {\n  const a = 'test';\n})()\n`);
       await expect(new EsOutput().print(result).asText()).resolves.toBe(text);
-      await expect(result.asExports()).resolves.toEqual({});
+      await expect(result.asExports()).resolves.toBeUndefined();
     });
   });
 });
 
 class TestImports extends EsImports {}
+
+class TestDeclarations extends EsDeclarations {}
 
 class TestNamespace extends EsNamespace {}

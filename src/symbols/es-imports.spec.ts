@@ -91,7 +91,6 @@ describe('EsImports', () => {
         `(async () => {\n`
           + `  const { test } = await import('test-module');\n`
           + `  test();\n`
-          + `  return {};\n`
           + `})()\n`,
       );
     });
@@ -116,7 +115,6 @@ describe('EsImports', () => {
           + `  const { test } = await import('test-module');\n`
           + `  test(1);\n`
           + `  test(2);\n`
-          + `  return {};\n`
           + `})()\n`,
       );
     });
@@ -136,7 +134,6 @@ describe('EsImports', () => {
           + `  const { test: test$0 } = await import('test-module2');\n`
           + `  test(1);\n`
           + `  test$0(2);\n`
-          + `  return {};\n`
           + `})()\n`,
       );
     });
@@ -158,7 +155,6 @@ describe('EsImports', () => {
           + `  } = await import('test-module');\n`
           + `  test1();\n`
           + `  test2();\n`
-          + `  return {};\n`
           + `})()\n`,
       );
     });
