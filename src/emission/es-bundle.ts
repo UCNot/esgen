@@ -1,5 +1,6 @@
 import { EveryPromiseResolver, PromiseResolver } from '@proc7ts/async';
 import { lazyValue } from '@proc7ts/primitives';
+import { EsDeclarations } from '../declarations/es-declarations.js';
 import { EsCode } from '../es-code.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsSource } from '../es-source.js';
@@ -18,6 +19,7 @@ export class EsBundle implements EsEmission {
   readonly #state: [EsEmission$State];
   readonly #format: EsBundleFormat;
   readonly #imports: () => EsImports;
+  readonly #declarations: () => EsDeclarations;
   readonly #ns: () => EsNamespace;
 
   /**
@@ -30,10 +32,12 @@ export class EsBundle implements EsEmission {
     format = EsBundleFormat.Default,
     ns = bundle => new EsNamespace(bundle, { comment: 'Bundle' }),
     imports = bundle => new EsImports(bundle),
+    declarations = bundle => new EsDeclarations(bundle),
   }: EsBundle.Init = {}) {
     this.#format = format;
     this.#ns = lazyValue(() => ns(this));
     this.#imports = lazyValue(() => imports(this));
+    this.#declarations = lazyValue(() => declarations(this));
     this.#state = [new EsEmission$ActiveState(newState => (this.#state[0] = newState))];
   }
 
@@ -50,6 +54,10 @@ export class EsBundle implements EsEmission {
 
   get imports(): EsImports {
     return this.#imports();
+  }
+
+  get declarations(): EsDeclarations {
+    return this.#declarations();
   }
 
   get ns(): EsNamespace {
@@ -188,11 +196,18 @@ export namespace EsBundle {
     readonly ns?: ((this: void, bundle: EsBundle) => EsNamespace) | undefined;
 
     /**
-     * Bundle imports collection factory.
+     * Import declarations collection factory.
      *
-     * @defaultValue New imports collection factory.
+     * @defaultValue New import declarations collection factory.
      */
     readonly imports?: ((this: void, bundle: EsBundle) => EsImports) | undefined;
+
+    /**
+     * Bundle declarations collection factory.
+     *
+     * @defaultValue New declarations collection factory.
+     */
+    readonly declarations?: ((this: void, bundle: EsBundle) => EsDeclarations) | undefined;
   }
 
   /**
@@ -243,6 +258,10 @@ class SpawnedEsEmission implements EsEmission {
 
   get imports(): EsImports {
     return this.bundle.imports;
+  }
+
+  get declarations(): EsDeclarations {
+    return this.bundle.declarations;
   }
 
   get ns(): EsNamespace {

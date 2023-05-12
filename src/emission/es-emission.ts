@@ -1,3 +1,4 @@
+import { EsDeclarations } from '../declarations/es-declarations.js';
 import { EsPrinter } from '../es-output.js';
 import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
@@ -25,9 +26,14 @@ export interface EsEmission {
   get format(): EsBundleFormat;
 
   /**
-   * Imports of the {@link bundle}.
+   * Import declarations of the {@link bundle}.
    */
   get imports(): EsImports;
+
+  /**
+   * Declarations of the {@link bundle}.
+   */
+  get declarations(): EsDeclarations;
 
   /**
    * Namespace to {@link EsNamespace#bindSymbol bind local symbols} to.
