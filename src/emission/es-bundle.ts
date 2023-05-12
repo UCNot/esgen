@@ -302,11 +302,13 @@ class EsEmission$ActiveState implements EsEmission$State {
     const { add, whenDone } = new EveryPromiseResolver<string | EsPrinter>();
 
     let emit = (...emitters: EsEmitter[]): void => {
-      add(...emitters.map(async emitter => await emitter.emit(emission)));
+      const emissions = emitters.map(async emitter => await emitter.emit(emission));
+
+      add(...emissions);
+      this.#resolver.add(...emissions);
     };
 
     emit(...emitters);
-    this.#resolver.add(whenDone());
 
     return {
       printer: {
