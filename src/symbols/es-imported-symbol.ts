@@ -8,7 +8,7 @@ import { EsSymbol } from './es-symbol.js';
  *
  * The symbol is automatically imported and bound to {@link EsBundle#ns top-level bundle namespace} whenever used.
  */
-export class EsImportedSymbol extends EsSymbol {
+export class EsImportedSymbol extends EsSymbol<EsImportedSymbol.Binding> {
 
   readonly #from: EsModule;
 
@@ -31,9 +31,12 @@ export class EsImportedSymbol extends EsSymbol {
     return this.#from;
   }
 
-  override emit(emission: EsEmission): EsEmission.Result;
-  override emit({ imports }: EsEmission): EsEmission.Result {
-    return imports.import(this);
+  override bind(binding: EsSymbol.Binding): EsImportedSymbol.Binding {
+    return binding.ns.emission.imports.addImport(this, binding);
+  }
+
+  override emit(emission: EsEmission): EsEmission.Result {
+    return emission.bundle.ns.bindSymbol(this).name;
   }
 
   override toString(): string {
@@ -44,4 +47,16 @@ export class EsImportedSymbol extends EsSymbol {
     );
   }
 
+}
+
+export namespace EsImportedSymbol {
+  /**
+   * Imported symbol binding to (bundle) namespace.
+   */
+  export interface Binding extends EsSymbol.Binding {
+    /**
+     * Source module the symbol is imported from.
+     */
+    readonly from: EsModule;
+  }
 }

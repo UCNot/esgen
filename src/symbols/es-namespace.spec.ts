@@ -1,12 +1,15 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import { EsBundle } from '../emission/es-bundle.js';
 import { EsNamespace } from './es-namespace.js';
 import { EsSymbol } from './es-symbol.js';
 
 describe('EsNamespace', () => {
+  let bundle: EsBundle;
   let ns: EsNamespace;
 
   beforeEach(() => {
-    ns = new EsNamespace();
+    bundle = new EsBundle();
+    ns = bundle.ns;
   });
 
   describe('name', () => {
@@ -17,18 +20,18 @@ describe('EsNamespace', () => {
       expect(ns.name()).toBe('tmp');
     });
     it('permits duplicate names in nested namespaces', () => {
-      expect(ns.nest().name('test')).toBe('test');
-      expect(ns.nest().name('test')).toBe('test');
+      expect(bundle.spawn().ns.name('test')).toBe('test');
+      expect(bundle.spawn().ns.name('test')).toBe('test');
     });
     it('generates alias for duplicate in nested namespace', () => {
       expect(ns.name('test')).toBe('test');
-      expect(ns.nest().name('test')).toBe('test$0');
-      expect(ns.nest().name('test')).toBe('test$0');
+      expect(bundle.spawn().ns.name('test')).toBe('test$0');
+      expect(bundle.spawn().ns.name('test')).toBe('test$0');
     });
     it('prevents duplicate of the declared in nested namespace', () => {
-      expect(ns.nest().name('test')).toBe('test');
+      expect(bundle.spawn().ns.name('test')).toBe('test');
       expect(ns.name('test')).toBe('test$0');
-      expect(ns.nest().name('test')).toBe('test');
+      expect(bundle.spawn().ns.name('test')).toBe('test');
     });
     it('assigns counter to aliases', () => {
       ns.name('test');
@@ -52,13 +55,13 @@ describe('EsNamespace', () => {
       expect(ns.name('test$1')).toBe('test$2');
     });
     it('resolves conflict with enclosing namespace', () => {
-      const nested = ns.nest();
+      const nested = bundle.spawn().ns;
 
       expect(ns.name('test')).toBe('test');
       expect(nested.name('test')).toBe('test$0');
     });
     it('resolves conflict between nested and enclosing namespace', () => {
-      const nested = ns.nest();
+      const nested = bundle.spawn().ns;
 
       expect(nested.name('test')).toBe('test');
       expect(ns.name('test')).toBe('test$0');
@@ -70,17 +73,18 @@ describe('EsNamespace', () => {
 
   describe('bindSymbol', () => {
     it('returns the binding of the symbol bound to the same namespace', () => {
-      const symbol = new EsSymbol('test');
+      const symbol = new TestSymbol('test');
+      const binding = ns.bindSymbol(symbol);
 
-      expect(ns.bindSymbol(symbol)).toBe('test');
-      expect(ns.bindSymbol(symbol)).toBe('test');
+      expect(binding).toEqual({ ns, name: 'test' });
+      expect(ns.bindSymbol(symbol)).toBe(binding);
     });
     it('prevents symbol re-binding', () => {
-      const nested1 = ns.nest({ comment: 'nested 1' });
-      const nested2 = ns.nest({ comment: 'nested 2' });
-      const symbol = new EsSymbol('test');
+      const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
+      const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
+      const symbol = new TestSymbol('test');
 
-      expect(nested1.bindSymbol(symbol)).toBe('test');
+      expect(nested1.bindSymbol(symbol)).toEqual({ ns: nested1, name: 'test' });
       expect(() => nested2.bindSymbol(symbol)).toThrow(
         new TypeError(
           `Can not bind Symbol "test" to /* nested 2 */. It is already bound to /* nested 1 */`,
@@ -91,63 +95,63 @@ describe('EsNamespace', () => {
 
   describe('findSymbol', () => {
     it('returns the bound symbol', () => {
-      const symbol = new EsSymbol('test');
+      const symbol = new TestSymbol('test');
+      const binding = ns.bindSymbol(symbol);
 
-      expect(ns.bindSymbol(symbol)).toBe('test');
-      expect(ns.findSymbol(symbol)).toEqual({ ns, name: 'test' });
+      expect(ns.findSymbol(symbol)).toBe(binding);
     });
     it('returns the binding of visible symbol', () => {
-      const nested = ns.nest().nest().nest();
-      const symbol = new EsSymbol('test');
+      const nested = bundle.spawn().spawn().spawn().ns;
+      const symbol = new TestSymbol('test');
+      const binding = ns.bindSymbol(symbol);
 
-      expect(ns.bindSymbol(symbol)).toBe('test');
-      expect(nested.findSymbol(symbol)).toEqual({ ns, name: 'test' });
+      expect(nested.findSymbol(symbol)).toBe(binding);
     });
     it('returns none for unbound symbol', () => {
-      expect(ns.findSymbol(new EsSymbol('test'))).toBeUndefined();
+      expect(ns.findSymbol(new TestSymbol('test'))).toBeUndefined();
     });
     it('returns none for symbol bound in nested namespace', () => {
-      const nested = ns.nest().nest().nest();
-      const symbol = new EsSymbol('test');
+      const nested = bundle.spawn().spawn().spawn().ns;
+      const symbol = new TestSymbol('test');
 
-      expect(nested.bindSymbol(symbol)).toBe('test');
+      expect(nested.bindSymbol(symbol)).toEqual({ ns: nested, name: 'test' });
       expect(ns.findSymbol(symbol)).toBeUndefined();
     });
     it('returns none for invisible symbol', () => {
-      const nested1 = ns.nest();
-      const nested2 = ns.nest();
-      const symbol = new EsSymbol('test');
+      const nested1 = bundle.spawn().ns;
+      const nested2 = bundle.spawn().ns;
+      const symbol = new TestSymbol('test');
 
-      expect(nested1.bindSymbol(symbol)).toBe('test');
+      expect(nested1.bindSymbol(symbol)).toEqual({ ns: nested1, name: 'test' });
       expect(nested2.findSymbol(symbol)).toBeUndefined();
     });
   });
 
   describe('symbolName', () => {
     it('returns the name of the bound symbol', () => {
-      const symbol = new EsSymbol('test');
+      const symbol = new TestSymbol('test');
 
-      expect(ns.bindSymbol(symbol)).toBe('test');
+      expect(ns.bindSymbol(symbol).name).toBe('test');
       expect(ns.symbolName(symbol)).toBe('test');
     });
     it('returns the name of visible symbol', () => {
-      const nested = ns.nest().nest().nest();
-      const symbol = new EsSymbol('test');
+      const nested = bundle.spawn().spawn().spawn().ns;
+      const symbol = new TestSymbol('test');
 
-      expect(ns.bindSymbol(symbol)).toBe('test');
+      expect(ns.bindSymbol(symbol).name).toBe('test');
       expect(nested.symbolName(symbol)).toBe('test');
     });
     it('throws for unbound symbol', () => {
-      expect(() => ns.symbolName(new EsSymbol('test', { comment: 'Test symbol' }))).toThrow(
+      expect(() => ns.symbolName(new TestSymbol('test', { comment: 'Test symbol' }))).toThrow(
         new ReferenceError(`Symbol "test" /* Test symbol */ is unbound`),
       );
     });
     it('throws for invisible symbol', () => {
-      const nested1 = ns.nest({ comment: 'nested 1' });
-      const nested2 = ns.nest({ comment: 'nested 2' });
-      const symbol = new EsSymbol('test');
+      const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
+      const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
+      const symbol = new TestSymbol('test');
 
-      expect(nested1.bindSymbol(symbol)).toBe('test');
+      expect(nested1.bindSymbol(symbol).name).toBe('test');
       expect(() => nested2.symbolName(symbol)).toThrow(
         new ReferenceError(
           `${symbol} is not visible within /* nested 2 */. It is bound to /* nested 1 */`,
@@ -156,3 +160,11 @@ describe('EsNamespace', () => {
     });
   });
 });
+
+class TestSymbol extends EsSymbol {
+
+  override bind(binding: EsSymbol.Binding): EsSymbol.Binding {
+    return binding;
+  }
+
+}

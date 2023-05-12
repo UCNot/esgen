@@ -9,8 +9,14 @@ import { EsNamespace } from './es-namespace.js';
  * In order to receive an actual name, the symbol has to be {@link EsNamespace#bindSymbol bound} to namespace. Then
  * the symbol becomes {@link EsNamespace#findSymbol visible} under its actual {@link EsNamespace#symbolName name} within
  * target namespace and its nested namespaces.
+ *
+ * @typeParam TBinding - Type of symbol bindings.
+ * @typeParam TBindRequest - Type of binding request.
  */
-export class EsSymbol implements EsEmitter {
+export abstract class EsSymbol<
+  out TBinding extends EsSymbol.Binding = EsSymbol.Binding,
+  in TBindRequest = void,
+> implements EsEmitter {
 
   readonly #requestedName: string;
   readonly #comment: string | undefined;
@@ -41,6 +47,18 @@ export class EsSymbol implements EsEmitter {
   }
 
   /**
+   * Performs symbol binding.
+   *
+   * Called by {@link EsNamespace#bindSymbol namespace} during emission to actually bind the symbol to namespace.
+   *
+   * @param binding - Symbol binding information.
+   * @param request - Binding request specific to this type of symbols.
+   *
+   * @returns Symbol binding specific to this type of symbols.
+   */
+  abstract bind(binding: EsSymbol.Binding, request: TBindRequest): TBinding;
+
+  /**
    * Emits the name of the symbol visible to {@link EsEmission#ns emission namespace}.
    *
    * @param emission - Code emission control.
@@ -61,6 +79,13 @@ export class EsSymbol implements EsEmitter {
 
 export namespace EsSymbol {
   /**
+   * Arbitrary symbol.
+   *
+   * @typeParam TBinding - Type of symbol binding.
+   */
+  export type Any<TBinding extends EsSymbol.Binding = EsSymbol.Binding> = EsSymbol<TBinding, any>;
+
+  /**
    * Symbol initialization options.
    */
   export interface Init {
@@ -71,7 +96,7 @@ export namespace EsSymbol {
   }
 
   /**
-   * Symbol {@link EsNamespace#findSymbol binding} to namespace.
+   * Information on symbol {@link EsNamespace#findSymbol binding} to namespace.
    */
   export interface Binding {
     /**
@@ -80,7 +105,7 @@ export namespace EsSymbol {
     readonly ns: EsNamespace;
 
     /**
-     * The actual name used to refer the symbol.
+     * The name used to refer the symbol.
      */
     readonly name: string;
   }

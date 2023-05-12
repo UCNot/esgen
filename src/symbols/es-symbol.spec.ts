@@ -11,8 +11,8 @@ describe('EsSymbol', () => {
 
   describe('emit', () => {
     it('emits bound symbol name', async () => {
-      const symbol = new EsSymbol('test');
-      const name = bundle.ns.bindSymbol(symbol);
+      const symbol = new TestSymbol('test');
+      const { name } = bundle.ns.bindSymbol(symbol);
 
       await expect(
         bundle
@@ -24,3 +24,11 @@ describe('EsSymbol', () => {
     });
   });
 });
+
+class TestSymbol extends EsSymbol {
+
+  override bind(binding: EsSymbol.Binding): EsSymbol.Binding {
+    return binding;
+  }
+
+}

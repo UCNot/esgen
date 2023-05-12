@@ -1,8 +1,8 @@
 import { jsStringLiteral } from 'httongue';
 import { EsBundleFormat } from '../emission/es-bundle-format.js';
-import { EsBundle } from '../emission/es-bundle.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsImportedSymbol } from './es-imported-symbol.js';
+import { EsImports } from './es-imports.js';
 
 /**
  * Module is a source of {@link EsImportedSymbol imported symbols}.
@@ -37,92 +37,97 @@ export abstract class EsModule {
   }
 
   /**
-   * Starts imports from this module to the given `bundle`.
+   * Starts imports from this module to the given collection of import declarations.
    *
-   * Called at most once per bundle when the first import added.
+   * Called at most once per bundle when first import added.
    *
-   * @param bundle - Target bundle.
+   * @param imports - Target collection of import declaration.
    *
-   * @returns Collection of imports from this module to the given `bundle`
+   * @returns Collection of imports from this module to the given collection of import declarations.
    */
-  startImports(bundle: EsBundle): EsModule.Imports;
-  startImports({ format }: EsBundle): EsModule.Imports {
-    const names = new Map<string, string>();
+  startImports(imports: EsImports): EsModule.Imports;
+  startImports({ bundle: { format } }: EsImports): EsModule.Imports {
+    const bindings = new Map<string, EsImportedSymbol.Binding>();
 
     return {
       printTo: out => {
-        out.print(this.#printImports(format, names));
+        out.print(this.#printImports(format, bindings));
       },
       addImport({ requestedName }, name) {
-        names.set(requestedName, name);
+        bindings.set(requestedName, name);
       },
-      findName({ requestedName }) {
-        return names.get(requestedName);
+      findImport({ requestedName }) {
+        return bindings.get(requestedName);
       },
     };
   }
 
-  #printImports(format: EsBundleFormat, imports: ReadonlyMap<string, string>): EsPrinter {
+  #printImports(
+    format: EsBundleFormat,
+    imports: ReadonlyMap<string, EsImportedSymbol.Binding>,
+  ): EsPrinter {
     switch (format) {
       case EsBundleFormat.ES2015:
         return this.#printStaticImports(imports);
       case EsBundleFormat.IIFE:
-        return this.#printIIFEImports(imports);
+        return this.#printDynamicImports(imports);
     }
   }
 
-  #printStaticImports(names: ReadonlyMap<string, string>): EsPrinter {
-    const from = jsStringLiteral(this.moduleName);
-
+  #printStaticImports(names: ReadonlyMap<string, EsImportedSymbol.Binding>): EsPrinter {
     return {
       printTo: out => {
+        const from = jsStringLiteral(this.moduleName);
+
         if (names.size > 1) {
           out
             .print(`import {`)
             .indent(out => {
-              for (const [name, alias] of names) {
-                out.print(`${this.#printStaticClause(name, alias)},`);
+              for (const [requestedName, { name }] of names) {
+                out.print(`${this.#printStaticClause(requestedName, name)},`);
               }
             })
             .print(`} from ${from};`);
         } else {
-          for (const [name, alias] of names) {
-            out.print(`import { ${this.#printStaticClause(name, alias)} } from ${from};`);
+          for (const [requestedName, { name }] of names) {
+            out.print(`import { ${this.#printStaticClause(requestedName, name)} } from ${from};`);
           }
         }
       },
     };
   }
 
-  #printStaticClause(name: string, alias: string): string {
-    return name === alias ? name : `${name} as ${alias}`;
+  #printStaticClause(requestedName: string, name: string): string {
+    return requestedName === name ? requestedName : `${requestedName} as ${name}`;
   }
 
-  #printIIFEImports(imports: ReadonlyMap<string, string>): EsPrinter {
-    const from = jsStringLiteral(this.moduleName);
-
+  #printDynamicImports(imports: ReadonlyMap<string, EsImportedSymbol.Binding>): EsPrinter {
     return {
       printTo: out => {
+        const from = jsStringLiteral(this.moduleName);
+
         if (imports.size > 1) {
           out
             .print('const {')
             .indent(out => {
-              for (const [name, alias] of imports) {
-                out.print(`${this.#printIIFEClause(name, alias)},`);
+              for (const [requestedName, { name }] of imports) {
+                out.print(`${this.#printDynamicClause(requestedName, name)},`);
               }
             })
             .print(`} = await import(${from});`);
         } else {
-          for (const [name, alias] of imports) {
-            out.print(`const { ${this.#printIIFEClause(name, alias)} } = await import(${from});`);
+          for (const [requestedName, { name }] of imports) {
+            out.print(
+              `const { ${this.#printDynamicClause(requestedName, name)} } = await import(${from});`,
+            );
           }
         }
       },
     };
   }
 
-  #printIIFEClause(name: string, alias: string): string {
-    return name === alias ? name : `${name}: ${alias}`;
+  #printDynamicClause(requestedName: string, name: string): string {
+    return requestedName === name ? requestedName : `${requestedName}: ${name}`;
   }
 
   toString(): string {
@@ -147,17 +152,17 @@ export namespace EsModule {
      * Adds new import from this module.
      *
      * @param symbol - Imported symbol.
-     * @param name - Name used to refer the imported `symbol`.
+     * @param binding - Binding of imported `symbol`.
      */
-    addImport(symbol: EsImportedSymbol, name: string): void;
+    addImport(symbol: EsImportedSymbol, binding: EsImportedSymbol.Binding): void;
 
     /**
-     * Searches for the name used to access the imported symbol within bundle.
+     * Searches for the import of the `symbol`.
      *
      * @param symbol - Imported symbol.
      *
-     * @returns Either previously {@link addImport added} import name, or falsy value if the import did not added yet.
+     * @returns Either previously {@link addImport added} symbol binding, or falsy value if the import not added yet.
      */
-    findName(symbol: EsImportedSymbol): string | undefined | null;
+    findImport(symbol: EsImportedSymbol): EsImportedSymbol.Binding | undefined | null;
   }
 }

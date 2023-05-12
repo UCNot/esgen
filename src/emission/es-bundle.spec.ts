@@ -57,9 +57,9 @@ describe('EsBundle', () => {
       expect(bundle.ns.toString()).toBe(`/* Bundle */`);
     });
     it('is accepted as initialization option', () => {
-      const ns = new EsNamespace();
-
-      expect(new EsBundle({ ns }).ns).toBe(ns);
+      expect(new EsBundle({ ns: bundle => new TestNamespace(bundle) }).ns).toBeInstanceOf(
+        TestNamespace,
+      );
     });
     it('is nested within namespace of spawning bundle', () => {
       const emission = bundle.spawn({ ns: { comment: 'Spawned' } });
@@ -150,3 +150,5 @@ describe('EsBundle', () => {
 });
 
 class TestImports extends EsImports {}
+
+class TestNamespace extends EsNamespace {}

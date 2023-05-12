@@ -17,8 +17,8 @@ export class EsBundle implements EsEmission {
 
   readonly #state: [EsEmission$State];
   readonly #format: EsBundleFormat;
-  readonly #imports: EsImports;
-  readonly #ns: EsNamespace;
+  readonly #imports: () => EsImports;
+  readonly #ns: () => EsNamespace;
 
   /**
    * Constructs bundle emission control.
@@ -28,12 +28,12 @@ export class EsBundle implements EsEmission {
   constructor(init?: EsBundle.Init);
   constructor({
     format = EsBundleFormat.Default,
-    ns = new EsNamespace({ comment: 'Bundle' }),
+    ns = bundle => new EsNamespace(bundle, { comment: 'Bundle' }),
     imports = bundle => new EsImports(bundle),
   }: EsBundle.Init = {}) {
     this.#format = format;
-    this.#ns = ns;
-    this.#imports = imports(this);
+    this.#ns = lazyValue(() => ns(this));
+    this.#imports = lazyValue(() => imports(this));
     this.#state = [new EsEmission$ActiveState(newState => (this.#state[0] = newState))];
   }
 
@@ -49,11 +49,11 @@ export class EsBundle implements EsEmission {
   }
 
   get imports(): EsImports {
-    return this.#imports;
+    return this.#imports();
   }
 
   get ns(): EsNamespace {
-    return this.#ns;
+    return this.#ns();
   }
 
   isActive(): boolean {
@@ -61,11 +61,7 @@ export class EsBundle implements EsEmission {
   }
 
   spawn(init?: EsEmission.Init): EsEmission {
-    return new SpawnedEsEmission(
-      this,
-      this.#state,
-      new EsNamespace({ ...init?.ns, enclosing: this.ns }),
-    );
+    return new SpawnedEsEmission(this, this.#state, emission => this.ns.nest(emission, { ...init?.ns }));
   }
 
   span(...emitters: EsEmitter[]): EsEmission.Span {
@@ -99,7 +95,7 @@ export class EsBundle implements EsEmission {
    * @returns Bundling result in appropriate {@link format}.
    */
   emit(...sources: EsSource[]): EsBundle.Result {
-    const { printer } = this.span(new EsCode().write(this.#imports, ...sources));
+    const { printer } = this.span(new EsCode().write(this.imports, ...sources));
 
     this.done();
 
@@ -185,11 +181,11 @@ export namespace EsBundle {
     readonly format?: EsBundleFormat | undefined;
 
     /**
-     * Top-level bundle namespace to use.
+     * Bundle namespace factory.
      *
-     * @defaultValue New namespace instance.
+     * @defaultValue New namespace instance factory.
      */
-    readonly ns?: EsNamespace | undefined;
+    readonly ns?: ((this: void, bundle: EsBundle) => EsNamespace) | undefined;
 
     /**
      * Bundle imports collection factory.
@@ -225,12 +221,16 @@ class SpawnedEsEmission implements EsEmission {
 
   readonly #bundle: EsBundle;
   readonly #state: [EsEmission$State];
-  readonly #ns: EsNamespace;
+  readonly #ns: () => EsNamespace;
 
-  constructor(bundle: EsBundle, state: [EsEmission$State], ns: EsNamespace) {
+  constructor(
+    bundle: EsBundle,
+    state: [EsEmission$State],
+    ns: (emission: EsEmission) => EsNamespace,
+  ) {
     this.#bundle = bundle;
     this.#state = state;
-    this.#ns = ns;
+    this.#ns = lazyValue(() => ns(this));
   }
 
   get bundle(): EsBundle {
@@ -246,7 +246,7 @@ class SpawnedEsEmission implements EsEmission {
   }
 
   get ns(): EsNamespace {
-    return this.#ns;
+    return this.#ns();
   }
 
   isActive(): boolean {
@@ -254,11 +254,7 @@ class SpawnedEsEmission implements EsEmission {
   }
 
   spawn(init?: EsEmission.Init): EsEmission {
-    return new SpawnedEsEmission(
-      this.bundle,
-      this.#state,
-      new EsNamespace({ ...init?.ns, enclosing: this.ns }),
-    );
+    return new SpawnedEsEmission(this.bundle, this.#state, emission => this.ns.nest(emission, init?.ns));
   }
 
   span(...emitters: EsEmitter[]): EsEmission.Span {

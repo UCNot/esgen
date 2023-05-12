@@ -2,9 +2,10 @@ import { EsBundle } from '../emission/es-bundle.js';
 import { EsEmission, EsEmitter } from '../emission/es-emission.js';
 import { EsImportedSymbol } from './es-imported-symbol.js';
 import { EsModule } from './es-module.js';
+import { EsSymbol } from './es-symbol.js';
 
 /**
- * Collection of {@link EsImportedSymbol imports} of the bundle.
+ * Collection of {@link EsImportedSymbol import} declarations of the bundle.
  *
  * Declared at bundle emission control.
  */
@@ -23,33 +24,41 @@ export class EsImports implements EsEmitter {
   }
 
   /**
-   * Declares the import if not declared yet.
+   * Code bundle to import to.
+   */
+  get bundle(): EsBundle {
+    return this.#bundle;
+  }
+
+  /**
+   * Declares the import.
    *
    * @param symbol - Symbol to import into the bundle.
+   * @param binding - Symbol binding information.
    *
-   * @returns The name to use to refer the imported `symbol`.
+   * @returns Binding of imported symbol.
    */
-  import(symbol: EsImportedSymbol): string {
+  addImport(symbol: EsImportedSymbol, binding: EsSymbol.Binding): EsImportedSymbol.Binding {
     const { from } = symbol;
     const { moduleId } = from;
     let moduleImports = this.#imports.get(moduleId);
 
     if (moduleImports) {
-      const name = moduleImports.findName(symbol);
+      const importBinding = moduleImports.findImport(symbol);
 
-      if (name) {
-        return name;
+      if (importBinding) {
+        return importBinding;
       }
     } else {
-      moduleImports = from.startImports(this.#bundle);
+      moduleImports = from.startImports(this);
       this.#imports.set(moduleId, moduleImports);
     }
 
-    const name = this.#bundle.ns.bindSymbol(symbol);
+    const importBinding: EsImportedSymbol.Binding = { ...binding, from };
 
-    moduleImports.addImport(symbol, name);
+    moduleImports.addImport(symbol, importBinding);
 
-    return name;
+    return importBinding;
   }
 
   emit(_emission: EsEmission): EsEmission.Result {

@@ -1,3 +1,4 @@
+import { EsEmission } from '../emission/es-emission.js';
 import { EsSymbol } from './es-symbol.js';
 
 /**
@@ -5,28 +6,41 @@ import { EsSymbol } from './es-symbol.js';
  */
 export class EsNamespace {
 
+  readonly #emission: EsEmission;
   readonly #shared: EsNamespace$SharedState;
   readonly #enclosing: EsNamespace | undefined;
   readonly #comment: string;
-  readonly #names = new Map<string, UsNames>();
+  readonly #names = new Map<string, EsNames>();
   #nestedSeq = 0;
 
   /**
    * Constructs namespace.
    *
+   * @param emission - Code emission control the namespace created for.
    * @param init - Initialization options.
    */
-  constructor(init?: EsNamespace.Init);
+  constructor(emission: EsEmission, init?: EsNamespace.Init);
 
-  constructor({
-    enclosing,
-    comment = enclosing
-      ? `${enclosing}/${++enclosing.#nestedSeq}`
-      : `Namespace #${++EsNamespace$seq}`,
-  }: EsNamespace.Init = {}) {
+  constructor(
+    emission: EsEmission,
+    {
+      enclosing,
+      comment = enclosing
+        ? `${enclosing}/${++enclosing.#nestedSeq}`
+        : `Namespace #${++EsNamespace$seq}`,
+    }: EsNamespace.Init = {},
+  ) {
+    this.#emission = emission;
     this.#shared = enclosing ? enclosing.#shared : { bindings: new Map() };
     this.#enclosing = enclosing;
     this.#comment = comment;
+  }
+
+  /**
+   * Code emission control this namespace created for.
+   */
+  get emission(): EsEmission {
+    return this.#emission;
   }
 
   /**
@@ -65,31 +79,56 @@ export class EsNamespace {
    *
    * @param symbol - Symbol to bind.
    *
-   * @returns The name used to refer the symbol.
+   * @returns Symbol binding.
    *
    * @throws [TypeError] if the `symbol` is bound to another namespace already.
    *
    * [TypeError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
    */
-  bindSymbol(symbol: EsSymbol): string {
-    const binding = this.#shared.bindings.get(symbol);
+  bindSymbol<TBinding extends EsSymbol.Binding>(symbol: EsSymbol<TBinding>): TBinding;
 
-    if (binding) {
-      if (binding.ns === this) {
+  /**
+   * Binds the given `symbol` to this namespace with the given binding `request`.
+   *
+   * The symbol will be {@link findSymbol visible} within namespace itself and its {@link nest nested} ones.
+   *
+   * @param symbol - Symbol to bind.
+   * @param request - Binding request.
+   *
+   * @returns Symbol binding.
+   *
+   * @throws [TypeError] if the `symbol` is bound to another namespace already.
+   *
+   * [TypeError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
+   */
+  bindSymbol<TBinding extends EsSymbol.Binding, TBindRequest>(
+    symbol: EsSymbol<TBinding, TBindRequest>,
+    request: TBindRequest,
+  ): TBinding;
+
+  bindSymbol<TBinding extends EsSymbol.Binding, TBindRequest>(
+    symbol: EsSymbol<TBinding, TBindRequest>,
+    request?: TBindRequest,
+  ): TBinding {
+    const existingBinding = this.#shared.bindings.get(symbol);
+
+    if (existingBinding) {
+      if (existingBinding.ns === this) {
         // Already bound to this namespace.
-        return binding.name;
+        return existingBinding as TBinding;
       }
 
       throw new TypeError(
-        `Can not bind ${symbol} to ${this}. It is already bound to ${binding.ns}`,
+        `Can not bind ${symbol} to ${this}. It is already bound to ${existingBinding.ns}`,
       );
     }
 
     const name = this.name(symbol.requestedName);
+    const newBinding = symbol.bind({ ns: this, name }, request as TBindRequest);
 
-    this.#shared.bindings.set(symbol, { ns: this, name });
+    this.#shared.bindings.set(symbol, newBinding);
 
-    return name;
+    return newBinding;
   }
 
   /**
@@ -99,10 +138,12 @@ export class EsNamespace {
    *
    * @returns Either found binding, or `undefined` when `symbol` is not visible.
    */
-  findSymbol(symbol: EsSymbol): EsSymbol.Binding | undefined {
+  findSymbol<TBinding extends EsSymbol.Binding>(
+    symbol: EsSymbol.Any<TBinding>,
+  ): TBinding | undefined {
     const binding = this.#shared.bindings.get(symbol);
 
-    return binding && (binding.ns.encloses(this) ? binding : undefined);
+    return binding && (binding.ns.encloses(this) ? (binding as TBinding) : undefined);
   }
 
   /**
@@ -114,7 +155,7 @@ export class EsNamespace {
    *
    * [ReferenceError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError
    */
-  symbolName(symbol: EsSymbol): string {
+  symbolName(symbol: EsSymbol.Any): string {
     const binding = this.#shared.bindings.get(symbol);
 
     if (!binding) {
@@ -185,14 +226,14 @@ export class EsNamespace {
     return name;
   }
 
-  #addAlias(names: UsNames, alias: string, forNested: boolean): void {
+  #addAlias(names: EsNames, alias: string, forNested: boolean): void {
     names.list.push(alias);
     if (forNested && !names.nested) {
       names.nested = alias;
     }
   }
 
-  #nextName({ list }: UsNames): string {
+  #nextName({ list }: EsNames): string {
     const lastName = list[list.length - 1];
     const dollarIdx = lastName.lastIndexOf('$');
     const lastIndex = dollarIdx < 0 ? NaN : Number(lastName.slice(dollarIdx + 1));
@@ -212,12 +253,13 @@ export class EsNamespace {
   /**
    * Creates nested namespace.
    *
+   * @param emission - Code emission control the nested namespace created for.
    * @param init - Nested namespace initialization options.
    *
    * @returns New namespace nested within current one.
    */
-  nest(init?: Omit<EsNamespace.Init, 'enclosing'>): EsNamespace {
-    return new EsNamespace({ ...init, enclosing: this });
+  nest(emission: EsEmission, init?: Omit<EsNamespace.Init, 'enclosing'>): EsNamespace {
+    return new EsNamespace(emission, { ...init, enclosing: this });
   }
 
   toString(): string {
@@ -249,11 +291,11 @@ export namespace EsNamespace {
 
 let EsNamespace$seq = 0;
 
-interface UsNames {
+interface EsNames {
   readonly list: string[];
   nested: string | undefined;
 }
 
 interface EsNamespace$SharedState {
-  readonly bindings: Map<EsSymbol, EsSymbol.Binding>;
+  readonly bindings: Map<EsSymbol.Any, EsSymbol.Binding>;
 }
