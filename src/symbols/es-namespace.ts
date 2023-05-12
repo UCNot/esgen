@@ -1,3 +1,4 @@
+import { lazyValue } from '@proc7ts/primitives';
 import { EsEmission } from '../emission/es-emission.js';
 import { EsSymbol } from './es-symbol.js';
 
@@ -123,8 +124,19 @@ export class EsNamespace {
       );
     }
 
-    const name = this.name(symbol.requestedName);
-    const newBinding = symbol.bind({ ns: this, name }, request as TBindRequest);
+    const getName = lazyValue(() => this.name(symbol.requestedName));
+    const newBinding = symbol.bind(
+      {
+        ns: this,
+        get name() {
+          // Reserve the name lazily.
+          // For example, when importing already imported symbol, the cached binding will be reused,
+          // so reserving another name is redundant.
+          return getName();
+        },
+      },
+      request as TBindRequest,
+    );
 
     this.#shared.bindings.set(symbol, newBinding);
 
