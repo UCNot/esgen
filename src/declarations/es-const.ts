@@ -65,7 +65,7 @@ class EsConstSymbol extends EsDeclaredSymbol {
   constructor(requestedName: string, initializer: string, init: EsConstInit) {
     super(requestedName, {
       ...init,
-      declare: ({ binding: { name } }) => `const ${name} = ${initializer};`,
+      declare: ({ naming: { name } }) => `const ${name} = ${initializer};`,
     });
   }
 

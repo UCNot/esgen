@@ -2,12 +2,12 @@ import { asArray } from '@proc7ts/primitives';
 import { EsBundle } from '../emission/es-bundle.js';
 import { EsEmission, EsEmissionResult } from '../emission/es-emission.js';
 import { EsSource } from '../es-source.js';
-import { EsAnySymbol, EsBinding, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
+import { EsAnySymbol, EsNaming, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
 
 /**
  * Symbol declared in bundle {@link EsDeclarations declarations}.
  *
- * The symbol is automatically declared and bound to {@link EsBundle#ns top-level bundle namespace} whenever used.
+ * The symbol is automatically declared and named in {@link EsBundle#ns bundle namespace} whenever used.
  */
 export class EsDeclaredSymbol extends EsSymbol {
 
@@ -38,12 +38,12 @@ export class EsDeclaredSymbol extends EsSymbol {
     return this.#exported;
   }
 
-  override bind(binding: EsBinding): EsBinding {
-    return binding.ns.emission.declarations.addDeclaration(this, binding);
+  override bind(naming: EsNaming): EsNaming {
+    return naming.ns.emission.declarations.addDeclaration(this, naming);
   }
 
   override emit(emission: EsEmission): EsEmissionResult {
-    return emission.bundle.ns.bindSymbol(this).name;
+    return emission.bundle.ns.nameSymbol(this).name;
   }
 
   /**
@@ -101,9 +101,9 @@ export interface EsDeclarationInit extends EsSymbolInit {
  */
 export interface EsDeclarationContext {
   /**
-   * Binding of declares symbol.
+   * Declared symbol naming.
    */
-  readonly binding: EsBinding;
+  readonly naming: EsNaming;
 
   /**
    * Refers the given symbol.

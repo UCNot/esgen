@@ -1,7 +1,7 @@
 import { jsStringLiteral } from 'httongue';
 import { EsBundleFormat } from '../emission/es-bundle-format.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
-import { EsImportBinding, EsImportInit, EsImportedSymbol } from './es-imported-symbol.js';
+import { EsImportInit, EsImportNaming, EsImportedSymbol } from './es-imported-symbol.js';
 import { EsImports } from './es-imports.js';
 
 /**
@@ -48,22 +48,22 @@ export abstract class EsModule {
    */
   startImports(imports: EsImports): EsModuleImports;
   startImports({ bundle: { format } }: EsImports): EsModuleImports {
-    const bindings = new Map<string, EsImportBinding>();
+    const namings = new Map<string, EsImportNaming>();
 
     return {
       printTo: out => {
-        out.print(this.#printImports(format, bindings));
+        out.print(this.#printImports(format, namings));
       },
       addImport({ importName }, name) {
-        bindings.set(importName, name);
+        namings.set(importName, name);
       },
       findImport({ requestedName }) {
-        return bindings.get(requestedName);
+        return namings.get(requestedName);
       },
     };
   }
 
-  #printImports(format: EsBundleFormat, imports: ReadonlyMap<string, EsImportBinding>): EsPrinter {
+  #printImports(format: EsBundleFormat, imports: ReadonlyMap<string, EsImportNaming>): EsPrinter {
     switch (format) {
       case EsBundleFormat.ES2015:
         return this.#printStaticImports(imports);
@@ -72,7 +72,7 @@ export abstract class EsModule {
     }
   }
 
-  #printStaticImports(names: ReadonlyMap<string, EsImportBinding>): EsPrinter {
+  #printStaticImports(names: ReadonlyMap<string, EsImportNaming>): EsPrinter {
     return {
       printTo: out => {
         const from = jsStringLiteral(this.moduleName);
@@ -99,7 +99,7 @@ export abstract class EsModule {
     return importName === name ? importName : `${importName} as ${name}`;
   }
 
-  #printDynamicImports(imports: ReadonlyMap<string, EsImportBinding>): EsPrinter {
+  #printDynamicImports(imports: ReadonlyMap<string, EsImportNaming>): EsPrinter {
     return {
       printTo: out => {
         const from = jsStringLiteral(this.moduleName);
@@ -149,16 +149,16 @@ export interface EsModuleImports extends EsPrinter {
    * Adds new import from this module.
    *
    * @param symbol - Imported symbol.
-   * @param binding - Binding of imported `symbol`.
+   * @param naming - Naming of imported `symbol` within namespace.
    */
-  addImport(symbol: EsImportedSymbol, binding: EsImportBinding): void;
+  addImport(symbol: EsImportedSymbol, naming: EsImportNaming): void;
 
   /**
    * Searches for the import of the `symbol`.
    *
    * @param symbol - Imported symbol.
    *
-   * @returns Either previously {@link addImport added} symbol binding, or falsy value if the import not added yet.
+   * @returns Either previously {@link addImport added} symbol naming, or falsy value if the import not added yet.
    */
-  findImport(symbol: EsImportedSymbol): EsImportBinding | undefined | null;
+  findImport(symbol: EsImportedSymbol): EsImportNaming | undefined | null;
 }

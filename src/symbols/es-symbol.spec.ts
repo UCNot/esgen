@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { EsBundle } from '../emission/es-bundle.js';
-import { EsBinding, EsSymbol } from './es-symbol.js';
+import { EsNaming, EsSymbol } from './es-symbol.js';
 
 describe('EsSymbol', () => {
   let bundle: EsBundle;
@@ -10,9 +10,9 @@ describe('EsSymbol', () => {
   });
 
   describe('emit', () => {
-    it('emits bound symbol name', async () => {
+    it('emits symbol name', async () => {
       const symbol = new TestSymbol('test');
-      const { name } = bundle.ns.bindSymbol(symbol);
+      const { name } = bundle.ns.nameSymbol(symbol);
 
       await expect(
         bundle
@@ -27,8 +27,8 @@ describe('EsSymbol', () => {
 
 class TestSymbol extends EsSymbol {
 
-  override bind(binding: EsBinding): EsBinding {
-    return binding;
+  override bind(naming: EsNaming): EsNaming {
+    return naming;
   }
 
 }

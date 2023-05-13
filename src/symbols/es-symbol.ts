@@ -6,14 +6,14 @@ import { EsNamespace } from './es-namespace.js';
  * Program symbol.
  *
  * Requests a {@link requestedName name} within program. The actual name, however, may differ to avoid naming conflicts.
- * In order to receive an actual name, the symbol has to be {@link EsNamespace#bindSymbol bound} to namespace. Then
- * the symbol becomes {@link EsNamespace#findSymbol visible} under its actual {@link EsNamespace#symbolName name} within
- * target namespace and its nested namespaces.
+ * In order to receive an actual name, the symbol has to be {@link EsNamespace#nameSymbol named} first. Then, the symbol
+ * becomes {@link EsNamespace#findSymbol visible} under its actual {@link EsNamespace#symbolName name} in target
+ * namespace and its nested namespaces.
  *
- * @typeParam TBinding - Type of symbol bindings.
- * @typeParam TBindRequest - Type of binding request.
+ * @typeParam TNaming - Type of symbol naming.
+ * @typeParam TConstraints - Type of naming constraints.
  */
-export abstract class EsSymbol<out TBinding extends EsBinding = EsBinding, in TBindRequest = void>
+export abstract class EsSymbol<out TNaming extends EsNaming = EsNaming, in TConstraints = void>
   implements EsEmitter {
 
   readonly #requestedName: string;
@@ -45,16 +45,16 @@ export abstract class EsSymbol<out TBinding extends EsBinding = EsBinding, in TB
   }
 
   /**
-   * Performs symbol binding.
+   * Binds named symbol to namespace.
    *
-   * Called by {@link EsNamespace#bindSymbol namespace} during emission to actually bind the symbol to namespace.
+   * Called to perform additional actions right after the symbol received its {@link EsNamespace#nameSymbol name}.
    *
-   * @param binding - Symbol binding information.
-   * @param request - Binding request specific to this type of symbols.
+   * @param naming - Symbol naming.
+   * @param constraints - Naming constraints specific to this type of symbols.
    *
-   * @returns Symbol binding specific to this type of symbols.
+   * @returns Naming specific to this type of symbols.
    */
-  abstract bind(binding: EsBinding, request: TBindRequest): TBinding;
+  abstract bind(naming: EsNaming, constraints: TConstraints): TNaming;
 
   /**
    * Emits the name of the symbol visible to {@link EsEmission#ns emission namespace}.
@@ -78,9 +78,9 @@ export abstract class EsSymbol<out TBinding extends EsBinding = EsBinding, in TB
 /**
  * Arbitrary symbol type suitable for wildcard usage.
  *
- * @typeParam TBinding - Type of symbol binding.
+ * @typeParam TNaming - Type of symbol naming.
  */
-export type EsAnySymbol<TBinding extends EsBinding = EsBinding> = EsSymbol<TBinding, any>;
+export type EsAnySymbol<TNaming extends EsNaming = EsNaming> = EsSymbol<TNaming, any>;
 
 /**
  * Symbol initialization options.
@@ -93,11 +93,11 @@ export interface EsSymbolInit {
 }
 
 /**
- * Information on symbol {@link EsNamespace#findSymbol binding} to namespace.
+ * Information on symbol {@link EsNamespace#findSymbol naming} within namespace.
  */
-export interface EsBinding {
+export interface EsNaming {
   /**
-   * Namespace the symbol is bound to.
+   * Namespace the symbol is visible in.
    */
   readonly ns: EsNamespace;
 
