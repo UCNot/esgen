@@ -1,8 +1,8 @@
 import { asArray } from '@proc7ts/primitives';
 import { EsBundle } from '../emission/es-bundle.js';
-import { EsEmission } from '../emission/es-emission.js';
+import { EsEmission, EsEmissionResult } from '../emission/es-emission.js';
 import { EsSource } from '../es-source.js';
-import { EsSymbol } from '../symbols/es-symbol.js';
+import { EsAnySymbol, EsBinding, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
 
 /**
  * Symbol declared in bundle {@link EsDeclarations declarations}.
@@ -12,8 +12,8 @@ import { EsSymbol } from '../symbols/es-symbol.js';
 export class EsDeclaredSymbol extends EsSymbol {
 
   readonly #exported: boolean;
-  readonly #refers: readonly EsSymbol.Any[];
-  readonly #declare: (declarer: EsDeclaredSymbol.Declarer) => EsSource;
+  readonly #refers: readonly EsAnySymbol[];
+  readonly #declare: (declarer: EsDeclarer) => EsSource;
 
   /**
    * Constructs declared symbol.
@@ -21,7 +21,7 @@ export class EsDeclaredSymbol extends EsSymbol {
    * @param requestedName - Requested symbol name. Make sure this is a valid ECMAScript name.
    * @param init - Declaration initialization options.
    */
-  constructor(requestedName: string, init: EsDeclaredSymbol.Init) {
+  constructor(requestedName: string, init: EsDeclarationInit) {
     super(requestedName, init);
 
     const { exported = false, refers, declare } = init;
@@ -38,11 +38,11 @@ export class EsDeclaredSymbol extends EsSymbol {
     return this.#exported;
   }
 
-  override bind(binding: EsSymbol.Binding): EsSymbol.Binding {
+  override bind(binding: EsBinding): EsBinding {
     return binding.ns.emission.declarations.addDeclaration(this, binding);
   }
 
-  override emit(emission: EsEmission): EsEmission.Result {
+  override emit(emission: EsEmission): EsEmissionResult {
     return emission.bundle.ns.bindSymbol(this).name;
   }
 
@@ -55,7 +55,7 @@ export class EsDeclaredSymbol extends EsSymbol {
    *
    * @returns Source of code that contains declaration.
    */
-  declare(declarer: EsDeclaredSymbol.Declarer): EsSource {
+  declare(declarer: EsDeclarer): EsSource {
     return code => {
       for (const ref of this.#refers) {
         declarer.refer(ref);
@@ -66,65 +66,51 @@ export class EsDeclaredSymbol extends EsSymbol {
 
 }
 
-export namespace EsDeclaredSymbol {
+/**
+ * Declaration initialization options.
+ */
+export interface EsDeclarationInit extends EsSymbolInit {
   /**
-   * Declaration initialization options.
+   * Whether the symbol is exported.
+   *
+   * If `true`, then the symbol will be exported under {@link EsDeclaredSymbol#requestedName requested name}.
    */
-  export interface Init extends EsSymbol.Init {
-    /**
-     * Whether the symbol is exported.
-     *
-     * If `true`, then the symbol will be exported under {@link EsDeclaredSymbol#requestedName requested name}.
-     */
-    readonly exported?: boolean | undefined;
-
-    /**
-     * Other symbols the declared one refers.
-     *
-     * Referred symbols supposed to be declared _before_ the referrer.
-     */
-    readonly refers?: EsSymbol.Any | readonly EsSymbol.Any[] | undefined;
-
-    /**
-     * Declares the symbol.
-     *
-     * Called on demand, at most once per bundle.
-     *
-     * @param declarer - Symbol declarer context.
-     *
-     * @returns Source of code that contains declaration.
-     */
-    declare(this: void, declarer: Declarer): EsSource;
-  }
+  readonly exported?: boolean | undefined;
 
   /**
-   * Constant initialization options.
+   * Other symbols the declared one refers.
+   *
+   * Referred symbols supposed to be declared _before_ the referrer.
    */
-  export interface ConstInit extends Omit<Init, 'declare'> {
-    /**
-     * Constant name prefix.
-     *
-     * @defaultValue `'CONST_'`, unless constant exported.
-     */
-    readonly prefix?: string | undefined;
-  }
+  readonly refers?: EsAnySymbol | readonly EsAnySymbol[] | undefined;
 
   /**
-   * Symbol declarer context.
+   * Declares the symbol.
+   *
+   * Called on demand, at most once per bundle.
+   *
+   * @param declarer - Symbol declarer context.
+   *
+   * @returns Source of code that contains declaration.
    */
-  export interface Declarer {
-    /**
-     * Binding of declares symbol.
-     */
-    readonly binding: EsSymbol.Binding;
+  declare(this: void, declarer: EsDeclarer): EsSource;
+}
 
-    /**
-     * Refers the given symbol.
-     *
-     * Referred symbols supposed to be declared _before_ the referrer.
-     *
-     * @param ref - Referred symbol.
-     */
-    refer(this: void, ref: EsSymbol.Any): void;
-  }
+/**
+ * Symbol declaration context.
+ */
+export interface EsDeclarer {
+  /**
+   * Binding of declares symbol.
+   */
+  readonly binding: EsBinding;
+
+  /**
+   * Refers the given symbol.
+   *
+   * Referred symbols supposed to be declared _before_ the referrer.
+   *
+   * @param ref - Referred symbol.
+   */
+  refer(this: void, ref: EsAnySymbol): void;
 }

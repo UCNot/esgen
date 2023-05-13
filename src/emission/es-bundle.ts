@@ -7,7 +7,7 @@ import { EsSource } from '../es-source.js';
 import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
-import { EsEmission, EsEmitter } from './es-emission.js';
+import { EsEmission, EsEmissionInit, EsEmissionSpan, EsEmitter } from './es-emission.js';
 
 /**
  * Code bundle control.
@@ -27,13 +27,13 @@ export class EsBundle implements EsEmission {
    *
    * @param init - Bundle emission initialization options.
    */
-  constructor(init?: EsBundle.Init);
+  constructor(init?: EsBundleInit);
   constructor({
     format = EsBundleFormat.Default,
     ns = bundle => new EsNamespace(bundle, { comment: 'Bundle' }),
     imports = bundle => new EsImports(bundle),
     declarations = bundle => new EsDeclarations(bundle),
-  }: EsBundle.Init = {}) {
+  }: EsBundleInit = {}) {
     this.#format = format;
     this.#ns = lazyValue(() => ns(this));
     this.#imports = lazyValue(() => imports(this));
@@ -68,11 +68,11 @@ export class EsBundle implements EsEmission {
     return this.#state[0].isActive();
   }
 
-  spawn(init?: EsEmission.Init): EsEmission {
+  spawn(init?: EsEmissionInit): EsEmission {
     return new SpawnedEsEmission(this, this.#state, emission => this.ns.nest(emission, { ...init?.ns }));
   }
 
-  span(...emitters: EsEmitter[]): EsEmission.Span {
+  span(...emitters: EsEmitter[]): EsEmissionSpan {
     return this.#state[0].span(this, ...emitters);
   }
 
@@ -102,7 +102,7 @@ export class EsBundle implements EsEmission {
    *
    * @returns Bundling result in appropriate {@link format}.
    */
-  emit(...sources: EsSource[]): EsBundle.Result {
+  emit(...sources: EsSource[]): EsBundleResult {
     const { printer } = this.span(
       new EsCode().write(
         this.imports,
@@ -183,60 +183,58 @@ export class EsBundle implements EsEmission {
 
 }
 
-export namespace EsBundle {
+/**
+ * Initialization options for bundle emission.
+ */
+export interface EsBundleInit {
   /**
-   * Initialization options for bundle emission.
+   * Format of the bundled code.
+   *
+   * @defaultValue {@link EsBundleFormat.Default}.
    */
-  export interface Init {
-    /**
-     * Format of the bundled code.
-     *
-     * @defaultValue {@link EsBundleFormat.Default}.
-     */
-    readonly format?: EsBundleFormat | undefined;
-
-    /**
-     * Bundle namespace factory.
-     *
-     * @defaultValue New namespace instance factory.
-     */
-    readonly ns?: ((this: void, bundle: EsBundle) => EsNamespace) | undefined;
-
-    /**
-     * Import declarations collection factory.
-     *
-     * @defaultValue New import declarations collection factory.
-     */
-    readonly imports?: ((this: void, bundle: EsBundle) => EsImports) | undefined;
-
-    /**
-     * Bundle declarations collection factory.
-     *
-     * @defaultValue New declarations collection factory.
-     */
-    readonly declarations?: ((this: void, bundle: EsBundle) => EsDeclarations) | undefined;
-  }
+  readonly format?: EsBundleFormat | undefined;
 
   /**
-   * Result of code {@link EsBundle#bundle bundling}.
+   * Bundle namespace factory.
+   *
+   * @defaultValue New namespace instance factory.
    */
-  export interface Result extends EsPrinter {
-    /**
-     * Represents bundled code as text.
-     *
-     * @returns Promise resolved to printed text.
-     */
-    asText(this: void): Promise<string>;
+  readonly ns?: ((this: void, bundle: EsBundle) => EsNamespace) | undefined;
 
-    /**
-     * Represents bundled code as exports.
-     *
-     * Works only for {@link EsBundleFormat.IIFE IIFE} format.
-     *
-     * @returns Promise resolved to bundle exports.
-     */
-    asExports(): Promise<unknown>;
-  }
+  /**
+   * Import declarations collection factory.
+   *
+   * @defaultValue New import declarations collection factory.
+   */
+  readonly imports?: ((this: void, bundle: EsBundle) => EsImports) | undefined;
+
+  /**
+   * Bundle declarations collection factory.
+   *
+   * @defaultValue New declarations collection factory.
+   */
+  readonly declarations?: ((this: void, bundle: EsBundle) => EsDeclarations) | undefined;
+}
+
+/**
+ * Result of code {@link EsBundle#bundle bundling}.
+ */
+export interface EsBundleResult extends EsPrinter {
+  /**
+   * Represents bundled code as text.
+   *
+   * @returns Promise resolved to printed text.
+   */
+  asText(this: void): Promise<string>;
+
+  /**
+   * Represents bundled code as exports.
+   *
+   * Works only for {@link EsBundleFormat.IIFE IIFE} format.
+   *
+   * @returns Promise resolved to bundle exports.
+   */
+  asExports(): Promise<unknown>;
 }
 
 class SpawnedEsEmission implements EsEmission {
@@ -279,11 +277,11 @@ class SpawnedEsEmission implements EsEmission {
     return this.bundle.isActive();
   }
 
-  spawn(init?: EsEmission.Init): EsEmission {
+  spawn(init?: EsEmissionInit): EsEmission {
     return new SpawnedEsEmission(this.bundle, this.#state, emission => this.ns.nest(emission, init?.ns));
   }
 
-  span(...emitters: EsEmitter[]): EsEmission.Span {
+  span(...emitters: EsEmitter[]): EsEmissionSpan {
     return this.#state[0].span(this, ...emitters);
   }
 
@@ -295,7 +293,7 @@ class SpawnedEsEmission implements EsEmission {
 
 interface EsEmission$State {
   isActive(): boolean;
-  span(emission: EsEmission, ...emitters: EsEmitter[]): EsEmission.Span;
+  span(emission: EsEmission, ...emitters: EsEmitter[]): EsEmissionSpan;
   done(): void;
   whenDone(): Promise<void>;
 }
@@ -320,7 +318,7 @@ class EsEmission$ActiveState implements EsEmission$State {
     return true;
   }
 
-  span(emission: EsEmission, ...emitters: EsEmitter[]): EsEmission.Span {
+  span(emission: EsEmission, ...emitters: EsEmitter[]): EsEmissionSpan {
     const { add, whenDone } = new EveryPromiseResolver<string | EsPrinter>();
 
     let emit = (...emitters: EsEmitter[]): void => {

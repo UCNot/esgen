@@ -1,16 +1,16 @@
 import { EsDeclarations } from '../declarations/es-declarations.js';
 import { EsPrinter } from '../es-output.js';
 import { EsImports } from '../symbols/es-imports.js';
-import { EsNamespace } from '../symbols/es-namespace.js';
+import { EsNamespace, EsNamespaceInit } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsBundle } from './es-bundle.js';
 
 /**
  * Code emission control.
  *
- * Ensures that all code {@link EsCode#emit emitted} before the code printed.
+ * Ensures that all code {@link EsEmitter#emit emitted} _before_ the code printed.
  *
- * Code emitted in multiple {@link EsEmission.Span spans} in arbitrary order.
+ * Code may be emitted in multiple {@link EsEmissionSpan spans} in arbitrary order.
  *
  * Emissions may {@link spawn} more emissions, e.g. for nested namespaces.
  */
@@ -54,7 +54,7 @@ export interface EsEmission {
    *
    * @returns New emission instance.
    */
-  spawn(init?: EsEmission.Init): EsEmission;
+  spawn(init?: EsEmissionInit): EsEmission;
 
   /**
    * Starts new emission span.
@@ -63,7 +63,7 @@ export interface EsEmission {
    *
    * @returns New code emission span.
    */
-  span(...emitters: EsEmitter[]): EsEmission.Span;
+  span(...emitters: EsEmitter[]): EsEmissionSpan;
 
   /**
    * Awaits for all code emissions completed.
@@ -73,49 +73,40 @@ export interface EsEmission {
   whenDone(): Promise<void>;
 }
 
-export namespace EsEmission {
+/**
+ * Initialization options for {@link EsEmission#spawn spawned} code emission.
+ */
+export interface EsEmissionInit {
   /**
-   * Initialization options for {@link EsEmission#spawn spawned} code emission.
+   * Initialization options for {@link EsNamespace#nest nested namespace}.
    */
-  export interface Init {
-    /**
-     * Initialization options for {@link EsNamespace#nest nested namespace}.
-     */
-    readonly ns?: Omit<EsNamespace.Init, 'enclosing'> | undefined;
-  }
-
-  /**
-   * Code emission span used to {@link emit} additional code and to {@link printer print} it then.
-   */
-  export interface Span {
-    /**
-     * Emitted code printer.
-     */
-    readonly printer: EsPrinter;
-
-    /**
-     * Emits additional code.
-     *
-     * Can be called before the emitted code {@link printer printed}.
-     *
-     * @param emitters - Additional code emitters.
-     */
-    emit(this: void, ...emitters: EsEmitter[]): void;
-  }
-
-  /**
-   * Code {@link EsEmitter#emit emission} result.
-   *
-   * Either printed string, emitted code printer, or a promise-like instance of the one of the above.
-   */
-  export type Result = string | EsPrinter | PromiseLike<string | EsPrinter>;
+  readonly ns?: Omit<EsNamespaceInit, 'enclosing'> | undefined;
 }
 
 /**
- * Code emitter invoked prior the code print.
+ * Code emission span used to {@link emit} additional code and to {@link printer print} it then.
+ */
+export interface EsEmissionSpan {
+  /**
+   * Emitted code printer.
+   */
+  readonly printer: EsPrinter;
+
+  /**
+   * Emits additional code.
+   *
+   * Can be called before the emitted code {@link printer printed}.
+   *
+   * @param emitters - Additional code emitters.
+   */
+  emit(this: void, ...emitters: EsEmitter[]): void;
+}
+
+/**
+ * Code emitter invoked prior to code {@link EsPrinter print}.
  *
- * Multiple code emissions may be active at the same time. More code emissions may be initiated while emitting the code.
- * However, all code emissions has to complete _before_ the emitted code printed.
+ * Multiple code emissions may be active at the same time. More code emissions may be {@link EsEmission#spawn spawned}
+ * while emitting the code. However, all code emissions have to complete _before_ the emitted code printed.
  */
 export interface EsEmitter {
   /**
@@ -125,5 +116,12 @@ export interface EsEmitter {
    *
    * @returns Emission result.
    */
-  emit(emission: EsEmission): EsEmission.Result;
+  emit(emission: EsEmission): EsEmissionResult;
 }
+
+/**
+ * Code {@link EsEmitter#emit emission} result.
+ *
+ * Either printable string, emitted code printer, or a promise-like instance resolving to one of the above.
+ */
+export type EsEmissionResult = string | EsPrinter | PromiseLike<string | EsPrinter>;

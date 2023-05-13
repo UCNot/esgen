@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { EsBundle } from '../emission/es-bundle.js';
-import { EsSymbol } from './es-symbol.js';
+import { EsBinding, EsSymbol } from './es-symbol.js';
 
 describe('EsSymbol', () => {
   let bundle: EsBundle;
@@ -27,7 +27,7 @@ describe('EsSymbol', () => {
 
 class TestSymbol extends EsSymbol {
 
-  override bind(binding: EsSymbol.Binding): EsSymbol.Binding {
+  override bind(binding: EsBinding): EsBinding {
     return binding;
   }
 

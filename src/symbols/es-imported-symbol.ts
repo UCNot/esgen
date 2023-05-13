@@ -1,14 +1,14 @@
 import { jsStringLiteral } from 'httongue';
-import { EsEmission } from '../emission/es-emission.js';
+import { EsEmission, EsEmissionResult } from '../emission/es-emission.js';
 import { EsModule } from './es-module.js';
-import { EsSymbol } from './es-symbol.js';
+import { EsBinding, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
 /**
  * Symbol imported from some {@link EsModule module}.
  *
  * The symbol is automatically imported and bound to {@link EsBundle#ns top-level bundle namespace} whenever used.
  */
-export class EsImportedSymbol extends EsSymbol<EsImportedSymbol.Binding> {
+export class EsImportedSymbol extends EsSymbol<EsImportBinding> {
 
   readonly #from: EsModule;
   readonly #importName: string;
@@ -20,7 +20,7 @@ export class EsImportedSymbol extends EsSymbol<EsImportedSymbol.Binding> {
    * @param importName - The name of imported symbol. I.e. the name of the module export.
    * @param init - Import initialization options.
    */
-  constructor(from: EsModule, importName: string, init?: EsImportedSymbol.Init) {
+  constructor(from: EsModule, importName: string, init?: EsImportInit) {
     super(init?.as ?? importName, init);
     this.#importName = importName;
     this.#from = from;
@@ -40,11 +40,11 @@ export class EsImportedSymbol extends EsSymbol<EsImportedSymbol.Binding> {
     return this.#importName;
   }
 
-  override bind(binding: EsSymbol.Binding): EsImportedSymbol.Binding {
+  override bind(binding: EsBinding): EsImportBinding {
     return binding.ns.emission.imports.addImport(this, binding);
   }
 
-  override emit(emission: EsEmission): EsEmission.Result {
+  override emit(emission: EsEmission): EsEmissionResult {
     return emission.bundle.ns.bindSymbol(this).name;
   }
 
@@ -58,25 +58,24 @@ export class EsImportedSymbol extends EsSymbol<EsImportedSymbol.Binding> {
 
 }
 
-export namespace EsImportedSymbol {
+/**
+ * Import initialization options.
+ */
+export interface EsImportInit extends EsSymbolInit {
   /**
-   * Import initialization options.
+   * Requested symbol name.
+   *
+   * @defaultValue The same as import name.
    */
-  export interface Init extends EsSymbol.Init {
-    /**
-     * Requested symbol name.
-     *
-     * @defaultValue The same as import name.
-     */
-    readonly as?: string | undefined;
-  }
+  readonly as?: string | undefined;
+}
+
+/**
+ * Imported symbol binding to (bundle) namespace.
+ */
+export interface EsImportBinding extends EsBinding {
   /**
-   * Imported symbol binding to (bundle) namespace.
+   * Source module the symbol is imported from.
    */
-  export interface Binding extends EsSymbol.Binding {
-    /**
-     * Source module the symbol is imported from.
-     */
-    readonly from: EsModule;
-  }
+  readonly from: EsModule;
 }

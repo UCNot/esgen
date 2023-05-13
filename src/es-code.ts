@@ -1,5 +1,5 @@
 import { noop } from '@proc7ts/primitives';
-import { EsEmission, EsEmitter } from './emission/es-emission.js';
+import { EsEmission, EsEmissionSpan, EsEmitter } from './emission/es-emission.js';
 import { EsOutput, EsPrinter } from './es-output.js';
 import { EsProducer, EsSource } from './es-source.js';
 
@@ -20,7 +20,7 @@ export class EsCode implements EsEmitter {
 
   readonly #enclosing: EsCode | undefined;
   readonly #emitters: EsEmitter[] = [];
-  readonly #emissions = new Map<EsEmission, EsEmission.Span>();
+  readonly #emissions = new Map<EsEmission, EsEmissionSpan>();
 
   /**
    * Constructs code fragment.

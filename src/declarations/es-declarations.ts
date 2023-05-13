@@ -4,7 +4,7 @@ import { EsBundle } from '../emission/es-bundle.js';
 import { EsCode } from '../es-code.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsSource } from '../es-source.js';
-import { EsSymbol } from '../symbols/es-symbol.js';
+import { EsAnySymbol, EsBinding, EsSymbol } from '../symbols/es-symbol.js';
 import { EsDeclaredSymbol } from './es-declared-symbol.js';
 
 /**
@@ -13,7 +13,7 @@ import { EsDeclaredSymbol } from './es-declared-symbol.js';
 export class EsDeclarations {
 
   readonly #bundle: EsBundle;
-  readonly #snippets = new Map<EsSymbol.Any, EsDeclSnippet>();
+  readonly #snippets = new Map<EsAnySymbol, EsDeclSnippet>();
   readonly #content = lazyValue(() => this.#build());
   #addDecl: (symbol: EsDeclaredSymbol, snippet: EsDeclSnippet) => void;
 
@@ -38,7 +38,7 @@ export class EsDeclarations {
     return this.#content().exports;
   }
 
-  addDeclaration(symbol: EsDeclaredSymbol, binding: EsSymbol.Binding): EsSymbol.Binding {
+  addDeclaration(symbol: EsDeclaredSymbol, binding: EsBinding): EsBinding {
     const newSnippet = new EsDeclSnippet(symbol, binding);
 
     this.#addDecl(symbol, newSnippet);
@@ -203,10 +203,10 @@ interface EsDeclarations$Content {
 class EsDeclSnippet {
 
   readonly #symbol: EsDeclaredSymbol;
-  readonly #binding: EsSymbol.Binding;
+  readonly #binding: EsBinding;
   readonly #refs = new Set<EsSymbol>();
 
-  constructor(symbol: EsDeclaredSymbol, binding: EsSymbol.Binding) {
+  constructor(symbol: EsDeclaredSymbol, binding: EsBinding) {
     this.#symbol = symbol;
     this.#binding = binding;
   }

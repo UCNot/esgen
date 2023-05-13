@@ -1,6 +1,6 @@
 import { asArray } from '@proc7ts/primitives';
 import { safeJsId } from '../impl/safe-js-id.js';
-import { EsDeclaredSymbol } from './es-declared-symbol.js';
+import { EsDeclarationInit, EsDeclaredSymbol } from './es-declared-symbol.js';
 
 /**
  * Declares constant.
@@ -18,16 +18,12 @@ import { EsDeclaredSymbol } from './es-declared-symbol.js';
  *
  * @returns Declared constant symbol.
  */
-export function esConst(
-  key: string,
-  initializer: string,
-  init?: EsDeclaredSymbol.ConstInit,
-): EsDeclaredSymbol;
+export function esConst(key: string, initializer: string, init?: EsConstInit): EsDeclaredSymbol;
 
 export function esConst(
   key: string,
   initializer: string,
-  { exported, refers, prefix = exported ? '' : 'CONST_' }: EsDeclaredSymbol.ConstInit = {},
+  { exported, refers, prefix = exported ? '' : 'CONST_' }: EsConstInit = {},
 ): EsDeclaredSymbol {
   refers = asArray(refers);
 
@@ -49,11 +45,24 @@ export function esConst(
   return newConst;
 }
 
+/**
+ * Constant initialization options.
+ */
+
+export interface EsConstInit extends Omit<EsDeclarationInit, 'declare'> {
+  /**
+   * Constant name prefix.
+   *
+   * @defaultValue `'CONST_'`, unless constant exported.
+   */
+  readonly prefix?: string | undefined;
+}
+
 const esConst$cache = new Map<string, EsConstSymbol>();
 
 class EsConstSymbol extends EsDeclaredSymbol {
 
-  constructor(requestedName: string, initializer: string, init: EsDeclaredSymbol.ConstInit) {
+  constructor(requestedName: string, initializer: string, init: EsConstInit) {
     super(requestedName, {
       ...init,
       declare: ({ binding: { name } }) => `const ${name} = ${initializer};`,

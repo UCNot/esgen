@@ -1,6 +1,6 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsEmission } from '../emission/es-emission.js';
-import { EsSymbol } from './es-symbol.js';
+import { EsAnySymbol, EsBinding, EsSymbol } from './es-symbol.js';
 
 /**
  * Namespace used to resolve naming conflicts.
@@ -20,7 +20,7 @@ export class EsNamespace {
    * @param emission - Code emission control the namespace created for.
    * @param init - Initialization options.
    */
-  constructor(emission: EsEmission, init?: EsNamespace.Init);
+  constructor(emission: EsEmission, init?: EsNamespaceInit);
 
   constructor(
     emission: EsEmission,
@@ -29,7 +29,7 @@ export class EsNamespace {
       comment = enclosing
         ? `${enclosing}/${++enclosing.#nestedSeq}`
         : `Namespace #${++EsNamespace$seq}`,
-    }: EsNamespace.Init = {},
+    }: EsNamespaceInit = {},
   ) {
     this.#emission = emission;
     this.#shared = enclosing ? enclosing.#shared : { bindings: new Map() };
@@ -86,7 +86,7 @@ export class EsNamespace {
    *
    * [TypeError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
    */
-  bindSymbol<TBinding extends EsSymbol.Binding>(symbol: EsSymbol<TBinding>): TBinding;
+  bindSymbol<TBinding extends EsBinding>(symbol: EsSymbol<TBinding>): TBinding;
 
   /**
    * Binds the given `symbol` to this namespace with the given binding `request`.
@@ -102,12 +102,12 @@ export class EsNamespace {
    *
    * [TypeError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
    */
-  bindSymbol<TBinding extends EsSymbol.Binding, TBindRequest>(
+  bindSymbol<TBinding extends EsBinding, TBindRequest>(
     symbol: EsSymbol<TBinding, TBindRequest>,
     request: TBindRequest,
   ): TBinding;
 
-  bindSymbol<TBinding extends EsSymbol.Binding, TBindRequest>(
+  bindSymbol<TBinding extends EsBinding, TBindRequest>(
     symbol: EsSymbol<TBinding, TBindRequest>,
     request?: TBindRequest,
   ): TBinding {
@@ -150,9 +150,7 @@ export class EsNamespace {
    *
    * @returns Either found binding, or `undefined` when `symbol` is not visible.
    */
-  findSymbol<TBinding extends EsSymbol.Binding>(
-    symbol: EsSymbol.Any<TBinding>,
-  ): TBinding | undefined {
+  findSymbol<TBinding extends EsBinding>(symbol: EsAnySymbol<TBinding>): TBinding | undefined {
     const binding = this.#shared.bindings.get(symbol);
 
     return binding && (binding.ns.encloses(this) ? (binding as TBinding) : undefined);
@@ -167,7 +165,7 @@ export class EsNamespace {
    *
    * [ReferenceError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError
    */
-  symbolName(symbol: EsSymbol.Any): string {
+  symbolName(symbol: EsAnySymbol): string {
     const binding = this.#shared.bindings.get(symbol);
 
     if (!binding) {
@@ -270,7 +268,7 @@ export class EsNamespace {
    *
    * @returns New namespace nested within current one.
    */
-  nest(emission: EsEmission, init?: Omit<EsNamespace.Init, 'enclosing'>): EsNamespace {
+  nest(emission: EsEmission, init?: Omit<EsNamespaceInit, 'enclosing'>): EsNamespace {
     return new EsNamespace(emission, { ...init, enclosing: this });
   }
 
@@ -280,25 +278,23 @@ export class EsNamespace {
 
 }
 
-export namespace EsNamespace {
+/**
+ * Namespace initialization options.
+ */
+export interface EsNamespaceInit {
   /**
-   * Namespace initialization options.
+   * Arbitrary human-readable comment.
+   *
+   * Used as for string representation of namespace.
    */
-  export interface Init {
-    /**
-     * Arbitrary human-readable comment.
-     *
-     * Used as for string representation of namespace.
-     */
-    readonly comment?: string | undefined;
+  readonly comment?: string | undefined;
 
-    /**
-     * Enclosing namespace. The constructed one is {@link EsNamespace#nest nested} within it.
-     *
-     * Unspecified for top-level namespace.
-     */
-    readonly enclosing?: EsNamespace | undefined;
-  }
+  /**
+   * Enclosing namespace. The constructed one is {@link EsNamespace#nest nested} within it.
+   *
+   * Unspecified for top-level namespace.
+   */
+  readonly enclosing?: EsNamespace | undefined;
 }
 
 let EsNamespace$seq = 0;
@@ -309,5 +305,5 @@ interface EsNames {
 }
 
 interface EsNamespace$SharedState {
-  readonly bindings: Map<EsSymbol.Any, EsSymbol.Binding>;
+  readonly bindings: Map<EsAnySymbol, EsBinding>;
 }

@@ -1,7 +1,7 @@
 import { jsStringLiteral } from 'httongue';
 import { EsBundleFormat } from '../emission/es-bundle-format.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
-import { EsImportedSymbol } from './es-imported-symbol.js';
+import { EsImportBinding, EsImportInit, EsImportedSymbol } from './es-imported-symbol.js';
 import { EsImports } from './es-imports.js';
 
 /**
@@ -33,7 +33,7 @@ export abstract class EsModule {
    *
    * @returns Imported symbol instance.
    */
-  import(name: string, init?: EsImportedSymbol.Init): EsImportedSymbol {
+  import(name: string, init?: EsImportInit): EsImportedSymbol {
     return new EsImportedSymbol(this, name, init);
   }
 
@@ -46,9 +46,9 @@ export abstract class EsModule {
    *
    * @returns Collection of imports from this module to the given collection of import declarations.
    */
-  startImports(imports: EsImports): EsModule.Imports;
-  startImports({ bundle: { format } }: EsImports): EsModule.Imports {
-    const bindings = new Map<string, EsImportedSymbol.Binding>();
+  startImports(imports: EsImports): EsModuleImports;
+  startImports({ bundle: { format } }: EsImports): EsModuleImports {
+    const bindings = new Map<string, EsImportBinding>();
 
     return {
       printTo: out => {
@@ -63,10 +63,7 @@ export abstract class EsModule {
     };
   }
 
-  #printImports(
-    format: EsBundleFormat,
-    imports: ReadonlyMap<string, EsImportedSymbol.Binding>,
-  ): EsPrinter {
+  #printImports(format: EsBundleFormat, imports: ReadonlyMap<string, EsImportBinding>): EsPrinter {
     switch (format) {
       case EsBundleFormat.ES2015:
         return this.#printStaticImports(imports);
@@ -75,7 +72,7 @@ export abstract class EsModule {
     }
   }
 
-  #printStaticImports(names: ReadonlyMap<string, EsImportedSymbol.Binding>): EsPrinter {
+  #printStaticImports(names: ReadonlyMap<string, EsImportBinding>): EsPrinter {
     return {
       printTo: out => {
         const from = jsStringLiteral(this.moduleName);
@@ -102,7 +99,7 @@ export abstract class EsModule {
     return importName === name ? importName : `${importName} as ${name}`;
   }
 
-  #printDynamicImports(imports: ReadonlyMap<string, EsImportedSymbol.Binding>): EsPrinter {
+  #printDynamicImports(imports: ReadonlyMap<string, EsImportBinding>): EsPrinter {
     return {
       printTo: out => {
         const from = jsStringLiteral(this.moduleName);
@@ -137,33 +134,31 @@ export abstract class EsModule {
 
 }
 
-export namespace EsModule {
+/**
+ * Collection of imports from module to particular bundle.
+ *
+ * Created {@link EsModule#startImports once} per bundle.
+ */
+export interface EsModuleImports extends EsPrinter {
   /**
-   * Collection of module imports to particular bundle.
-   *
-   * Created {@link EsModule#startImports once} per bundle.
+   * Prints the imports clause to the given output.
    */
-  export interface Imports extends EsPrinter {
-    /**
-     * Prints the imports clause to the given output.
-     */
-    printTo(out: EsOutput): void | PromiseLike<void>;
+  printTo(out: EsOutput): void | PromiseLike<void>;
 
-    /**
-     * Adds new import from this module.
-     *
-     * @param symbol - Imported symbol.
-     * @param binding - Binding of imported `symbol`.
-     */
-    addImport(symbol: EsImportedSymbol, binding: EsImportedSymbol.Binding): void;
+  /**
+   * Adds new import from this module.
+   *
+   * @param symbol - Imported symbol.
+   * @param binding - Binding of imported `symbol`.
+   */
+  addImport(symbol: EsImportedSymbol, binding: EsImportBinding): void;
 
-    /**
-     * Searches for the import of the `symbol`.
-     *
-     * @param symbol - Imported symbol.
-     *
-     * @returns Either previously {@link addImport added} symbol binding, or falsy value if the import not added yet.
-     */
-    findImport(symbol: EsImportedSymbol): EsImportedSymbol.Binding | undefined | null;
-  }
+  /**
+   * Searches for the import of the `symbol`.
+   *
+   * @param symbol - Imported symbol.
+   *
+   * @returns Either previously {@link addImport added} symbol binding, or falsy value if the import not added yet.
+   */
+  findImport(symbol: EsImportedSymbol): EsImportBinding | undefined | null;
 }
