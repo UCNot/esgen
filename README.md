@@ -20,6 +20,6 @@
 [github-image]: https://img.shields.io/static/v1?logo=github&label=GitHub&message=project&color=informational
 [github-url]: https://github.com/run-z/esgen
 [api-docs-image]: https://img.shields.io/static/v1?logo=typescript&label=API&message=docs&color=informational
-[API documentation]: https://hatsyjs.github.io/esgen/
+[API documentation]: https://run-z.github.io/esgen/
 [explanation]: https://github.com/run-z/esgen/blob/master/doc/explanation.md
 [URI charge]: https://github.com/run-z/esgen/blob/master/doc/uri-charge-format.md
