@@ -13,8 +13,10 @@ import { EsNamespace } from './es-namespace.js';
  * @typeParam TNaming - Type of symbol naming.
  * @typeParam TConstraints - Type of naming constraints.
  */
-export abstract class EsSymbol<out TNaming extends EsNaming = EsNaming, in TConstraints = void>
-  implements EsEmitter {
+export abstract class EsSymbol<
+  out TNaming extends EsNaming = EsNaming,
+  in TConstraints extends EsNamingConstraints = EsNamingConstraints,
+> implements EsEmitter {
 
   readonly #requestedName: string;
   readonly #comment: string | undefined;
@@ -105,4 +107,19 @@ export interface EsNaming {
    * The name used to refer the symbol.
    */
   readonly name: string;
+}
+
+/**
+ * Basic symbol {@link EsNamespace#nameSymbol naming} constraints.
+ */
+export interface EsNamingConstraints {
+  /**
+   * Whether new name required.
+   *
+   * By default, if symbol already named within namespace, then existing naming will be reused. But when this flag set
+   * to `true`, then error will be thrown in the above situation.
+   *
+   * @defaultValue `false`
+   */
+  readonly requireNew?: boolean | undefined;
 }

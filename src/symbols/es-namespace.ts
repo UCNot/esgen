@@ -1,6 +1,6 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsEmission } from '../emission/es-emission.js';
-import { EsAnySymbol, EsNaming, EsSymbol } from './es-symbol.js';
+import { EsAnySymbol, EsNaming, EsNamingConstraints, EsSymbol } from './es-symbol.js';
 
 /**
  * Namespace used to resolve naming conflicts.
@@ -80,6 +80,7 @@ export class EsNamespace {
    *
    * @typeParam TNaming - Type of symbol naming.
    * @param symbol - Symbol to bind.
+   * @param requireNew - Whether new name required.
    *
    * @returns Symbol naming.
    *
@@ -87,7 +88,7 @@ export class EsNamespace {
    *
    * [TypeError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
    */
-  nameSymbol<TNaming extends EsNaming>(symbol: EsSymbol<TNaming>): TNaming;
+  nameSymbol<TNaming extends EsNaming>(symbol: EsSymbol<TNaming>, requireNew?: boolean): TNaming;
 
   /**
    * Names the given `symbol` to this namespace with the given naming `constraints`.
@@ -95,7 +96,7 @@ export class EsNamespace {
    * The symbol will be {@link findSymbol visible} within namespace itself and its {@link nest nested} ones.
    *
    * @typeParam TNaming - Type of symbol naming.
-   * @typeParam TConstraints - Type of symbol naming constraints.
+   * @typeParam TConstraints - Type of naming constraints.
    * @param symbol - Symbol to bind.
    * @param constraints - Naming constraints.
    *
@@ -105,12 +106,12 @@ export class EsNamespace {
    *
    * [TypeError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
    */
-  nameSymbol<TNaming extends EsNaming, TConstraints>(
+  nameSymbol<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
     symbol: EsSymbol<TNaming, TConstraints>,
     constraints: TConstraints,
   ): TNaming;
 
-  nameSymbol<TNaming extends EsNaming, TConstraints>(
+  nameSymbol<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
     symbol: EsSymbol<TNaming, TConstraints>,
     constraints?: TConstraints,
   ): TNaming {
@@ -119,6 +120,10 @@ export class EsNamespace {
     if (oldNaming) {
       if (oldNaming.ns === this) {
         // Already named in this namespace.
+        if (constraints?.requireNew) {
+          throw new TypeError(`Can not rename ${symbol} in ${this}`);
+        }
+
         return oldNaming as TNaming;
       }
 
