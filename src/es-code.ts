@@ -1,7 +1,7 @@
 import { noop } from '@proc7ts/primitives';
-import { EsEmission, EsEmissionSpan, EsEmitter } from './emission/es-emission.js';
+import { EsEmission, EsEmissionInit, EsEmissionSpan, EsEmitter } from './emission/es-emission.js';
 import { EsOutput, EsPrinter } from './es-output.js';
-import { EsProducer, EsSource } from './es-source.js';
+import { EsBuilder, EsProducer, EsSource } from './es-source.js';
 
 /**
  * Writable fragment of code.
@@ -146,6 +146,40 @@ export class EsCode implements EsEmitter {
     this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...sources), ''));
 
     return this;
+  }
+
+  /**
+   * Emits code under {@link EsEmission#spawn spawned} emission control and appends emission result to this fragment.
+   *
+   * @param builder - Code builder.
+   *
+   * @returns `this` instance.
+   */
+  scope(builder: EsBuilder): this;
+
+  /**
+   * Emits code under emission control {@link EsEmission#spawn spawned} with custom options and appends emission result
+   * to this fragment.
+   *
+   * @param init - Custom emission options.
+   * @param builder - Code builder.
+   *
+   * @returns `this` instance.
+   */
+  scope(init: EsEmissionInit, builder: EsBuilder): this;
+
+  scope(initOrBuilder: EsEmissionInit | EsBuilder, builder?: EsBuilder): this {
+    let init: EsEmissionInit | undefined;
+
+    if (builder) {
+      init = initOrBuilder as EsEmissionInit;
+    } else {
+      builder = initOrBuilder as EsBuilder;
+    }
+
+    return this.write((code, emission) => {
+      code.write(new EsCode().write(builder!).emit(emission.spawn(init)));
+    });
   }
 
   /**
