@@ -131,7 +131,7 @@ export interface EsLocalNamingConstraints extends EsNamingConstraints {
   /**
    * Always require new name.
    */
-  readonly requireNew?: true;
+  readonly requireNew: true;
 
   /**
    * Local symbol declarer.
