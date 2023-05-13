@@ -4,8 +4,8 @@ import { EsBundle } from '../emission/es-bundle.js';
 import { EsCode } from '../es-code.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsSource } from '../es-source.js';
-import { EsAnySymbol, EsBinding, EsSymbol } from '../symbols/es-symbol.js';
-import { EsDeclaredSymbol } from './es-declared-symbol.js';
+import { EsAnySymbol, EsNaming, EsSymbol } from '../symbols/es-symbol.js';
+import { EsDeclaredSymbol } from './es-declared.symbol.js';
 
 /**
  * Collection of bundle declarations.
@@ -38,12 +38,22 @@ export class EsDeclarations {
     return this.#content().exports;
   }
 
-  addDeclaration(symbol: EsDeclaredSymbol, binding: EsBinding): EsBinding {
-    const newSnippet = new EsDeclSnippet(symbol, binding);
+  /**
+   * Add symbol declaration.
+   *
+   * Called when {@link EsNamespace#nameSymbol naming} the symbol.
+   *
+   * @param symbol - Declared symbol.
+   * @param naming - Symbol naming.
+   *
+   * @returns
+   */
+  addDeclaration(symbol: EsDeclaredSymbol, naming: EsNaming): EsNaming {
+    const newSnippet = new EsDeclSnippet(symbol, naming);
 
     this.#addDecl(symbol, newSnippet);
 
-    return binding;
+    return naming;
   }
 
   #build(): EsDeclarations$Content {
@@ -203,12 +213,12 @@ interface EsDeclarations$Content {
 class EsDeclSnippet {
 
   readonly #symbol: EsDeclaredSymbol;
-  readonly #binding: EsBinding;
+  readonly #naming: EsNaming;
   readonly #refs = new Set<EsSymbol>();
 
-  constructor(symbol: EsDeclaredSymbol, binding: EsBinding) {
+  constructor(symbol: EsDeclaredSymbol, naming: EsNaming) {
     this.#symbol = symbol;
-    this.#binding = binding;
+    this.#naming = naming;
   }
 
   refs(): IterableIterator<EsSymbol> {
@@ -220,7 +230,7 @@ class EsDeclSnippet {
     let prefix: string | undefined;
 
     if (this.#symbol.exported) {
-      const { name } = this.#binding;
+      const { name } = this.#naming;
       const { requestedName } = this.#symbol;
 
       switch (bundle.format) {
@@ -241,7 +251,7 @@ class EsDeclSnippet {
       body: new EsCode()
         .write(code => {
           const snippet = this.#symbol.declare({
-            binding: this.#binding,
+            naming: this.#naming,
             refer: this.#refer.bind(this),
           });
 

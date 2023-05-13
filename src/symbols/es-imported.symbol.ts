@@ -1,14 +1,14 @@
 import { jsStringLiteral } from 'httongue';
 import { EsEmission, EsEmissionResult } from '../emission/es-emission.js';
 import { EsModule } from './es-module.js';
-import { EsBinding, EsSymbol, EsSymbolInit } from './es-symbol.js';
+import { EsNaming, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
 /**
  * Symbol imported from some {@link EsModule module}.
  *
- * The symbol is automatically imported and bound to {@link EsBundle#ns top-level bundle namespace} whenever used.
+ * The symbol is automatically imported and named in {@link EsBundle#ns bundle namespace} whenever used.
  */
-export class EsImportedSymbol extends EsSymbol<EsImportBinding> {
+export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
 
   readonly #from: EsModule;
   readonly #importName: string;
@@ -40,12 +40,12 @@ export class EsImportedSymbol extends EsSymbol<EsImportBinding> {
     return this.#importName;
   }
 
-  override bind(binding: EsBinding): EsImportBinding {
-    return binding.ns.emission.imports.addImport(this, binding);
+  override bind(naming: EsNaming): EsImportNaming {
+    return naming.ns.emission.imports.addImport(this, naming);
   }
 
   override emit(emission: EsEmission): EsEmissionResult {
-    return emission.bundle.ns.bindSymbol(this).name;
+    return emission.bundle.ns.nameSymbol(this).name;
   }
 
   override toString(): string {
@@ -71,9 +71,9 @@ export interface EsImportInit extends EsSymbolInit {
 }
 
 /**
- * Imported symbol binding to (bundle) namespace.
+ * Imported symbol naming within (bundle) namespace.
  */
-export interface EsImportBinding extends EsBinding {
+export interface EsImportNaming extends EsNaming {
   /**
    * Source module the symbol is imported from.
    */

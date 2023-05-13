@@ -1,6 +1,6 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsEmission } from '../emission/es-emission.js';
-import { EsAnySymbol, EsBinding, EsSymbol } from './es-symbol.js';
+import { EsAnySymbol, EsNaming, EsNamingConstraints, EsSymbol } from './es-symbol.js';
 
 /**
  * Namespace used to resolve naming conflicts.
@@ -11,7 +11,7 @@ export class EsNamespace {
   readonly #shared: EsNamespace$SharedState;
   readonly #enclosing: EsNamespace | undefined;
   readonly #comment: string;
-  readonly #names = new Map<string, EsNames>();
+  readonly #names = new Map<string, EsReservedNames>();
   #nestedSeq = 0;
 
   /**
@@ -32,7 +32,7 @@ export class EsNamespace {
     }: EsNamespaceInit = {},
   ) {
     this.#emission = emission;
-    this.#shared = enclosing ? enclosing.#shared : { bindings: new Map() };
+    this.#shared = enclosing ? enclosing.#shared : { namings: new Map() };
     this.#enclosing = enclosing;
     this.#comment = comment;
   }
@@ -74,110 +74,116 @@ export class EsNamespace {
   }
 
   /**
-   * Binds the given `symbol` to this namespace.
+   * Names the given `symbol` within namespace.
    *
    * The symbol will be {@link findSymbol visible} within namespace itself and its {@link nest nested} ones.
    *
+   * @typeParam TNaming - Type of symbol naming.
    * @param symbol - Symbol to bind.
+   * @param requireNew - Whether new name required.
    *
-   * @returns Symbol binding.
+   * @returns Symbol naming.
    *
-   * @throws [TypeError] if the `symbol` is bound to another namespace already.
+   * @throws [TypeError] if the `symbol` is already named within another namespace.
    *
    * [TypeError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
    */
-  bindSymbol<TBinding extends EsBinding>(symbol: EsSymbol<TBinding>): TBinding;
+  nameSymbol<TNaming extends EsNaming>(symbol: EsSymbol<TNaming>, requireNew?: boolean): TNaming;
 
   /**
-   * Binds the given `symbol` to this namespace with the given binding `request`.
+   * Names the given `symbol` to this namespace with the given naming `constraints`.
    *
    * The symbol will be {@link findSymbol visible} within namespace itself and its {@link nest nested} ones.
    *
+   * @typeParam TNaming - Type of symbol naming.
+   * @typeParam TConstraints - Type of naming constraints.
    * @param symbol - Symbol to bind.
-   * @param request - Binding request.
+   * @param constraints - Naming constraints.
    *
-   * @returns Symbol binding.
+   * @returns Symbol naming.
    *
-   * @throws [TypeError] if the `symbol` is bound to another namespace already.
+   * @throws [TypeError] if the `symbol` is already named within another namespace.
    *
    * [TypeError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
    */
-  bindSymbol<TBinding extends EsBinding, TBindRequest>(
-    symbol: EsSymbol<TBinding, TBindRequest>,
-    request: TBindRequest,
-  ): TBinding;
+  nameSymbol<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
+    symbol: EsSymbol<TNaming, TConstraints>,
+    constraints: TConstraints,
+  ): TNaming;
 
-  bindSymbol<TBinding extends EsBinding, TBindRequest>(
-    symbol: EsSymbol<TBinding, TBindRequest>,
-    request?: TBindRequest,
-  ): TBinding {
-    const existingBinding = this.#shared.bindings.get(symbol);
+  nameSymbol<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
+    symbol: EsSymbol<TNaming, TConstraints>,
+    constraints?: TConstraints,
+  ): TNaming {
+    const oldNaming = this.#shared.namings.get(symbol);
 
-    if (existingBinding) {
-      if (existingBinding.ns === this) {
-        // Already bound to this namespace.
-        return existingBinding as TBinding;
+    if (oldNaming) {
+      if (oldNaming.ns === this) {
+        // Already named in this namespace.
+        if (constraints?.requireNew) {
+          throw new TypeError(`Can not rename ${symbol} in ${this}`);
+        }
+
+        return oldNaming as TNaming;
       }
 
       throw new TypeError(
-        `Can not bind ${symbol} to ${this}. It is already bound to ${existingBinding.ns}`,
+        `Can not assign new name to ${symbol} in ${this}. It is already named in ${oldNaming.ns}`,
       );
     }
 
-    const getName = lazyValue(() => this.name(symbol.requestedName));
-    const newBinding = symbol.bind(
+    const getName = lazyValue(() => this.reserveName(symbol.requestedName));
+    const newNaming = symbol.bind(
       {
         ns: this,
         get name() {
           // Reserve the name lazily.
-          // For example, when importing already imported symbol, the cached binding will be reused,
+          // For example, when importing already imported symbol, the cached naming will be reused,
           // so reserving another name is redundant.
           return getName();
         },
       },
-      request as TBindRequest,
+      constraints as TConstraints,
     );
 
-    this.#shared.bindings.set(symbol, newBinding);
+    this.#shared.namings.set(symbol, newNaming);
 
-    return newBinding;
+    return newNaming;
   }
 
   /**
-   * Searches for the `symbol` {@link bindSymbol binding} to this namespace or its parent.
+   * Searches for the `symbol` {@link nameSymbol named} in this namespace or one of enclosing namespaces.
    *
    * @param symbol - Target symbol.
    *
-   * @returns Either found binding, or `undefined` when `symbol` is not visible.
+   * @returns Either found symbol naming, or `undefined` when `symbol` is not visible.
    */
-  findSymbol<TBinding extends EsBinding>(symbol: EsAnySymbol<TBinding>): TBinding | undefined {
-    const binding = this.#shared.bindings.get(symbol);
+  findSymbol<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming | undefined {
+    const naming = this.#shared.namings.get(symbol);
 
-    return binding && (binding.ns.encloses(this) ? (binding as TBinding) : undefined);
+    return naming && (naming.ns.encloses(this) ? (naming as TNaming) : undefined);
   }
 
   /**
-   * Obtains a name used to refer the `symbol` visible within this namespace.
+   * Obtains a name used to refer the `symbol` visible in this namespace.
    *
-   * @param symbol - Target symbol previously bound to this namespace or one of enclosing ones.
+   * @param symbol - Target symbol previously named in this namespace or one of enclosing ones.
    *
-   * @throws [ReferenceError] if symbol unbound or not visible within this namespace.
+   * @throws [ReferenceError] if symbol is unnamed or invisible to this namespace.
    *
    * [ReferenceError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError
    */
   symbolName(symbol: EsAnySymbol): string {
-    const binding = this.#shared.bindings.get(symbol);
+    const naming = this.#shared.namings.get(symbol);
 
-    if (!binding) {
-      throw new ReferenceError(`${symbol} is unbound`);
+    if (!naming) {
+      throw new ReferenceError(`${symbol} is unnamed`);
     }
-    if (!binding.ns.encloses(this)) {
-      throw new ReferenceError(
-        `${symbol} is not visible within ${this}. It is bound to ${binding.ns}`,
-      );
+    if (!naming.ns.encloses(this)) {
+      throw new ReferenceError(`${symbol} is invisible to ${this}. It is named in ${naming.ns}`);
     }
 
-    return binding.name;
+    return naming.name;
   }
 
   /**
@@ -190,11 +196,11 @@ export class EsNamespace {
    *
    * @returns Reserved and conflict-free name based on `preferred` one.
    */
-  name(preferred = 'tmp'): string {
-    return this.#name(preferred, false);
+  reserveName(preferred = 'tmp'): string {
+    return this.#reserveName(preferred, false);
   }
 
-  #name(preferred: string, forNested: boolean): string {
+  #reserveName(preferred: string, forNested: boolean): string {
     if (forNested) {
       const names = this.#names.get(preferred);
 
@@ -205,8 +211,8 @@ export class EsNamespace {
 
     if (this.#enclosing) {
       const names = this.#names.get(preferred);
-      const name = this.#reserveName(
-        this.#enclosing.#name(names ? this.#nextName(names) : preferred, true),
+      const name = this.#saveName(
+        this.#enclosing.#reserveName(names ? this.#nextName(names) : preferred, true),
         forNested,
       );
 
@@ -217,10 +223,10 @@ export class EsNamespace {
       return name;
     }
 
-    return this.#reserveName(preferred, forNested);
+    return this.#saveName(preferred, forNested);
   }
 
-  #reserveName(preferred: string, forNested: boolean): string {
+  #saveName(preferred: string, forNested: boolean): string {
     const names = this.#names.get(preferred);
     let name: string;
 
@@ -236,14 +242,14 @@ export class EsNamespace {
     return name;
   }
 
-  #addAlias(names: EsNames, alias: string, forNested: boolean): void {
+  #addAlias(names: EsReservedNames, alias: string, forNested: boolean): void {
     names.list.push(alias);
     if (forNested && !names.nested) {
       names.nested = alias;
     }
   }
 
-  #nextName({ list }: EsNames): string {
+  #nextName({ list }: EsReservedNames): string {
     const lastName = list[list.length - 1];
     const dollarIdx = lastName.lastIndexOf('$');
     const lastIndex = dollarIdx < 0 ? NaN : Number(lastName.slice(dollarIdx + 1));
@@ -299,11 +305,11 @@ export interface EsNamespaceInit {
 
 let EsNamespace$seq = 0;
 
-interface EsNames {
+interface EsReservedNames {
   readonly list: string[];
   nested: string | undefined;
 }
 
 interface EsNamespace$SharedState {
-  readonly bindings: Map<EsAnySymbol, EsBinding>;
+  readonly namings: Map<EsAnySymbol, EsNaming>;
 }

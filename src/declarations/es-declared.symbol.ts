@@ -2,18 +2,18 @@ import { asArray } from '@proc7ts/primitives';
 import { EsBundle } from '../emission/es-bundle.js';
 import { EsEmission, EsEmissionResult } from '../emission/es-emission.js';
 import { EsSource } from '../es-source.js';
-import { EsAnySymbol, EsBinding, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
+import { EsAnySymbol, EsNaming, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
 
 /**
  * Symbol declared in bundle {@link EsDeclarations declarations}.
  *
- * The symbol is automatically declared and bound to {@link EsBundle#ns top-level bundle namespace} whenever used.
+ * The symbol is automatically declared and named in {@link EsBundle#ns bundle namespace} whenever used.
  */
 export class EsDeclaredSymbol extends EsSymbol {
 
   readonly #exported: boolean;
   readonly #refers: readonly EsAnySymbol[];
-  readonly #declare: (declarer: EsDeclarer) => EsSource;
+  readonly #declare: (context: EsDeclarationContext) => EsSource;
 
   /**
    * Constructs declared symbol.
@@ -38,12 +38,12 @@ export class EsDeclaredSymbol extends EsSymbol {
     return this.#exported;
   }
 
-  override bind(binding: EsBinding): EsBinding {
-    return binding.ns.emission.declarations.addDeclaration(this, binding);
+  override bind(naming: EsNaming): EsNaming {
+    return naming.ns.emission.declarations.addDeclaration(this, naming);
   }
 
   override emit(emission: EsEmission): EsEmissionResult {
-    return emission.bundle.ns.bindSymbol(this).name;
+    return emission.bundle.ns.nameSymbol(this).name;
   }
 
   /**
@@ -51,16 +51,16 @@ export class EsDeclaredSymbol extends EsSymbol {
    *
    * Called on demand, at most once per bundle.
    *
-   * @param declarer - Symbol declarer context.
+   * @param context - Declaration context.
    *
    * @returns Source of code that contains declaration.
    */
-  declare(declarer: EsDeclarer): EsSource {
+  declare(context: EsDeclarationContext): EsSource {
     return code => {
       for (const ref of this.#refers) {
-        declarer.refer(ref);
+        context.refer(ref);
       }
-      code.write(this.#declare(declarer));
+      code.write(this.#declare(context));
     };
   }
 
@@ -89,21 +89,21 @@ export interface EsDeclarationInit extends EsSymbolInit {
    *
    * Called on demand, at most once per bundle.
    *
-   * @param declarer - Symbol declarer context.
+   * @param context - Declaration context.
    *
    * @returns Source of code that contains declaration.
    */
-  declare(this: void, declarer: EsDeclarer): EsSource;
+  declare(this: void, context: EsDeclarationContext): EsSource;
 }
 
 /**
- * Symbol declaration context.
+ * Declaration context.
  */
-export interface EsDeclarer {
+export interface EsDeclarationContext {
   /**
-   * Binding of declares symbol.
+   * Declared symbol naming.
    */
-  readonly binding: EsBinding;
+  readonly naming: EsNaming;
 
   /**
    * Refers the given symbol.

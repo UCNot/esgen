@@ -1,6 +1,6 @@
 import { asArray } from '@proc7ts/primitives';
 import { safeJsId } from '../impl/safe-js-id.js';
-import { EsDeclarationInit, EsDeclaredSymbol } from './es-declared-symbol.js';
+import { EsDeclarationInit, EsDeclaredSymbol } from './es-declared.symbol.js';
 
 /**
  * Declares constant.
@@ -65,7 +65,7 @@ class EsConstSymbol extends EsDeclaredSymbol {
   constructor(requestedName: string, initializer: string, init: EsConstInit) {
     super(requestedName, {
       ...init,
-      declare: ({ binding: { name } }) => `const ${name} = ${initializer};`,
+      declare: ({ naming: { name } }) => `const ${name} = ${initializer};`,
     });
   }
 

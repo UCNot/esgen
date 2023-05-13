@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { EsExternalModule } from './es-external-module.js';
 import { esImport } from './es-import.js';
-import { EsImportedSymbol } from './es-imported-symbol.js';
+import { EsImportedSymbol } from './es-imported.symbol.js';
 
 describe('EsImportedSymbol', () => {
   describe('toString', () => {

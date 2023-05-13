@@ -36,7 +36,7 @@ export interface EsEmission {
   get declarations(): EsDeclarations;
 
   /**
-   * Namespace to {@link EsNamespace#bindSymbol bind local symbols} to.
+   * Namespace to {@link EsNamespace#nameSymbol bind local symbols} to.
    */
   get ns(): EsNamespace;
 
