@@ -40,6 +40,17 @@ describe('EsImports', () => {
           .asText(),
       ).resolves.toBe(`import { test } from 'test-module';\ntest(1);\ntest(2);\n`);
     });
+    it('renames imported symbol', async () => {
+      await expect(
+        bundle
+          .emit(code => {
+            const test = esImport('test-module', 'test', { as: 'myTest' });
+
+            code.inline(test, `();`);
+          })
+          .asText(),
+      ).resolves.toBe(`import { test as myTest } from 'test-module';\nmyTest();\n`);
+    });
     it('resolves conflicts', async () => {
       await expect(
         bundle
@@ -115,6 +126,22 @@ describe('EsImports', () => {
           + `  const { test } = await import('test-module');\n`
           + `  test(1);\n`
           + `  test(2);\n`
+          + `})()\n`,
+      );
+    });
+    it('renames imported symbol', async () => {
+      await expect(
+        bundle
+          .emit(code => {
+            const test = esImport('test-module', 'test', { as: 'myTest' });
+
+            code.inline(test, `();`);
+          })
+          .asText(),
+      ).resolves.toBe(
+        `(async () => {\n`
+          + `  const { test: myTest } = await import('test-module');\n`
+          + `  myTest();\n`
           + `})()\n`,
       );
     });

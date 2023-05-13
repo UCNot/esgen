@@ -29,11 +29,12 @@ export abstract class EsModule {
    * Creates symbol imported from this module.
    *
    * @param name - Name of symbol to import.
+   * @param init - Import initialization options.
    *
    * @returns Imported symbol instance.
    */
-  import(name: string): EsImportedSymbol {
-    return new EsImportedSymbol(this, name);
+  import(name: string, init?: EsImportedSymbol.Init): EsImportedSymbol {
+    return new EsImportedSymbol(this, name, init);
   }
 
   /**
@@ -53,8 +54,8 @@ export abstract class EsModule {
       printTo: out => {
         out.print(this.#printImports(format, bindings));
       },
-      addImport({ requestedName }, name) {
-        bindings.set(requestedName, name);
+      addImport({ importName }, name) {
+        bindings.set(importName, name);
       },
       findImport({ requestedName }) {
         return bindings.get(requestedName);
@@ -83,22 +84,22 @@ export abstract class EsModule {
           out
             .print(`import {`)
             .indent(out => {
-              for (const [requestedName, { name }] of names) {
-                out.print(`${this.#printStaticClause(requestedName, name)},`);
+              for (const [importName, { name }] of names) {
+                out.print(`${this.#printStaticClause(importName, name)},`);
               }
             })
             .print(`} from ${from};`);
         } else {
-          for (const [requestedName, { name }] of names) {
-            out.print(`import { ${this.#printStaticClause(requestedName, name)} } from ${from};`);
+          for (const [importName, { name }] of names) {
+            out.print(`import { ${this.#printStaticClause(importName, name)} } from ${from};`);
           }
         }
       },
     };
   }
 
-  #printStaticClause(requestedName: string, name: string): string {
-    return requestedName === name ? requestedName : `${requestedName} as ${name}`;
+  #printStaticClause(importName: string, name: string): string {
+    return importName === name ? importName : `${importName} as ${name}`;
   }
 
   #printDynamicImports(imports: ReadonlyMap<string, EsImportedSymbol.Binding>): EsPrinter {
@@ -110,15 +111,15 @@ export abstract class EsModule {
           out
             .print('const {')
             .indent(out => {
-              for (const [requestedName, { name }] of imports) {
-                out.print(`${this.#printDynamicClause(requestedName, name)},`);
+              for (const [importName, { name }] of imports) {
+                out.print(`${this.#printDynamicClause(importName, name)},`);
               }
             })
             .print(`} = await import(${from});`);
         } else {
-          for (const [requestedName, { name }] of imports) {
+          for (const [importName, { name }] of imports) {
             out.print(
-              `const { ${this.#printDynamicClause(requestedName, name)} } = await import(${from});`,
+              `const { ${this.#printDynamicClause(importName, name)} } = await import(${from});`,
             );
           }
         }
@@ -126,8 +127,8 @@ export abstract class EsModule {
     };
   }
 
-  #printDynamicClause(requestedName: string, name: string): string {
-    return requestedName === name ? requestedName : `${requestedName}: ${name}`;
+  #printDynamicClause(importName: string, name: string): string {
+    return importName === name ? importName : `${importName}: ${name}`;
   }
 
   toString(): string {

@@ -11,16 +11,18 @@ import { EsSymbol } from './es-symbol.js';
 export class EsImportedSymbol extends EsSymbol<EsImportedSymbol.Binding> {
 
   readonly #from: EsModule;
+  readonly #importName: string;
 
   /**
    * Constructs new imported symbol.
    *
    * @param from - Source module the symbol is imported from.
-   * @param requestedName - The name of imported imported symbol. I.e. the name of the module export.
-   * @param init - Symbol initialization options.
+   * @param importName - The name of imported symbol. I.e. the name of the module export.
+   * @param init - Import initialization options.
    */
-  constructor(from: EsModule, requestedName: string, init?: EsSymbol.Init) {
-    super(requestedName, init);
+  constructor(from: EsModule, importName: string, init?: EsImportedSymbol.Init) {
+    super(init?.as ?? importName, init);
+    this.#importName = importName;
     this.#from = from;
   }
 
@@ -29,6 +31,13 @@ export class EsImportedSymbol extends EsSymbol<EsImportedSymbol.Binding> {
    */
   get from(): EsModule {
     return this.#from;
+  }
+
+  /**
+   * The name of imported symbol. I.e. the name of the module export.
+   */
+  get importName(): string {
+    return this.#importName;
   }
 
   override bind(binding: EsSymbol.Binding): EsImportedSymbol.Binding {
@@ -50,6 +59,17 @@ export class EsImportedSymbol extends EsSymbol<EsImportedSymbol.Binding> {
 }
 
 export namespace EsImportedSymbol {
+  /**
+   * Import initialization options.
+   */
+  export interface Init extends EsSymbol.Init {
+    /**
+     * Requested symbol name.
+     *
+     * @defaultValue The same as import name.
+     */
+    readonly as?: string | undefined;
+  }
   /**
    * Imported symbol binding to (bundle) namespace.
    */

@@ -6,9 +6,14 @@ import { EsImportedSymbol } from './es-imported-symbol.js';
  *
  * @param from - Source module name.
  * @param name - Name of symbol to import.
+ * @param init - Import initialization options.
  *
  * @returns Imported symbol instance.
  */
-export function esImport(from: string, name: string): EsImportedSymbol {
-  return EsExternalModule.byName(from).import(name);
+export function esImport(
+  from: string,
+  name: string,
+  init?: EsImportedSymbol.Init,
+): EsImportedSymbol {
+  return EsExternalModule.byName(from).import(name, init);
 }
