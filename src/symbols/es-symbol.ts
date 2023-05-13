@@ -47,6 +47,17 @@ export abstract class EsSymbol<
   }
 
   /**
+   * Whether this is a unique symbol.
+   *
+   * Non-unique symbols may be named multiple times in unrelated namespaces.
+   *
+   * @defaultValue `true`.
+   */
+  isUnique(): boolean {
+    return true;
+  }
+
+  /**
    * Binds named symbol to namespace.
    *
    * Called to perform additional actions right after the symbol received its {@link EsNamespace#nameSymbol name}.
