@@ -1,6 +1,6 @@
 import { EsBundle } from '../emission/es-bundle.js';
 import { EsEmission, EsEmissionResult, EsEmitter } from '../emission/es-emission.js';
-import { EsImportNaming, EsImportedSymbol } from './es-imported-symbol.js';
+import { EsImportNaming, EsImportedSymbol } from './es-imported.symbol.js';
 import { EsModuleImports } from './es-module.js';
 import { EsNaming } from './es-symbol.js';
 

@@ -1,7 +1,7 @@
 import { jsStringLiteral } from 'httongue';
 import { EsBundleFormat } from '../emission/es-bundle-format.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
-import { EsImportInit, EsImportNaming, EsImportedSymbol } from './es-imported-symbol.js';
+import { EsImportInit, EsImportNaming, EsImportedSymbol } from './es-imported.symbol.js';
 import { EsImports } from './es-imports.js';
 
 /**

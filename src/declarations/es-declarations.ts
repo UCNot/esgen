@@ -5,7 +5,7 @@ import { EsCode } from '../es-code.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsSource } from '../es-source.js';
 import { EsAnySymbol, EsNaming, EsSymbol } from '../symbols/es-symbol.js';
-import { EsDeclaredSymbol } from './es-declared-symbol.js';
+import { EsDeclaredSymbol } from './es-declared.symbol.js';
 
 /**
  * Collection of bundle declarations.

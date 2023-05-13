@@ -1,6 +1,6 @@
 import { asArray } from '@proc7ts/primitives';
 import { safeJsId } from '../impl/safe-js-id.js';
-import { EsDeclarationInit, EsDeclaredSymbol } from './es-declared-symbol.js';
+import { EsDeclarationInit, EsDeclaredSymbol } from './es-declared.symbol.js';
 
 /**
  * Declares constant.

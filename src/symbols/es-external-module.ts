@@ -1,4 +1,4 @@
-import { EsImportedSymbol } from './es-imported-symbol.js';
+import { EsImportedSymbol } from './es-imported.symbol.js';
 import { EsModule } from './es-module.js';
 
 /**
