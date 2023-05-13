@@ -13,7 +13,7 @@ export class EsDeclaredSymbol extends EsSymbol {
 
   readonly #exported: boolean;
   readonly #refers: readonly EsAnySymbol[];
-  readonly #declare: (declarer: EsDeclarer) => EsSource;
+  readonly #declare: (context: EsDeclarationContext) => EsSource;
 
   /**
    * Constructs declared symbol.
@@ -51,16 +51,16 @@ export class EsDeclaredSymbol extends EsSymbol {
    *
    * Called on demand, at most once per bundle.
    *
-   * @param declarer - Symbol declarer context.
+   * @param context - Declaration context.
    *
    * @returns Source of code that contains declaration.
    */
-  declare(declarer: EsDeclarer): EsSource {
+  declare(context: EsDeclarationContext): EsSource {
     return code => {
       for (const ref of this.#refers) {
-        declarer.refer(ref);
+        context.refer(ref);
       }
-      code.write(this.#declare(declarer));
+      code.write(this.#declare(context));
     };
   }
 
@@ -89,17 +89,17 @@ export interface EsDeclarationInit extends EsSymbolInit {
    *
    * Called on demand, at most once per bundle.
    *
-   * @param declarer - Symbol declarer context.
+   * @param context - Declaration context.
    *
    * @returns Source of code that contains declaration.
    */
-  declare(this: void, declarer: EsDeclarer): EsSource;
+  declare(this: void, context: EsDeclarationContext): EsSource;
 }
 
 /**
- * Symbol declaration context.
+ * Declaration context.
  */
-export interface EsDeclarer {
+export interface EsDeclarationContext {
   /**
    * Binding of declares symbol.
    */
