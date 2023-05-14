@@ -12,7 +12,7 @@ export class EsNamespace {
   readonly #enclosing: EsNamespace | undefined;
   readonly #comment: string;
   readonly #names = new Map<string, EsReservedNames>();
-  readonly #nonUniques = new Map<EsAnySymbol, EsNaming>();
+  readonly #nonUniques = new Map<EsAnySymbol, EsNonUniqueNaming<any>>();
   #nestedSeq = 0;
 
   /**
@@ -125,17 +125,37 @@ export class EsNamespace {
     symbol: EsSymbol<TNaming, TConstraints>,
     constraints?: TConstraints,
   ): TNaming {
-    const oldNaming = this.#findNonUniqueSymbol(symbol);
+    const found = this.#findNonUniqueSymbol(symbol);
 
-    if (oldNaming) {
-      return this.#checkVisibility(symbol, oldNaming, constraints);
+    if (found) {
+      const {
+        naming: { ns },
+        visible,
+      } = found;
+
+      if (visible || this.encloses(ns)) {
+        return this.#checkVisibility(symbol, found.naming, constraints);
+      }
     }
 
-    const newNaming = this.#bindSymbol(symbol, constraints);
+    const naming = this.#bindSymbol(symbol, constraints);
 
-    this.#nonUniques.set(symbol, newNaming);
+    this.#nonUniques.set(symbol, { naming, visible: true });
+    this.#registerNestedNaming(symbol, naming);
 
-    return newNaming;
+    return naming;
+  }
+
+  #registerNestedNaming<TNaming extends EsNaming>(
+    symbol: EsAnySymbol<TNaming>,
+    naming: TNaming,
+  ): void {
+    const { enclosing } = this;
+
+    if (enclosing && !enclosing.#nonUniques.has(symbol)) {
+      enclosing.#nonUniques.set(symbol, { naming, visible: false });
+      enclosing.#registerNestedNaming(symbol, naming);
+    }
   }
 
   #checkVisibility<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
@@ -185,7 +205,13 @@ export class EsNamespace {
    * @returns Either found symbol naming, or `undefined` when `symbol` is not visible.
    */
   findSymbol<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming | undefined {
-    return symbol.isUnique() ? this.#findUniqueSymbol(symbol) : this.#findNonUniqueSymbol(symbol);
+    if (symbol.isUnique()) {
+      return this.#findUniqueSymbol(symbol);
+    }
+
+    const nonUnique = this.#findNonUniqueSymbol(symbol);
+
+    return nonUnique?.visible ? nonUnique.naming : undefined;
   }
 
   #findUniqueSymbol<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming | undefined {
@@ -196,8 +222,8 @@ export class EsNamespace {
 
   #findNonUniqueSymbol<TNaming extends EsNaming>(
     symbol: EsAnySymbol<TNaming>,
-  ): TNaming | undefined {
-    const found = this.#nonUniques.get(symbol) as TNaming | undefined;
+  ): EsNonUniqueNaming<TNaming> | undefined {
+    const found = this.#nonUniques.get(symbol) as EsNonUniqueNaming<TNaming> | undefined;
 
     if (found) {
       return found;
@@ -249,10 +275,16 @@ export class EsNamespace {
     const found = this.#findNonUniqueSymbol(symbol);
 
     if (!found) {
-      throw new ReferenceError(`${symbol} is unknown to ${this}`);
+      throw new ReferenceError(`${symbol} is unnamed`);
     }
 
-    return found.name;
+    const { naming, visible } = found;
+
+    if (!visible) {
+      throw new ReferenceError(`${symbol} is invisible to ${this}. It is named in ${naming.ns}`);
+    }
+
+    return naming.name;
   }
 
   /**
@@ -381,4 +413,9 @@ interface EsReservedNames {
 
 interface EsNamespace$SharedState {
   readonly uniques: Map<EsAnySymbol, EsNaming>;
+}
+
+interface EsNonUniqueNaming<TNaming extends EsNaming> {
+  readonly naming: TNaming;
+  readonly visible: boolean;
 }
