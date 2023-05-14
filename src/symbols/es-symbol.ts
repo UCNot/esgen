@@ -48,11 +48,11 @@ export abstract class EsSymbol<
   }
 
   /**
-   * Whether this is a unique symbol.
+   * Informs whether this is a unique symbol.
    *
    * Non-unique symbols may be named multiple times in unrelated namespaces.
    *
-   * @defaultValue `true`.
+   * @returns `true` by default.
    */
   isUnique(): boolean {
     return true;

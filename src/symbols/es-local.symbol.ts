@@ -1,5 +1,6 @@
+import { lazyValue } from '@proc7ts/primitives';
 import { jsStringLiteral } from 'httongue';
-import { EsProducer, EsSource } from '../es-source.js';
+import { EsSource } from '../es-source.js';
 import { EsNaming, EsNamingConstraints, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
 /**
@@ -9,21 +10,24 @@ export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstrai
 
   override bind(naming: EsNaming, constraints: EsLocalNamingConstraints): EsLocalNaming;
   override bind(naming: EsNaming, { declare }: EsLocalNamingConstraints): EsLocalNaming {
-    const context: EsLocalContext = {
-      symbol: this,
-      naming: naming,
-    };
-    const declaration =
-      'declareLocal' in declare && typeof declare.declareLocal === 'function'
-        ? declare.declareLocal(context)
-        : (declare as EsLocalDeclarer.Function)(context);
-
     return {
       ...naming,
-      toCode: () => declaration,
+      asDeclaration: lazyValue(() => {
+        const context: EsLocalContext = {
+          symbol: this,
+          naming: naming,
+        };
+
+        return 'declareLocal' in declare && typeof declare.declareLocal === 'function'
+          ? declare.declareLocal(context)
+          : (declare as EsLocalDeclarer.Function)(context);
+      }),
     };
   }
 
+  /**
+   * @returns `false`, as the same local may be declared in multiple unrelated namespaces.
+   */
   override isUnique(): boolean {
     return false;
   }
@@ -39,7 +43,7 @@ export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstrai
    */
   declare(declare: EsLocalDeclarer): EsSource {
     return (code, emission) => {
-      code.write(emission.ns.nameSymbol(this, { declare, requireNew: true }));
+      code.write(emission.ns.nameSymbol(this, { declare, requireNew: true }).asDeclaration());
     };
   }
 
@@ -121,11 +125,11 @@ export interface EsLocalContext {
  *
  * Can be used as a source of local declaration code.
  */
-export interface EsLocalNaming extends EsNaming, EsProducer {
+export interface EsLocalNaming extends EsNaming {
   /**
-   * Emits local declaration code.
+   * Emits local {@link EsLocalSymbol#declare declaration} code.
    */
-  toCode(): EsSource;
+  asDeclaration(this: void): EsSource;
 }
 
 /**
