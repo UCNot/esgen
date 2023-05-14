@@ -23,6 +23,19 @@ describe('EsSymbol', () => {
       ).resolves.toBe(`${name}();\n`);
     });
   });
+
+  describe('toString', () => {
+    it('allows to omit tag', () => {
+      expect(new TestSymbol('test').toString({ tag: null }).toString()).toBe('test');
+    });
+    it('allows to override comment', () => {
+      expect(
+        new TestSymbol('test', { comment: 'Some comment' })
+          .toString({ comment: 'More info' })
+          .toString(),
+      ).toBe('test /* [Symbol] More info */');
+    });
+  });
 });
 
 class TestSymbol extends EsSymbol {

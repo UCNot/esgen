@@ -1,5 +1,4 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { jsStringLiteral } from 'httongue';
 import { EsSource } from '../es-source.js';
 import { EsNaming, EsNamingConstraints, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
@@ -47,12 +46,17 @@ export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstrai
     };
   }
 
-  toString(): string {
-    const { requestedName, comment } = this;
-
-    return (
-      `Local symbol ${jsStringLiteral(requestedName, '"')}` + (comment ? ` /* ${comment} */` : '')
-    );
+  /**
+   * @param tag - Symbol tag to include. Defaults to `[Local]`.
+   */
+  override toString({
+    tag = '[Local]',
+    comment,
+  }: {
+    readonly tag?: string | null | undefined;
+    readonly comment?: string | null | undefined;
+  } = {}): string {
+    return super.toString({ tag, comment });
   }
 
 }

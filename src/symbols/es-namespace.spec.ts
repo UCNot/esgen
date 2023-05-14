@@ -88,7 +88,7 @@ describe('EsNamespace', () => {
         expect(nested1.nameSymbol(symbol)).toEqual({ ns: nested1, name: 'test' });
         expect(() => nested2.nameSymbol(symbol)).toThrow(
           new TypeError(
-            `Can not assign new name to Symbol "test" in /* nested 2 */. It is already named in /* nested 1 */`,
+            `Can not assign new name to test /* [Symbol] */ in /* nested 2 */. It is already named in /* nested 1 */`,
           ),
         );
       });
@@ -144,7 +144,7 @@ describe('EsNamespace', () => {
       });
       it('throws for unnamed symbol', () => {
         expect(() => ns.symbolName(new UniqueSymbol('test', { comment: 'Test symbol' }))).toThrow(
-          new ReferenceError(`Symbol "test" /* Test symbol */ is unnamed`),
+          new ReferenceError(`test /* [Symbol] Test symbol */ is unnamed`),
         );
       });
       it('throws for invisible symbol', () => {
@@ -186,7 +186,7 @@ describe('EsNamespace', () => {
         expect(ns.nameSymbol(symbol)).toEqual({ ns: nested, name: 'test' });
         expect(() => nested.nameSymbol(symbol)).toThrow(
           new TypeError(
-            `Can not assign new name to Symbol "test" in /* nested */. It is already named in /* Bundle */`,
+            `Can not assign new name to test /* [Symbol] */ in /* nested */. It is already named in /* Bundle */`,
           ),
         );
       });
@@ -197,7 +197,7 @@ describe('EsNamespace', () => {
         expect(nested.nameSymbol(symbol)).toEqual({ ns: nested, name: 'test' });
         expect(() => ns.nameSymbol(symbol)).toThrow(
           new TypeError(
-            `Can not assign new name to Symbol "test" in /* Bundle */. It is already named in /* nested */`,
+            `Can not assign new name to test /* [Symbol] */ in /* Bundle */. It is already named in /* nested */`,
           ),
         );
       });
@@ -255,7 +255,7 @@ describe('EsNamespace', () => {
         const symbol = new NonUniqueSymbol('test', { comment: 'Test symbol' });
 
         expect(() => ns.symbolName(symbol)).toThrow(
-          new ReferenceError(`Symbol "test" /* Test symbol */ is unnamed`),
+          new ReferenceError(`test /* [Symbol] Test symbol */ is unnamed`),
         );
       });
       it('throws for invisible symbol', () => {

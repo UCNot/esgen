@@ -1,7 +1,7 @@
-import { jsStringLiteral } from 'httongue';
 import { EsEmission, EsEmissionResult, EsEmitter } from '../emission/es-emission.js';
 import { safeJsId } from '../impl/safe-js-id.js';
 import { EsNamespace } from './es-namespace.js';
+import { esSymbolString } from './es-symbol-string.js';
 
 /**
  * Program symbol.
@@ -81,10 +81,24 @@ export abstract class EsSymbol<
     return emission.ns.symbolName(this);
   }
 
-  toString(): string {
-    const { requestedName, comment } = this;
+  /**
+   * Builds a string representation of this symbol.
+   *
+   * @param tag - Symbol tag to include. Defaults to `[Symbol]`.
+   * @param comment - Comment to include. Defaults to {@link comment symbol comment}.
+   *
+   * @returns - String representation of this symbol.
+   */
+  toString({
+    tag = '[Symbol]',
+    comment = this.comment,
+  }: {
+    readonly tag?: string | null | undefined;
+    readonly comment?: string | null | undefined;
+  } = {}): string {
+    const { requestedName } = this;
 
-    return `Symbol ${jsStringLiteral(requestedName, '"')}` + (comment ? ` /* ${comment} */` : '');
+    return esSymbolString(requestedName, { tag, comment });
   }
 
 }
