@@ -24,6 +24,10 @@ export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstrai
     };
   }
 
+  override isUnique(): boolean {
+    return false;
+  }
+
   /**
    * Declares local symbol and binds it to namespace.
    *
