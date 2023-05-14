@@ -1,8 +1,43 @@
 export function safeJsId(id: string): string {
-  return id.replace(UNSAFE_ID_REPLACEMENT_PATTERN, replaceUnsafeJsChars);
+  if (JS_KEYWORDS.has(id)) {
+    return `__${id}__`;
+  }
+
+  return id.replace(UNSAFE_JS_ID_REPLACEMENT_PATTERN, replaceUnsafeJsChars);
 }
 
-const UNSAFE_ID_REPLACEMENT_PATTERN = /(?:^[^a-zA-Z_$]|(?<!^)[^0-9a-zA-Z_$])+/g;
+const JS_KEYWORDS = new Set([
+  'instanceof',
+  'typeof',
+  'break',
+  'do',
+  'new',
+  'var',
+  'case',
+  'else',
+  'return',
+  'void',
+  'catch',
+  'finally',
+  'continue',
+  'for',
+  'switch',
+  'while',
+  'this',
+  'with',
+  'debugger',
+  'function',
+  'throw',
+  'default',
+  'if',
+  'try',
+  'delete',
+  'in',
+]);
+
+const UNSAFE_JS_ID_REPLACEMENT_PATTERN =
+  // eslint-disable-next-line no-misleading-character-class
+  /(?:^[^\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}_$]|(?<!^)[^\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}\u{200c}\u{200d}_$])+/gu;
 
 function replaceUnsafeJsChars(chars: string): string {
   let result = '_';

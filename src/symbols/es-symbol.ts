@@ -1,5 +1,6 @@
 import { jsStringLiteral } from 'httongue';
 import { EsEmission, EsEmissionResult, EsEmitter } from '../emission/es-emission.js';
+import { safeJsId } from '../impl/safe-js-id.js';
 import { EsNamespace } from './es-namespace.js';
 
 /**
@@ -24,11 +25,11 @@ export abstract class EsSymbol<
   /**
    * Constructs symbol.
    *
-   * @param requestedName - Requested symbol name. Make sure this is a valid ECMAScript name.
+   * @param requestedName - Requested symbol name.
    * @param init - Initialization options.
    */
   constructor(requestedName: string, init?: EsSymbolInit) {
-    this.#requestedName = requestedName;
+    this.#requestedName = safeJsId(requestedName);
     this.#comment = init?.comment;
   }
 
