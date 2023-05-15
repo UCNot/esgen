@@ -1,6 +1,6 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsEmission } from '../emission/es-emission.js';
-import { EsAnySymbol, EsNaming, EsNamingConstraints, EsSymbol } from './es-symbol.js';
+import { EsAnySymbol, EsNaming, EsNamingConstraints, EsReference, EsSymbol } from './es-symbol.js';
 
 /**
  * Namespace used to resolve naming conflicts.
@@ -200,13 +200,15 @@ export class EsNamespace {
   }
 
   /**
-   * Searches for the `symbol` {@link nameSymbol named} in this namespace or one of enclosing namespaces.
+   * Searches for the symbol {@link nameSymbol named} in this namespace or one of enclosing namespaces.
    *
-   * @param symbol - Target symbol.
+   * @param ref - Reference to target symbol.
    *
    * @returns Either found symbol naming, or `undefined` when `symbol` is not visible.
    */
-  findSymbol<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming | undefined {
+  findSymbol<TNaming extends EsNaming>(ref: EsReference<TNaming>): TNaming | undefined;
+
+  findSymbol<TNaming extends EsNaming>({ symbol }: EsReference<TNaming>): TNaming | undefined {
     if (symbol.isUnique()) {
       return this.#findUniqueSymbol(symbol);
     }
@@ -248,11 +250,11 @@ export class EsNamespace {
   }
 
   /**
-   * Refers the `symbol` visible in this namespace.
+   * Refers the symbol visible in this namespace.
    *
    * In contrast to {@link findSymbol} method, this one throws if the symbol is unnamed yet.
    *
-   * @param symbol - Target symbol previously named in this namespace or one of enclosing ones.
+   * @param ref - Reference to symbol previously named in this namespace or one of enclosing ones.
    *
    * @returns Referred symbol naming.
    *
@@ -260,7 +262,9 @@ export class EsNamespace {
    *
    * [ReferenceError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError
    */
-  refer<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming {
+  refer<TNaming extends EsNaming>(ref: EsReference<TNaming>): TNaming;
+
+  refer<TNaming extends EsNaming>({ symbol }: EsReference<TNaming>): TNaming {
     return symbol.isUnique() ? this.#referUniqueSymbol(symbol) : this.#referNonUniqueSymbol(symbol);
   }
 

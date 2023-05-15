@@ -19,7 +19,7 @@ import { esSymbolString } from './es-symbol-string.js';
 export abstract class EsSymbol<
   out TNaming extends EsNaming = EsNaming,
   in TConstraints extends EsNamingConstraints = EsNamingConstraints,
-> implements EsEmitter {
+> implements EsReference<TNaming>, EsEmitter {
 
   readonly #requestedName: string;
   readonly #comment: string | undefined;
@@ -33,6 +33,13 @@ export abstract class EsSymbol<
   constructor(requestedName: string, init?: EsSymbolInit) {
     this.#requestedName = esSafeId(requestedName);
     this.#comment = init?.comment;
+  }
+
+  /**
+   * Always refers to itself.
+   */
+  get symbol(): this {
+    return this;
   }
 
   /**
@@ -125,6 +132,22 @@ export interface EsSymbolInit {
    * Human-readable symbol comment used in its string representation.
    */
   readonly comment?: string | undefined;
+}
+
+/**
+ * Symbol reference.
+ *
+ * @typeParam TNaming - Type of symbol naming.
+ * @typeParam TSymbol - Type of symbol.
+ */
+export interface EsReference<
+  out TNaming extends EsNaming = EsNaming,
+  out TSymbol extends EsAnySymbol<TNaming> = EsAnySymbol<TNaming>,
+> {
+  /**
+   * Referred symbol.
+   */
+  readonly symbol: TSymbol;
 }
 
 /**

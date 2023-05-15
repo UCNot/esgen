@@ -161,14 +161,14 @@ export class EsCode implements EsEmitter {
    * Emits code under emission control {@link EsEmission#spawn spawned} with custom options and appends emission result
    * to this fragment.
    *
-   * @param init - Custom emission options.
+   * @param init - Custom scope emission options.
    * @param builder - Code builder.
    *
    * @returns `this` instance.
    */
-  scope(init: EsEmissionInit, builder: EsBuilder): this;
+  scope(init: EsEmissionInit | undefined, builder: EsBuilder): this;
 
-  scope(initOrBuilder: EsEmissionInit | EsBuilder, builder?: EsBuilder): this {
+  scope(initOrBuilder: EsEmissionInit | EsBuilder | undefined, builder?: EsBuilder): this {
     let init: EsEmissionInit | undefined;
 
     if (builder) {

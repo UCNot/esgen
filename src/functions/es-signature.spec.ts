@@ -36,6 +36,19 @@ describe('EsSignature', () => {
     );
   });
 
+  describe('for', () => {
+    it('returns new signature instance', () => {
+      const signature = EsSignature.for({ arg: {} });
+
+      expect(signature.args.arg.requestedName).toBe('arg');
+    });
+    it('returns signature instance itself', () => {
+      const signature = new EsSignature({});
+
+      expect(EsSignature.for(signature)).toBe(signature);
+    });
+  });
+
   describe('declare', () => {
     let bundle: EsBundle;
 

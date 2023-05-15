@@ -14,6 +14,17 @@ import { EsArg, EsArgKind, EsArgSymbol } from './es-arg.symbol.js';
  */
 export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args> {
 
+  /**
+   * Creates signature for the given arguments definition.
+   *
+   * @param args - Either function signature or arguments definition.
+   *
+   * @returns Signature itself if `args` is a signature instance already, or new signature instance.
+   */
+  static for<TArgs extends EsSignature.Args>(args: EsSignature<TArgs> | TArgs): EsSignature<TArgs> {
+    return args instanceof EsSignature ? args : new EsSignature(args);
+  }
+
   readonly #args: EsSignature.Symbols<TArgs>;
   readonly #vararg: EsArgSymbol | undefined;
 
@@ -164,20 +175,20 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args> 
   }
 
   /**
-   * Calls function.
+   * Calls a function.
    *
-   * @param values - Named argument values.
+   * @param args - Named argument values.
    *
    * @returns Source of code containing comma-separated argument values enclosed into parentheses.
    */
   call(
-    ...values: EsSignature.RequiredKeyOf<TArgs> extends never
+    ...args: EsSignature.RequiredKeyOf<TArgs> extends never
       ? [EsSignature.ValuesOf<TArgs>?]
       : [EsSignature.ValuesOf<TArgs>]
   ): EsSource;
 
-  call(values: EsSignature.ValuesOf<TArgs> = {} as EsSignature.ValuesOf<TArgs>): EsSource {
-    const argValues = this.#buildArgValues(values);
+  call(args: EsSignature.ValuesOf<TArgs> = {} as EsSignature.ValuesOf<TArgs>): EsSource {
+    const argValues = this.#buildArgValues(args);
 
     if (argValues.length > 3) {
       // Each value on new line.
