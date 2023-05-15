@@ -46,14 +46,17 @@ export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstrai
     };
   }
 
-  /**
-   * @param tag - Symbol tag to include. Defaults to `[Local]`.
-   */
   override toString({
     tag = '[Local]',
     comment,
   }: {
+    /**
+     * Symbol tag to include. Defaults to `[Local]`.
+     */
     readonly tag?: string | null | undefined;
+    /**
+     * Comment to include. Defaults to {@link comment symbol comment}.
+     */
     readonly comment?: string | null | undefined;
   } = {}): string {
     return super.toString({ tag, comment });

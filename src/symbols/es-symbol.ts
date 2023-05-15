@@ -86,16 +86,19 @@ export abstract class EsSymbol<
   /**
    * Builds a string representation of this symbol.
    *
-   * @param tag - Symbol tag to include. Defaults to `[Symbol]`.
-   * @param comment - Comment to include. Defaults to {@link comment symbol comment}.
-   *
    * @returns - String representation of this symbol.
    */
   toString({
     tag = '[Symbol]',
     comment = this.comment,
   }: {
+    /**
+     * Symbol tag to include. Defaults to `[Symbol]`.
+     */
     readonly tag?: string | null | undefined;
+    /**
+     * Comment to include. Defaults to {@link comment symbol comment}.
+     */
     readonly comment?: string | null | undefined;
   } = {}): string {
     const { requestedName } = this;

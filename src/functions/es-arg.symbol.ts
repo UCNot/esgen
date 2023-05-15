@@ -99,14 +99,17 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming, EsArgNamingConstraints> {
     };
   }
 
-  /**
-   * @param tag - Symbol tag to include. Defaults to `[Arg #${position}]`.
-   */
   override toString({
     tag = `[Arg #${this.position}]`,
     comment = this.comment,
   }: {
+    /**
+     * Symbol tag to include. Defaults to `[Arg #${position}]`.
+     */
     readonly tag?: string | null | undefined;
+    /**
+     * Comment to include. Defaults to {@link comment symbol comment}.
+     */
     readonly comment?: string | null | undefined;
   } = {}): string {
     const { kind, requestedName } = this;
@@ -227,7 +230,7 @@ export interface EsArgNaming extends EsNaming {
   readonly symbol: EsArgSymbol;
 
   /**
-   * Emits argument {@link declare declaration} code.
+   * Emits argument {@link EsArgSymbol#declare declaration} code.
    *
    * @returns Argument declaration code.
    */

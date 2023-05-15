@@ -64,14 +64,17 @@ export class EsDeclaredSymbol extends EsSymbol {
     };
   }
 
-  /**
-   * @param tag - Symbol tag to include. Defaults to `[Declared]`.
-   */
   override toString({
     tag = '[Declared]',
     comment,
   }: {
+    /**
+     * Symbol tag to include. Defaults to `[Declared]`
+     */
     readonly tag?: string | null | undefined;
+    /**
+     * Comment to include. Defaults to {@link comment symbol comment}.
+     */
     readonly comment?: string | null | undefined;
   } = {}): string {
     return super.toString({ tag, comment });
