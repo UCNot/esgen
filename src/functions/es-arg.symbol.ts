@@ -51,6 +51,9 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming, EsArgNamingConstraints> {
     return this.#position;
   }
 
+  /**
+   * Kind of argument.
+   */
   get kind(): EsArgKind {
     return this.#kind;
   }

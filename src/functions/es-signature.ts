@@ -1,3 +1,4 @@
+import { isArray } from '@proc7ts/primitives';
 import { jsStringLiteral } from 'httongue';
 import { EsSource } from '../es-source.js';
 import { EsArg, EsArgKind, EsArgSymbol } from './es-arg.symbol.js';
@@ -130,18 +131,20 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args> 
 
       if (decls.length > 3 || (hasCustomDeclaration && decls.length > 1)) {
         // Each declaration on a new line.
-        code
-          .write('(')
-          .indent(code => {
-            decls.forEach((decl, index, { length }) => {
-              if (index + 1 < length || !this.vararg) {
-                code.inline(decl, ',');
-              } else {
-                code.inline(decl);
-              }
-            });
-          })
-          .write(')');
+        code.block(code => {
+          code
+            .write('(')
+            .indent(code => {
+              decls.forEach((decl, index, { length }) => {
+                if (index + 1 < length || !this.vararg) {
+                  code.inline(decl, ',');
+                } else {
+                  code.inline(decl);
+                }
+              });
+            })
+            .write(')');
+        });
       } else {
         // Few declarations on the same line.
         code.inline(
@@ -158,6 +161,85 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args> 
         );
       }
     };
+  }
+
+  /**
+   * Calls function.
+   *
+   * @param values - Named argument values.
+   *
+   * @returns Source of code containing comma-separated argument values enclosed into parentheses.
+   */
+  call(
+    ...values: EsSignature.RequiredKeyOf<TArgs> extends never
+      ? [EsSignature.ValuesOf<TArgs>?]
+      : [EsSignature.ValuesOf<TArgs>]
+  ): EsSource;
+
+  call(values: EsSignature.ValuesOf<TArgs> = {} as EsSignature.ValuesOf<TArgs>): EsSource {
+    const argValues = this.#buildArgValues(values);
+
+    if (argValues.length > 3) {
+      // Each value on new line.
+      return code => {
+        code.block(code => {
+          code
+            .write('(')
+            .indent(code => {
+              for (const argValue of argValues) {
+                code.inline(argValue, ',');
+              }
+            })
+            .write(')');
+        });
+      };
+    }
+
+    // Inline arguments.
+    return code => {
+      code.inline(code => {
+        code.write('(');
+        argValues.forEach((argValue, index, { length }) => {
+          if (index + 1 < length) {
+            code.inline(argValue, ', ');
+          } else {
+            code.write(argValue);
+          }
+        });
+        code.write(')');
+      });
+    };
+  }
+
+  #buildArgValues(values: EsSignature.ValuesOf<TArgs>): EsSource[] {
+    const argValues: EsSource[] = [];
+
+    for (const name of Object.keys(this.args)) {
+      const argValue: EsSource | readonly EsSource[] | undefined =
+        values[name as keyof typeof values];
+
+      if (argValue == null) {
+        // Optional argument without value.
+        // Place `undefined` instead.
+        argValues.push('undefined');
+      } else if (isArray(argValue)) {
+        // Vararg is always the last.
+        argValues.push(...argValue);
+      } else {
+        argValues.push(argValue);
+      }
+    }
+
+    // Remove trailing `undefined` values.
+    for (let i = argValues.length - 1; i >= 0; --i) {
+      if (argValues[i] === 'undefined') {
+        argValues.length = i;
+      } else {
+        break;
+      }
+    }
+
+    return argValues;
   }
 
   toString(): string {
@@ -213,9 +295,58 @@ export namespace EsSignature {
   export type KeysOf<TArgs extends Args> = TArgs extends Args<infer TKey> ? TKey : never;
 
   /**
+   * {@link EsArgKind.Required Required} argument {@link EsArg.Key keys} extracted from signature arguments
+   * {@link EsSignature.Args definition}.
+   *
+   * @typeParam TArgs - Type of arguments definition.
+   */
+  export type RequiredKeyOf<TArgs extends Args> = TArgs extends Args<infer TKey>
+    ? TKey extends `${string}?` | `...${string}`
+      ? never
+      : TKey
+    : never;
+
+  /**
+   * {@link EsArgKind.Optional Optional} argument {@link EsArg.Key keys} extracted from signature arguments
+   * {@link EsSignature.Args definition}.
+   *
+   * @typeParam TArgs - Type of arguments definition.
+   */
+  export type OptionalKeyOf<TArgs extends Args> = TArgs extends Args<infer TKey>
+    ? TKey extends `${infer TOptionalKey}?`
+      ? TOptionalKey
+      : never
+    : never;
+
+  /**
+   * {@link EsArgKind.VarArg Vararg} argument {@link EsArg.Key keys} extracted from signature arguments
+   * {@link EsSignature.Args definition}.
+   *
+   * @typeParam TArgs - Type of arguments definition.
+   */
+  export type VarArgKeyOf<TArgs extends Args> = TArgs extends Args<infer TKey>
+    ? TKey extends `...${infer TVarArgKey}`
+      ? TVarArgKey
+      : never
+    : never;
+
+  /**
    * Argument {@link EsArg.NameOf names} extracted from signature arguments {@link EsSignature.Args definition}.
    *
    * @typeParam TArgs - Type of arguments definition.
    */
   export type NamesOf<TArgs extends Args> = EsArg.NameOf<KeysOf<TArgs>>;
+
+  /**
+   * Named argument values to pass to {@link EsSignature#call function call}.
+   *
+   * @typeParam TArgs - Type of arguments definition.
+   */
+  export type ValuesOf<TArgs extends Args> = {
+    readonly [key in EsArg.NameOf<RequiredKeyOf<TArgs>>]: EsSource;
+  } & {
+    readonly [key in EsArg.NameOf<OptionalKeyOf<TArgs>>]?: EsSource | undefined;
+  } & {
+    readonly [key in EsArg.NameOf<VarArgKeyOf<TArgs>>]?: EsSource | readonly EsSource[] | undefined;
+  };
 }
