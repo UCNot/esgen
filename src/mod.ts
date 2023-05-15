@@ -9,3 +9,4 @@ export * from './es-source.js';
 export * from './esline.tag.js';
 export * from './functions/mod.js';
 export * from './symbols/mod.js';
+export * from './util/mod.js';

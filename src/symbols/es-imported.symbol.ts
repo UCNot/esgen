@@ -48,6 +48,9 @@ export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
     return emission.bundle.ns.nameSymbol(this).name;
   }
 
+  /**
+   * @param tag - Symbol tag to include. Defaults to `[from "${moduleName}"]`.
+   */
   override toString({
     tag = `[from ${jsStringLiteral(this.from.moduleName, '"')}]`,
     comment = this.comment,
