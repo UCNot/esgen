@@ -185,6 +185,7 @@ export class EsNamespace {
 
     return symbol.bind(
       {
+        symbol,
         ns: this,
         get name() {
           // Reserve the name lazily.
@@ -192,6 +193,7 @@ export class EsNamespace {
           // so reserving another name is redundant.
           return getName();
         },
+        toCode: getName,
       },
       constraints!,
     );
@@ -246,20 +248,24 @@ export class EsNamespace {
   }
 
   /**
-   * Obtains a name used to refer the `symbol` visible in this namespace.
+   * Refers the `symbol` visible in this namespace.
+   *
+   * In contrast to {@link findSymbol} method, this one throws if the symbol is unnamed yet.
    *
    * @param symbol - Target symbol previously named in this namespace or one of enclosing ones.
+   *
+   * @returns Referred symbol naming.
    *
    * @throws [ReferenceError] if symbol is unnamed or invisible to this namespace.
    *
    * [ReferenceError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError
    */
-  symbolName(symbol: EsAnySymbol): string {
-    return symbol.isUnique() ? this.#uniqueSymbolName(symbol) : this.#nonUniqueSymbolName(symbol);
+  refer<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming {
+    return symbol.isUnique() ? this.#referUniqueSymbol(symbol) : this.#referNonUniqueSymbol(symbol);
   }
 
-  #uniqueSymbolName(symbol: EsAnySymbol): string {
-    const naming = this.#shared.uniques.get(symbol);
+  #referUniqueSymbol<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming {
+    const naming = this.#shared.uniques.get(symbol) as TNaming | undefined;
 
     if (!naming) {
       throw new ReferenceError(`${symbol} is unnamed`);
@@ -268,10 +274,10 @@ export class EsNamespace {
       throw new ReferenceError(`${symbol} is invisible to ${this}. It is named in ${naming.ns}`);
     }
 
-    return naming.name;
+    return naming;
   }
 
-  #nonUniqueSymbolName(symbol: EsAnySymbol): string {
+  #referNonUniqueSymbol<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming {
     const found = this.#findNonUniqueSymbol(symbol);
 
     if (!found) {
@@ -284,7 +290,7 @@ export class EsNamespace {
       throw new ReferenceError(`${symbol} is invisible to ${this}. It is named in ${naming.ns}`);
     }
 
-    return naming.name;
+    return naming;
   }
 
   /**

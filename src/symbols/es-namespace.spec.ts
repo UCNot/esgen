@@ -77,7 +77,12 @@ describe('EsNamespace', () => {
         const symbol = new UniqueSymbol('test');
         const naming = ns.nameSymbol(symbol);
 
-        expect(naming).toEqual({ ns, name: 'test' });
+        expect(naming).toEqual({
+          symbol,
+          ns,
+          name: 'test',
+          toCode: expect.any(Function),
+        });
         expect(ns.nameSymbol(symbol)).toBe(naming);
       });
       it('prevents symbol renaming', () => {
@@ -85,7 +90,12 @@ describe('EsNamespace', () => {
         const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
         const symbol = new UniqueSymbol('test');
 
-        expect(nested1.nameSymbol(symbol)).toEqual({ ns: nested1, name: 'test' });
+        expect(nested1.nameSymbol(symbol)).toEqual({
+          symbol,
+          ns: nested1,
+          name: 'test',
+          toCode: expect.any(Function),
+        });
         expect(() => nested2.nameSymbol(symbol)).toThrow(
           new TypeError(
             `Can not assign new name to test /* [Symbol] */ in /* nested 2 */. It is already named in /* nested 1 */`,
@@ -115,7 +125,12 @@ describe('EsNamespace', () => {
         const nested = bundle.spawn().spawn().spawn().ns;
         const symbol = new UniqueSymbol('test');
 
-        expect(nested.nameSymbol(symbol)).toEqual({ ns: nested, name: 'test' });
+        expect(nested.nameSymbol(symbol)).toEqual({
+          symbol,
+          ns: nested,
+          name: 'test',
+          toCode: expect.any(Function),
+        });
         expect(ns.findSymbol(symbol)).toBeUndefined();
       });
       it('returns none for invisible symbol', () => {
@@ -123,27 +138,32 @@ describe('EsNamespace', () => {
         const nested2 = bundle.spawn().ns;
         const symbol = new UniqueSymbol('test');
 
-        expect(nested1.nameSymbol(symbol)).toEqual({ ns: nested1, name: 'test' });
+        expect(nested1.nameSymbol(symbol)).toEqual({
+          symbol,
+          ns: nested1,
+          name: 'test',
+          toCode: expect.any(Function),
+        });
         expect(nested2.findSymbol(symbol)).toBeUndefined();
       });
     });
 
-    describe('symbolName', () => {
-      it('returns symbol name', () => {
+    describe('refer', () => {
+      it('returns symbol naming', () => {
         const symbol = new UniqueSymbol('test');
 
         expect(ns.nameSymbol(symbol).name).toBe('test');
-        expect(ns.symbolName(symbol)).toBe('test');
+        expect(ns.refer(symbol).name).toBe('test');
       });
-      it('returns visible symbol name', () => {
+      it('returns visible symbol naming', () => {
         const nested = bundle.spawn().spawn().spawn().ns;
         const symbol = new UniqueSymbol('test');
 
         expect(ns.nameSymbol(symbol).name).toBe('test');
-        expect(nested.symbolName(symbol)).toBe('test');
+        expect(nested.refer(symbol).name).toBe('test');
       });
       it('throws for unnamed symbol', () => {
-        expect(() => ns.symbolName(new UniqueSymbol('test', { comment: 'Test symbol' }))).toThrow(
+        expect(() => ns.refer(new UniqueSymbol('test', { comment: 'Test symbol' }))).toThrow(
           new ReferenceError(`test /* [Symbol] Test symbol */ is unnamed`),
         );
       });
@@ -153,7 +173,7 @@ describe('EsNamespace', () => {
         const symbol = new UniqueSymbol('test');
 
         expect(nested1.nameSymbol(symbol).name).toBe('test');
-        expect(() => nested2.symbolName(symbol)).toThrow(
+        expect(() => nested2.refer(symbol)).toThrow(
           new ReferenceError(
             `${symbol} is invisible to /* nested 2 */. It is named in /* nested 1 */`,
           ),
@@ -168,7 +188,7 @@ describe('EsNamespace', () => {
         const symbol = new NonUniqueSymbol('test');
         const naming = ns.nameSymbol(symbol);
 
-        expect(naming).toEqual({ ns, name: 'test' });
+        expect(naming).toEqual({ symbol, ns, name: 'test', toCode: expect.any(Function) });
         expect(ns.nameSymbol(symbol)).toBe(naming);
       });
       it('names the symbol in unrelated namespace', () => {
@@ -176,14 +196,29 @@ describe('EsNamespace', () => {
         const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
         const symbol = new NonUniqueSymbol('test');
 
-        expect(nested1.nameSymbol(symbol)).toEqual({ ns: nested1, name: 'test' });
-        expect(nested2.nameSymbol(symbol)).toEqual({ ns: nested2, name: 'test' });
+        expect(nested1.nameSymbol(symbol)).toEqual({
+          symbol,
+          ns: nested1,
+          name: 'test',
+          toCode: expect.any(Function),
+        });
+        expect(nested2.nameSymbol(symbol)).toEqual({
+          symbol,
+          ns: nested2,
+          name: 'test',
+          toCode: expect.any(Function),
+        });
       });
       it('prevents symbol renaming in nested namespace', () => {
         const nested = bundle.spawn({ ns: { comment: 'nested' } }).ns;
         const symbol = new NonUniqueSymbol('test');
 
-        expect(ns.nameSymbol(symbol)).toEqual({ ns: nested, name: 'test' });
+        expect(ns.nameSymbol(symbol)).toEqual({
+          symbol,
+          ns: nested,
+          name: 'test',
+          toCode: expect.any(Function),
+        });
         expect(() => nested.nameSymbol(symbol)).toThrow(
           new TypeError(
             `Can not assign new name to test /* [Symbol] */ in /* nested */. It is already named in /* Bundle */`,
@@ -194,7 +229,12 @@ describe('EsNamespace', () => {
         const nested = bundle.spawn({ ns: { comment: 'nested' } }).ns;
         const symbol = new NonUniqueSymbol('test');
 
-        expect(nested.nameSymbol(symbol)).toEqual({ ns: nested, name: 'test' });
+        expect(nested.nameSymbol(symbol)).toEqual({
+          symbol,
+          ns: nested,
+          name: 'test',
+          toCode: expect.any(Function),
+        });
         expect(() => ns.nameSymbol(symbol)).toThrow(
           new TypeError(
             `Can not assign new name to test /* [Symbol] */ in /* Bundle */. It is already named in /* nested */`,
@@ -224,7 +264,12 @@ describe('EsNamespace', () => {
         const nested = bundle.spawn().spawn().spawn().ns;
         const symbol = new UniqueSymbol('test');
 
-        expect(nested.nameSymbol(symbol)).toEqual({ ns: nested, name: 'test' });
+        expect(nested.nameSymbol(symbol)).toEqual({
+          symbol,
+          ns: nested,
+          name: 'test',
+          toCode: expect.any(Function),
+        });
         expect(ns.findSymbol(symbol)).toBeUndefined();
       });
       it('returns none for invisible symbol', () => {
@@ -232,29 +277,34 @@ describe('EsNamespace', () => {
         const nested2 = bundle.spawn().ns;
         const symbol = new NonUniqueSymbol('test');
 
-        expect(nested1.nameSymbol(symbol)).toEqual({ ns: nested1, name: 'test' });
+        expect(nested1.nameSymbol(symbol)).toEqual({
+          symbol,
+          ns: nested1,
+          name: 'test',
+          toCode: expect.any(Function),
+        });
         expect(nested2.findSymbol(symbol)).toBeUndefined();
       });
     });
 
-    describe('symbolName', () => {
-      it('returns symbol name', () => {
+    describe('refer', () => {
+      it('returns symbol naming', () => {
         const symbol = new NonUniqueSymbol('test');
 
         expect(ns.nameSymbol(symbol).name).toBe('test');
-        expect(ns.symbolName(symbol)).toBe('test');
+        expect(ns.refer(symbol).name).toBe('test');
       });
-      it('returns visible symbol name', () => {
+      it('returns visible symbol naming', () => {
         const nested = bundle.spawn().spawn().spawn().ns;
         const symbol = new NonUniqueSymbol('test');
 
         expect(ns.nameSymbol(symbol).name).toBe('test');
-        expect(nested.symbolName(symbol)).toBe('test');
+        expect(nested.refer(symbol).name).toBe('test');
       });
       it('throws for unnamed symbol', () => {
         const symbol = new NonUniqueSymbol('test', { comment: 'Test symbol' });
 
-        expect(() => ns.symbolName(symbol)).toThrow(
+        expect(() => ns.refer(symbol)).toThrow(
           new ReferenceError(`test /* [Symbol] Test symbol */ is unnamed`),
         );
       });
@@ -264,7 +314,7 @@ describe('EsNamespace', () => {
         const symbol = new NonUniqueSymbol('test');
 
         expect(nested1.nameSymbol(symbol).name).toBe('test');
-        expect(() => nested2.symbolName(symbol)).toThrow(
+        expect(() => nested2.refer(symbol)).toThrow(
           new ReferenceError(
             `${symbol} is invisible to /* nested 2 */. It is named in /* nested 1 */`,
           ),

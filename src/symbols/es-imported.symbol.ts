@@ -82,8 +82,5 @@ export interface EsImportInit extends EsSymbolInit {
  * Imported symbol naming within (bundle) namespace.
  */
 export interface EsImportNaming extends EsNaming {
-  /**
-   * Source module the symbol is imported from.
-   */
-  readonly from: EsModule;
+  readonly symbol: EsImportedSymbol;
 }

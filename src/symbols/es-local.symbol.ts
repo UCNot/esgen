@@ -8,7 +8,7 @@ import { EsNaming, EsNamingConstraints, EsSymbol, EsSymbolInit } from './es-symb
 export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstraints> {
 
   override bind(naming: EsNaming, constraints: EsLocalNamingConstraints): EsLocalNaming;
-  override bind(naming: EsNaming, { declare }: EsLocalNamingConstraints): EsLocalNaming {
+  override bind(naming: EsLocalNaming, { declare }: EsLocalNamingConstraints): EsLocalNaming {
     return {
       ...naming,
       asDeclaration: lazyValue(() => {
@@ -133,6 +133,8 @@ export interface EsLocalContext {
  * Can be used as a source of local declaration code.
  */
 export interface EsLocalNaming extends EsNaming {
+  readonly symbol: EsLocalSymbol;
+
   /**
    * Emits local {@link EsLocalSymbol#declare declaration} code.
    */

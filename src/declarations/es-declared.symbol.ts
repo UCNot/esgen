@@ -9,7 +9,7 @@ import { EsAnySymbol, EsNaming, EsSymbol, EsSymbolInit } from '../symbols/es-sym
  *
  * The symbol is automatically declared and named in {@link EsBundle#ns bundle namespace} whenever used.
  */
-export class EsDeclaredSymbol extends EsSymbol {
+export class EsDeclaredSymbol extends EsSymbol<EsDeclarationNaming> {
 
   readonly #exported: boolean;
   readonly #refers: readonly EsAnySymbol[];
@@ -38,8 +38,8 @@ export class EsDeclaredSymbol extends EsSymbol {
     return this.#exported;
   }
 
-  override bind(naming: EsNaming): EsNaming {
-    return naming.ns.emission.declarations.addDeclaration(this, naming);
+  override bind(naming: EsNaming): EsDeclarationNaming {
+    return naming.ns.emission.declarations.addDeclaration(this, naming) as EsDeclarationNaming;
   }
 
   override emit(emission: EsEmission): EsEmissionResult {
@@ -110,6 +110,13 @@ export interface EsDeclarationInit extends EsSymbolInit {
    * @returns Source of code that contains declaration.
    */
   declare(this: void, context: EsDeclarationContext): EsSource;
+}
+
+/**
+ * Declared symbol naming.
+ */
+export interface EsDeclarationNaming extends EsNaming {
+  readonly symbol: EsDeclaredSymbol;
 }
 
 /**

@@ -54,11 +54,9 @@ export class EsImports implements EsEmitter {
       this.#imports.set(moduleId, moduleImports);
     }
 
-    const importNaming: EsImportNaming = { ...naming, from };
+    moduleImports.addImport(symbol, naming as EsImportNaming);
 
-    moduleImports.addImport(symbol, importNaming);
-
-    return importNaming;
+    return naming as EsImportNaming;
   }
 
   emit(_emission: EsEmission): EsEmissionResult {

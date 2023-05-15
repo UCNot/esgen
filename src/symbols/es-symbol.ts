@@ -1,4 +1,6 @@
 import { EsEmission, EsEmissionResult, EsEmitter } from '../emission/es-emission.js';
+import { EsCode } from '../es-code.js';
+import { EsProducer, EsSource } from '../es-source.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsNamespace } from './es-namespace.js';
 import { esSymbolString } from './es-symbol-string.js';
@@ -8,7 +10,7 @@ import { esSymbolString } from './es-symbol-string.js';
  *
  * Requests a {@link requestedName name} within program. The actual name, however, may differ to avoid naming conflicts.
  * In order to receive an actual name, the symbol has to be {@link EsNamespace#nameSymbol named} first. Then, the symbol
- * becomes {@link EsNamespace#findSymbol visible} under its actual {@link EsNamespace#symbolName name} in target
+ * becomes {@link EsNamespace#findSymbol visible} under its actual {@link EsNamespace#refer name} in target
  * namespace and its nested namespaces.
  *
  * @typeParam TNaming - Type of symbol naming.
@@ -80,7 +82,7 @@ export abstract class EsSymbol<
    * @returns Emission result.
    */
   emit(emission: EsEmission): EsEmissionResult {
-    return emission.ns.symbolName(this);
+    return new EsCode().write(emission.ns.refer<TNaming>(this)).emit(emission);
   }
 
   /**
@@ -128,7 +130,12 @@ export interface EsSymbolInit {
 /**
  * Information on symbol {@link EsNamespace#findSymbol naming} within namespace.
  */
-export interface EsNaming {
+export interface EsNaming extends EsProducer {
+  /**
+   * Named symbol
+   */
+  readonly symbol: EsAnySymbol;
+
   /**
    * Namespace the symbol is visible in.
    */
@@ -138,6 +145,13 @@ export interface EsNaming {
    * The name used to refer the symbol.
    */
   readonly name: string;
+
+  /**
+   * Emits symbol name.
+   *
+   * @returns Source of code containing symbol name.
+   */
+  toCode(this: void): EsSource;
 }
 
 /**
