@@ -48,12 +48,14 @@ export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
     return emission.bundle.ns.nameSymbol(this).name;
   }
 
-  override toString(): string {
-    return (
-      `import { ${this.requestedName}`
-      + (this.comment ? ` /* ${this.comment} */` : '')
-      + ` } from ${jsStringLiteral(this.from.moduleName, '"')}`
-    );
+  override toString({
+    tag = `[from ${jsStringLiteral(this.from.moduleName, '"')}]`,
+    comment = this.comment,
+  }: {
+    readonly tag?: string | null | undefined;
+    readonly comment?: string | null | undefined;
+  } = {}): string {
+    return super.toString({ tag, comment });
   }
 
 }
