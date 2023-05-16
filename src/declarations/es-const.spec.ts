@@ -22,7 +22,7 @@ describe('esConst', () => {
     ).resolves.toBe(`const CONST_TEST = 13;\nconsole.log(CONST_TEST);\n`);
   });
   it('declares constant with unsafe name', async () => {
-    const symbol = esConst('\u042a\u044a', `42`);
+    const symbol = esConst('1\0 \n', `42`, { prefix: '' });
 
     await expect(
       bundle
@@ -30,7 +30,18 @@ describe('esConst', () => {
           code.inline(`console.log(`, symbol, ');');
         })
         .asText(),
-    ).resolves.toBe(`const CONST__x42Ax44A_ = 42;\nconsole.log(CONST__x42Ax44A_);\n`);
+    ).resolves.toBe(`const _x31x0x20xA_ = 42;\nconsole.log(_x31x0x20xA_);\n`);
+  });
+  it('declares constant with keyword name', async () => {
+    const symbol = esConst('new', `43`, { prefix: '' });
+
+    await expect(
+      bundle
+        .emit(code => {
+          code.inline(`console.log(`, symbol, ');');
+        })
+        .asText(),
+    ).resolves.toBe(`const __new__ = 43;\nconsole.log(__new__);\n`);
   });
   it('declares referred constant before referrer', async () => {
     const symbol1 = esConst('1', `1`);

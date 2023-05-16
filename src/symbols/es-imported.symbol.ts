@@ -48,12 +48,20 @@ export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
     return emission.bundle.ns.nameSymbol(this).name;
   }
 
-  override toString(): string {
-    return (
-      `import { ${this.requestedName}`
-      + (this.comment ? ` /* ${this.comment} */` : '')
-      + ` } from ${jsStringLiteral(this.from.moduleName, '"')}`
-    );
+  override toString({
+    tag = `[from ${jsStringLiteral(this.from.moduleName, '"')}]`,
+    comment = this.comment,
+  }: {
+    /**
+     * Symbol tag to include. Defaults to `[from "${moduleName}"]`.
+     */
+    readonly tag?: string | null | undefined;
+    /**
+     * Comment to include. Defaults to {@link comment symbol comment}.
+     */
+    readonly comment?: string | null | undefined;
+  } = {}): string {
+    return super.toString({ tag, comment });
   }
 
 }
@@ -74,8 +82,5 @@ export interface EsImportInit extends EsSymbolInit {
  * Imported symbol naming within (bundle) namespace.
  */
 export interface EsImportNaming extends EsNaming {
-  /**
-   * Source module the symbol is imported from.
-   */
-  readonly from: EsModule;
+  readonly symbol: EsImportedSymbol;
 }

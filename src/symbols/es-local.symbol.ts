@@ -1,5 +1,5 @@
-import { jsStringLiteral } from 'httongue';
-import { EsProducer, EsSource } from '../es-source.js';
+import { lazyValue } from '@proc7ts/primitives';
+import { EsSource } from '../es-source.js';
 import { EsNaming, EsNamingConstraints, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
 /**
@@ -8,20 +8,27 @@ import { EsNaming, EsNamingConstraints, EsSymbol, EsSymbolInit } from './es-symb
 export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstraints> {
 
   override bind(naming: EsNaming, constraints: EsLocalNamingConstraints): EsLocalNaming;
-  override bind(naming: EsNaming, { declare }: EsLocalNamingConstraints): EsLocalNaming {
-    const context: EsLocalContext = {
-      symbol: this,
-      naming: naming,
-    };
-    const declaration =
-      'declareLocal' in declare && typeof declare.declareLocal === 'function'
-        ? declare.declareLocal(context)
-        : (declare as EsLocalDeclarer.Function)(context);
-
+  override bind(naming: EsLocalNaming, { declare }: EsLocalNamingConstraints): EsLocalNaming {
     return {
       ...naming,
-      toCode: () => declaration,
+      asDeclaration: lazyValue(() => {
+        const context: EsLocalContext = {
+          symbol: this,
+          naming: naming,
+        };
+
+        return 'declareLocal' in declare && typeof declare.declareLocal === 'function'
+          ? declare.declareLocal(context)
+          : (declare as EsLocalDeclarer.Function)(context);
+      }),
     };
+  }
+
+  /**
+   * @returns `false`, as the same local may be declared in multiple unrelated namespaces.
+   */
+  override isUnique(): boolean {
+    return false;
   }
 
   /**
@@ -35,16 +42,24 @@ export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstrai
    */
   declare(declare: EsLocalDeclarer): EsSource {
     return (code, emission) => {
-      code.write(emission.ns.nameSymbol(this, { declare, requireNew: true }));
+      code.write(emission.ns.nameSymbol(this, { declare, requireNew: true }).asDeclaration());
     };
   }
 
-  toString(): string {
-    const { requestedName, comment } = this;
-
-    return (
-      `Local symbol ${jsStringLiteral(requestedName, '"')}` + (comment ? ` /* ${comment} */` : '')
-    );
+  override toString({
+    tag = '[Local]',
+    comment,
+  }: {
+    /**
+     * Symbol tag to include. Defaults to `[Local]`.
+     */
+    readonly tag?: string | null | undefined;
+    /**
+     * Comment to include. Defaults to {@link comment symbol comment}.
+     */
+    readonly comment?: string | null | undefined;
+  } = {}): string {
+    return super.toString({ tag, comment });
   }
 
 }
@@ -117,11 +132,13 @@ export interface EsLocalContext {
  *
  * Can be used as a source of local declaration code.
  */
-export interface EsLocalNaming extends EsNaming, EsProducer {
+export interface EsLocalNaming extends EsNaming {
+  readonly symbol: EsLocalSymbol;
+
   /**
-   * Emits local declaration code.
+   * Emits local {@link EsLocalSymbol#declare declaration} code.
    */
-  toCode(): EsSource;
+  asDeclaration(this: void): EsSource;
 }
 
 /**

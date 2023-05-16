@@ -7,7 +7,7 @@ describe('EsImportedSymbol', () => {
   describe('toString', () => {
     it(`reflects module name and requested name`, () => {
       expect(esImport('test-module', 'testSymbol').toString()).toBe(
-        `import { testSymbol } from "test-module"`,
+        `testSymbol /* [from "test-module"] */`,
       );
     });
     it(`reflects comment`, () => {
@@ -15,7 +15,7 @@ describe('EsImportedSymbol', () => {
         new EsImportedSymbol(new EsExternalModule('test-module'), 'testSymbol', {
           comment: 'Test',
         }).toString(),
-      ).toBe(`import { testSymbol /* Test */ } from "test-module"`);
+      ).toBe(`testSymbol /* [from "test-module"] Test */`);
     });
   });
 });

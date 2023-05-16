@@ -43,20 +43,20 @@ describe('EsLocalSymbol', () => {
             });
           })
           .asText(),
-      ).rejects.toThrow(new TypeError(`Can not rename Local symbol "test" in /* Local */`));
+      ).rejects.toThrow(new TypeError(`Can not rename test /* [Local] */ in /* Local */`));
     });
   });
 
   describe('toString', () => {
     it(`reflects requested name`, () => {
-      expect(esLocal('testSymbol').toString()).toBe(`Local symbol "testSymbol"`);
+      expect(esLocal('testSymbol').toString()).toBe(`testSymbol /* [Local] */`);
     });
     it(`reflects comment`, () => {
       expect(
         esLocal('testSymbol', {
           comment: 'Test',
         }).toString(),
-      ).toBe(`Local symbol "testSymbol" /* Test */`);
+      ).toBe(`testSymbol /* [Local] Test */`);
     });
   });
 });

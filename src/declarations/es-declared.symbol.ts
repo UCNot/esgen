@@ -2,14 +2,21 @@ import { asArray } from '@proc7ts/primitives';
 import { EsBundle } from '../emission/es-bundle.js';
 import { EsEmission, EsEmissionResult } from '../emission/es-emission.js';
 import { EsSource } from '../es-source.js';
-import { EsAnySymbol, EsNaming, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
+import { EsNamespace } from '../symbols/es-namespace.js';
+import {
+  EsAnySymbol,
+  EsNaming,
+  EsResolution,
+  EsSymbol,
+  EsSymbolInit,
+} from '../symbols/es-symbol.js';
 
 /**
  * Symbol declared in bundle {@link EsDeclarations declarations}.
  *
  * The symbol is automatically declared and named in {@link EsBundle#ns bundle namespace} whenever used.
  */
-export class EsDeclaredSymbol extends EsSymbol {
+export class EsDeclaredSymbol extends EsSymbol<EsDeclarationNaming> {
 
   readonly #exported: boolean;
   readonly #refers: readonly EsAnySymbol[];
@@ -38,8 +45,17 @@ export class EsDeclaredSymbol extends EsSymbol {
     return this.#exported;
   }
 
-  override bind(naming: EsNaming): EsNaming {
-    return naming.ns.emission.declarations.addDeclaration(this, naming);
+  override refer(
+    resolution: EsResolution<EsDeclarationNaming, this>,
+    ns: EsNamespace,
+  ): EsResolution<EsDeclarationNaming, this> {
+    ns.emission.bundle.ns.nameSymbol(this);
+
+    return resolution;
+  }
+
+  override bind(naming: EsNaming): EsDeclarationNaming {
+    return naming.ns.emission.declarations.addDeclaration(this, naming) as EsDeclarationNaming;
   }
 
   override emit(emission: EsEmission): EsEmissionResult {
@@ -62,6 +78,22 @@ export class EsDeclaredSymbol extends EsSymbol {
       }
       code.write(this.#declare(context));
     };
+  }
+
+  override toString({
+    tag = '[Declared]',
+    comment,
+  }: {
+    /**
+     * Symbol tag to include. Defaults to `[Declared]`
+     */
+    readonly tag?: string | null | undefined;
+    /**
+     * Comment to include. Defaults to {@link comment symbol comment}.
+     */
+    readonly comment?: string | null | undefined;
+  } = {}): string {
+    return super.toString({ tag, comment });
   }
 
 }
@@ -94,6 +126,13 @@ export interface EsDeclarationInit extends EsSymbolInit {
    * @returns Source of code that contains declaration.
    */
   declare(this: void, context: EsDeclarationContext): EsSource;
+}
+
+/**
+ * Declared symbol naming.
+ */
+export interface EsDeclarationNaming extends EsNaming {
+  readonly symbol: EsDeclaredSymbol;
 }
 
 /**

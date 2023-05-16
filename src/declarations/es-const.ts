@@ -1,5 +1,5 @@
 import { asArray } from '@proc7ts/primitives';
-import { safeJsId } from '../impl/safe-js-id.js';
+import { esSafeId } from '../util/es-safe-id.js';
 import { EsDeclarationInit, EsDeclaredSymbol } from './es-declared.symbol.js';
 
 /**
@@ -35,7 +35,7 @@ export function esConst(
     return existingConst;
   }
 
-  const newConst = new EsConstSymbol(safeJsId(`${prefix}${key}`), initializer, {
+  const newConst = new EsConstSymbol(esSafeId(`${prefix}${key}`), initializer, {
     exported,
     refers,
   });

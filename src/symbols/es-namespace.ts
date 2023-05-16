@@ -1,6 +1,13 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsEmission } from '../emission/es-emission.js';
-import { EsAnySymbol, EsNaming, EsNamingConstraints, EsSymbol } from './es-symbol.js';
+import {
+  EsAnySymbol,
+  EsNaming,
+  EsNamingConstraints,
+  EsReference,
+  EsResolution,
+  EsSymbol,
+} from './es-symbol.js';
 
 /**
  * Namespace used to resolve naming conflicts.
@@ -12,6 +19,7 @@ export class EsNamespace {
   readonly #enclosing: EsNamespace | undefined;
   readonly #comment: string;
   readonly #names = new Map<string, EsReservedNames>();
+  readonly #nonUniques = new Map<EsAnySymbol, EsNonUniqueNaming<any>>();
   #nestedSeq = 0;
 
   /**
@@ -32,7 +40,7 @@ export class EsNamespace {
     }: EsNamespaceInit = {},
   ) {
     this.#emission = emission;
-    this.#shared = enclosing ? enclosing.#shared : { namings: new Map() };
+    this.#shared = enclosing ? enclosing.#shared : { uniques: new Map() };
     this.#enclosing = enclosing;
     this.#comment = comment;
   }
@@ -79,23 +87,6 @@ export class EsNamespace {
    * The symbol will be {@link findSymbol visible} within namespace itself and its {@link nest nested} ones.
    *
    * @typeParam TNaming - Type of symbol naming.
-   * @param symbol - Symbol to bind.
-   * @param requireNew - Whether new name required.
-   *
-   * @returns Symbol naming.
-   *
-   * @throws [TypeError] if the `symbol` is already named within another namespace.
-   *
-   * [TypeError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
-   */
-  nameSymbol<TNaming extends EsNaming>(symbol: EsSymbol<TNaming>, requireNew?: boolean): TNaming;
-
-  /**
-   * Names the given `symbol` to this namespace with the given naming `constraints`.
-   *
-   * The symbol will be {@link findSymbol visible} within namespace itself and its {@link nest nested} ones.
-   *
-   * @typeParam TNaming - Type of symbol naming.
    * @typeParam TConstraints - Type of naming constraints.
    * @param symbol - Symbol to bind.
    * @param constraints - Naming constraints.
@@ -104,37 +95,104 @@ export class EsNamespace {
    *
    * @throws [TypeError] if the `symbol` is already named within another namespace.
    *
-   * [TypeError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
+   * [TypeError]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError
    */
   nameSymbol<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
     symbol: EsSymbol<TNaming, TConstraints>,
-    constraints: TConstraints,
+    ...constraints: EsNamingConstraints extends TConstraints ? [TConstraints?] : [TConstraints]
   ): TNaming;
 
   nameSymbol<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
     symbol: EsSymbol<TNaming, TConstraints>,
     constraints?: TConstraints,
   ): TNaming {
-    const oldNaming = this.#shared.namings.get(symbol);
+    return symbol.isUnique()
+      ? this.#nameUniqueSymbol(symbol, constraints)
+      : this.#nameNonUniqueSymbol(symbol, constraints);
+  }
+
+  #nameUniqueSymbol<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
+    symbol: EsSymbol<TNaming, TConstraints>,
+    constraints?: TConstraints,
+  ): TNaming {
+    const oldNaming = this.#shared.uniques.get(symbol) as TNaming | undefined;
 
     if (oldNaming) {
-      if (oldNaming.ns === this) {
-        // Already named in this namespace.
-        if (constraints?.requireNew) {
-          throw new TypeError(`Can not rename ${symbol} in ${this}`);
-        }
-
-        return oldNaming as TNaming;
-      }
-
-      throw new TypeError(
-        `Can not assign new name to ${symbol} in ${this}. It is already named in ${oldNaming.ns}`,
-      );
+      return this.#checkVisibility(symbol, oldNaming, constraints);
     }
 
+    const newNaming = this.#bindSymbol(symbol, constraints);
+
+    this.#shared.uniques.set(symbol, newNaming);
+
+    return newNaming;
+  }
+
+  #nameNonUniqueSymbol<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
+    symbol: EsSymbol<TNaming, TConstraints>,
+    constraints?: TConstraints,
+  ): TNaming {
+    const found = this.#findNonUniqueSymbol(symbol);
+
+    if (found) {
+      const {
+        naming: { ns },
+        visible,
+      } = found;
+
+      if (visible || this.encloses(ns)) {
+        return this.#checkVisibility(symbol, found.naming, constraints);
+      }
+    }
+
+    const naming = this.#bindSymbol(symbol, constraints);
+
+    this.#nonUniques.set(symbol, { naming, visible: true });
+    this.#registerNestedNaming(symbol, naming);
+
+    return naming;
+  }
+
+  #registerNestedNaming<TNaming extends EsNaming>(
+    symbol: EsAnySymbol<TNaming>,
+    naming: TNaming,
+  ): void {
+    const { enclosing } = this;
+
+    if (enclosing && !enclosing.#nonUniques.has(symbol)) {
+      enclosing.#nonUniques.set(symbol, { naming, visible: false });
+      enclosing.#registerNestedNaming(symbol, naming);
+    }
+  }
+
+  #checkVisibility<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
+    symbol: EsSymbol<TNaming, TConstraints>,
+    naming: TNaming,
+    constraints: TConstraints | undefined,
+  ): TNaming {
+    if (naming.ns === this) {
+      // Already names in this namespace.
+      if (constraints?.requireNew) {
+        throw new TypeError(`Can not rename ${symbol} in ${this}`);
+      }
+
+      return naming;
+    }
+
+    throw new TypeError(
+      `Can not assign new name to ${symbol} in ${this}. It is already named in ${naming.ns}`,
+    );
+  }
+
+  #bindSymbol<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
+    symbol: EsSymbol<TNaming, TConstraints>,
+    constraints: TConstraints | undefined,
+  ): TNaming {
     const getName = lazyValue(() => this.reserveName(symbol.requestedName));
-    const newNaming = symbol.bind(
+
+    return symbol.bind(
       {
+        symbol,
         ns: this,
         get name() {
           // Reserve the name lazily.
@@ -142,48 +200,159 @@ export class EsNamespace {
           // so reserving another name is redundant.
           return getName();
         },
+        emit: getName,
       },
-      constraints as TConstraints,
+      constraints!,
     );
-
-    this.#shared.namings.set(symbol, newNaming);
-
-    return newNaming;
   }
 
   /**
-   * Searches for the `symbol` {@link nameSymbol named} in this namespace or one of enclosing namespaces.
+   * Searches for the symbol {@link nameSymbol named} in this namespace or one of enclosing namespaces.
    *
-   * @param symbol - Target symbol.
+   * @param ref - Reference to target symbol.
    *
    * @returns Either found symbol naming, or `undefined` when `symbol` is not visible.
    */
-  findSymbol<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming | undefined {
-    const naming = this.#shared.namings.get(symbol);
+  findSymbol<TNaming extends EsNaming>(ref: EsReference<TNaming>): TNaming | undefined;
+
+  findSymbol<TNaming extends EsNaming>({ symbol }: EsReference<TNaming>): TNaming | undefined {
+    if (symbol.isUnique()) {
+      return this.#findUniqueSymbol(symbol);
+    }
+
+    const nonUnique = this.#findNonUniqueSymbol(symbol);
+
+    return nonUnique?.visible ? nonUnique.naming : undefined;
+  }
+
+  #findUniqueSymbol<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming | undefined {
+    const naming = this.#shared.uniques.get(symbol);
 
     return naming && (naming.ns.encloses(this) ? (naming as TNaming) : undefined);
   }
 
+  #findNonUniqueSymbol<TNaming extends EsNaming>(
+    symbol: EsAnySymbol<TNaming>,
+  ): EsNonUniqueNaming<TNaming> | undefined {
+    const found = this.#nonUniques.get(symbol) as EsNonUniqueNaming<TNaming> | undefined;
+
+    if (found) {
+      return found;
+    }
+
+    const { enclosing } = this;
+
+    if (enclosing) {
+      const found = enclosing.#findNonUniqueSymbol(symbol);
+
+      if (found) {
+        // Cache for future use.
+        this.#nonUniques.set(symbol, found);
+
+        return found;
+      }
+    }
+
+    return;
+  }
+
   /**
-   * Obtains a name used to refer the `symbol` visible in this namespace.
+   * Refers the symbol visible in this namespace.
    *
-   * @param symbol - Target symbol previously named in this namespace or one of enclosing ones.
+   * @param ref - Reference to symbol previously named in this namespace or one of enclosing ones.
    *
-   * @throws [ReferenceError] if symbol is unnamed or invisible to this namespace.
-   *
-   * [ReferenceError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError
+   * @returns Referred symbol naming.
    */
-  symbolName(symbol: EsAnySymbol): string {
-    const naming = this.#shared.namings.get(symbol);
+  refer<TNaming extends EsNaming>(ref: EsReference<TNaming>): EsResolution<TNaming>;
+
+  refer<TNaming extends EsNaming>({ symbol }: EsReference<TNaming>): EsResolution<TNaming> {
+    const findNaming = symbol.isUnique()
+      ? () => this.#findUniqueNaming(symbol)
+      : () => this.#findNonUniqueNaming(symbol);
+    const whenNamed = async (): Promise<TNaming> => await this.#whenNamed(symbol, findNaming);
+
+    return symbol.refer(
+      {
+        symbol,
+        getNaming: () => this.#getNaming(symbol, findNaming),
+        whenNamed,
+        async emit() {
+          const { name } = await whenNamed();
+
+          return name;
+        },
+      },
+      this,
+    );
+  }
+
+  #findUniqueNaming<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming | undefined {
+    const naming = this.#shared.uniques.get(symbol) as TNaming | undefined;
+
+    if (naming && !naming.ns.encloses(this)) {
+      throw new ReferenceError(`${symbol} is invisible to ${this}. It is named in ${naming.ns}`);
+    }
+
+    return naming;
+  }
+
+  #findNonUniqueNaming<TNaming extends EsNaming>(
+    symbol: EsAnySymbol<TNaming>,
+  ): TNaming | undefined {
+    const found = this.#findNonUniqueSymbol(symbol);
+
+    if (!found) {
+      return;
+    }
+
+    const { naming, visible } = found;
+
+    if (!visible) {
+      throw new ReferenceError(`${symbol} is invisible to ${this}. It is named in ${naming.ns}`);
+    }
+
+    return naming;
+  }
+
+  #getNaming<TNaming extends EsNaming>(
+    symbol: EsAnySymbol<TNaming>,
+    findNaming: () => TNaming | undefined,
+  ): TNaming {
+    const naming = findNaming();
 
     if (!naming) {
       throw new ReferenceError(`${symbol} is unnamed`);
     }
-    if (!naming.ns.encloses(this)) {
-      throw new ReferenceError(`${symbol} is invisible to ${this}. It is named in ${naming.ns}`);
+
+    return naming;
+  }
+
+  async #whenNamed<TNaming extends EsNaming>(
+    symbol: EsAnySymbol<TNaming>,
+    findNaming: () => TNaming | undefined,
+  ): Promise<TNaming> {
+    // Try immediately
+    const immediateNaming = findNaming();
+
+    if (immediateNaming) {
+      return immediateNaming;
     }
 
-    return naming.name;
+    // Try after pending promises resolution.
+    await Promise.resolve();
+
+    const pendingNaming = findNaming();
+
+    if (pendingNaming) {
+      return pendingNaming;
+    }
+
+    // Try after all promises resolution.
+    await new Promise(resolve => {
+      setImmediate(resolve);
+    });
+
+    return this.#getNaming(symbol, findNaming);
   }
 
   /**
@@ -311,5 +480,10 @@ interface EsReservedNames {
 }
 
 interface EsNamespace$SharedState {
-  readonly namings: Map<EsAnySymbol, EsNaming>;
+  readonly uniques: Map<EsAnySymbol, EsNaming>;
+}
+
+interface EsNonUniqueNaming<TNaming extends EsNaming> {
+  readonly naming: TNaming;
+  readonly visible: boolean;
 }

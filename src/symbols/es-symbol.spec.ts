@@ -9,6 +9,15 @@ describe('EsSymbol', () => {
     bundle = new EsBundle();
   });
 
+  describe('requestedName', () => {
+    it('converted to ECMAScript-safe identifier', () => {
+      expect(new TestSymbol('').requestedName).toBe('__');
+      expect(new TestSymbol('if').requestedName).toBe('__if__');
+      expect(new TestSymbol('if').requestedName).toBe('__if__');
+      expect(new TestSymbol('1\0\n').requestedName).toBe('_x31x0xA_');
+    });
+  });
+
   describe('emit', () => {
     it('emits symbol name', async () => {
       const symbol = new TestSymbol('test');
@@ -21,6 +30,19 @@ describe('EsSymbol', () => {
           })
           .asText(),
       ).resolves.toBe(`${name}();\n`);
+    });
+  });
+
+  describe('toString', () => {
+    it('allows to omit tag', () => {
+      expect(new TestSymbol('test').toString({ tag: null }).toString()).toBe('test');
+    });
+    it('allows to override comment', () => {
+      expect(
+        new TestSymbol('test', { comment: 'Some comment' })
+          .toString({ comment: 'More info' })
+          .toString(),
+      ).toBe('test /* [Symbol] More info */');
     });
   });
 });
