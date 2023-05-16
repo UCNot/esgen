@@ -1,6 +1,5 @@
 import { EsEmission, EsEmissionResult, EsEmitter } from '../emission/es-emission.js';
 import { EsCode } from '../es-code.js';
-import { EsProducer, EsSource } from '../es-source.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsNamespace } from './es-namespace.js';
 import { esSymbolString } from './es-symbol-string.js';
@@ -216,7 +215,7 @@ export interface EsResolution<
 /**
  * Information on symbol {@link EsNamespace#findSymbol naming} within namespace.
  */
-export interface EsNaming extends EsProducer {
+export interface EsNaming extends EsEmitter {
   /**
    * Named symbol
    */
@@ -235,9 +234,9 @@ export interface EsNaming extends EsProducer {
   /**
    * Emits symbol name.
    *
-   * @returns Source of code containing symbol name.
+   * @returns Emission result.
    */
-  toCode(this: void): EsSource;
+  emit(this: void): EsEmissionResult;
 }
 
 /**

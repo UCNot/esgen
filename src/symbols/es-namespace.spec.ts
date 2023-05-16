@@ -81,7 +81,7 @@ describe('EsNamespace', () => {
           symbol,
           ns,
           name: 'test',
-          toCode: expect.any(Function),
+          emit: expect.any(Function),
         });
         expect(ns.nameSymbol(symbol)).toBe(naming);
       });
@@ -94,7 +94,7 @@ describe('EsNamespace', () => {
           symbol,
           ns: nested1,
           name: 'test',
-          toCode: expect.any(Function),
+          emit: expect.any(Function),
         });
         expect(() => nested2.nameSymbol(symbol)).toThrow(
           new TypeError(
@@ -129,7 +129,7 @@ describe('EsNamespace', () => {
           symbol,
           ns: nested,
           name: 'test',
-          toCode: expect.any(Function),
+          emit: expect.any(Function),
         });
         expect(ns.findSymbol(symbol)).toBeUndefined();
       });
@@ -142,7 +142,7 @@ describe('EsNamespace', () => {
           symbol,
           ns: nested1,
           name: 'test',
-          toCode: expect.any(Function),
+          emit: expect.any(Function),
         });
         expect(nested2.findSymbol(symbol)).toBeUndefined();
       });
@@ -203,7 +203,7 @@ describe('EsNamespace', () => {
             symbol,
             ns,
             name: 'test',
-            toCode: expect.any(Function),
+            emit: expect.any(Function),
           });
         });
         it('resolves on symbol named after delay', async () => {
@@ -219,7 +219,7 @@ describe('EsNamespace', () => {
             symbol,
             ns,
             name: 'test',
-            toCode: expect.any(Function),
+            emit: expect.any(Function),
           });
         });
         it('rejects on invisible symbol', async () => {
@@ -244,7 +244,7 @@ describe('EsNamespace', () => {
         const symbol = new NonUniqueSymbol('test');
         const naming = ns.nameSymbol(symbol);
 
-        expect(naming).toEqual({ symbol, ns, name: 'test', toCode: expect.any(Function) });
+        expect(naming).toEqual({ symbol, ns, name: 'test', emit: expect.any(Function) });
         expect(ns.nameSymbol(symbol)).toBe(naming);
       });
       it('names the symbol in unrelated namespace', () => {
@@ -256,13 +256,13 @@ describe('EsNamespace', () => {
           symbol,
           ns: nested1,
           name: 'test',
-          toCode: expect.any(Function),
+          emit: expect.any(Function),
         });
         expect(nested2.nameSymbol(symbol)).toEqual({
           symbol,
           ns: nested2,
           name: 'test',
-          toCode: expect.any(Function),
+          emit: expect.any(Function),
         });
       });
       it('prevents symbol renaming in nested namespace', () => {
@@ -273,7 +273,7 @@ describe('EsNamespace', () => {
           symbol,
           ns: nested,
           name: 'test',
-          toCode: expect.any(Function),
+          emit: expect.any(Function),
         });
         expect(() => nested.nameSymbol(symbol)).toThrow(
           new TypeError(
@@ -289,7 +289,7 @@ describe('EsNamespace', () => {
           symbol,
           ns: nested,
           name: 'test',
-          toCode: expect.any(Function),
+          emit: expect.any(Function),
         });
         expect(() => ns.nameSymbol(symbol)).toThrow(
           new TypeError(
@@ -324,7 +324,7 @@ describe('EsNamespace', () => {
           symbol,
           ns: nested,
           name: 'test',
-          toCode: expect.any(Function),
+          emit: expect.any(Function),
         });
         expect(ns.findSymbol(symbol)).toBeUndefined();
       });
@@ -337,7 +337,7 @@ describe('EsNamespace', () => {
           symbol,
           ns: nested1,
           name: 'test',
-          toCode: expect.any(Function),
+          emit: expect.any(Function),
         });
         expect(nested2.findSymbol(symbol)).toBeUndefined();
       });

@@ -200,7 +200,7 @@ export class EsNamespace {
           // so reserving another name is redundant.
           return getName();
         },
-        toCode: getName,
+        emit: getName,
       },
       constraints!,
     );
