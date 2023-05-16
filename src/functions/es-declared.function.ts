@@ -59,7 +59,9 @@ export interface EsFunctionDeclarationInit<out TArgs extends EsSignature.Args>
   extends Omit<EsDeclarationInit, 'declare'>,
     EsFunctionDeclaration<TArgs> {
   /**
-   * Builds function body.
+   * Declares function body.
+   *
+   * Called on demand, at most once per bundle.
    *
    * @param fn - Declared function.
    * @param context - Function declaration context.

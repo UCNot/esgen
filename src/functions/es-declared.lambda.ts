@@ -1,3 +1,4 @@
+import { esDeclare } from '../declarations/es-declare.js';
 import {
   EsDeclarationContext,
   EsDeclarationInit,
@@ -35,12 +36,12 @@ export class EsDeclaredLambda<out TArgs extends EsSignature.Args> extends EsFunc
     args: EsSignature<TArgs> | TArgs,
     init: EsLambdaDeclarationInit<TArgs>,
   ) {
-    const { body, spec = 'const' } = init;
+    const { body } = init;
 
     super(
-      new EsDeclaredSymbol(requestedName, {
+      esDeclare(requestedName, {
         ...init,
-        declare: context => esline`${spec} ${context.naming.name} = ${this.lambda(fn => body(fn, context), init)};`,
+        value: context => esline`${this.lambda(fn => body(fn, context), init)};`,
       }),
       args,
     );
@@ -57,7 +58,9 @@ export interface EsLambdaDeclarationInit<out TArgs extends EsSignature.Args>
   extends Omit<EsDeclarationInit, 'declare'>,
     EsLambdaDeclaration<TArgs> {
   /**
-   * Builds function body.
+   * Declares function body.
+   *
+   * Called on demand, at most once per bundle.
    *
    * @param fn - Declared function.
    * @param context - Function declaration context.
