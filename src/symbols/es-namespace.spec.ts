@@ -153,31 +153,87 @@ describe('EsNamespace', () => {
         const symbol = new UniqueSymbol('test');
 
         expect(ns.nameSymbol(symbol).name).toBe('test');
-        expect(ns.refer(symbol).name).toBe('test');
+        expect(ns.refer(symbol).getNaming().name).toBe('test');
       });
       it('returns visible symbol naming', () => {
         const nested = bundle.spawn().spawn().spawn().ns;
         const symbol = new UniqueSymbol('test');
 
         expect(ns.nameSymbol(symbol).name).toBe('test');
-        expect(nested.refer(symbol).name).toBe('test');
+        expect(nested.refer(symbol).getNaming().name).toBe('test');
       });
-      it('throws for unnamed symbol', () => {
-        expect(() => ns.refer(new UniqueSymbol('test', { comment: 'Test symbol' }))).toThrow(
-          new ReferenceError(`test /* [Symbol] Test symbol */ is unnamed`),
-        );
-      });
-      it('throws for invisible symbol', () => {
-        const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
-        const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
-        const symbol = new UniqueSymbol('test');
 
-        expect(nested1.nameSymbol(symbol).name).toBe('test');
-        expect(() => nested2.refer(symbol)).toThrow(
-          new ReferenceError(
-            `${symbol} is invisible to /* nested 2 */. It is named in /* nested 1 */`,
-          ),
-        );
+      describe('getNaming', () => {
+        it('throws for unnamed symbol', () => {
+          const symbol = new UniqueSymbol('test', { comment: 'Test symbol' });
+
+          expect(() => ns.refer(symbol).getNaming()).toThrow(
+            new ReferenceError(`test /* [Symbol] Test symbol */ is unnamed`),
+          );
+        });
+        it('throws for invisible symbol', () => {
+          const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
+          const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
+          const symbol = new UniqueSymbol('test');
+
+          expect(nested1.nameSymbol(symbol).name).toBe('test');
+          expect(() => nested2.refer(symbol).getNaming()).toThrow(
+            new ReferenceError(
+              `${symbol} is invisible to /* nested 2 */. It is named in /* nested 1 */`,
+            ),
+          );
+        });
+      });
+
+      describe('whenNamed', () => {
+        it('rejects on unnamed symbol', async () => {
+          const symbol = new UniqueSymbol('test', { comment: 'Test symbol' });
+
+          await expect(ns.refer(symbol).whenNamed()).rejects.toThrow(
+            new ReferenceError(`test /* [Symbol] Test symbol */ is unnamed`),
+          );
+        });
+        it('resolves on symbol named immediately after reference', async () => {
+          const symbol = new UniqueSymbol('test', { comment: 'Test symbol' });
+          const whenNamed = ns.refer(symbol).whenNamed();
+
+          ns.nameSymbol(symbol);
+
+          await expect(whenNamed).resolves.toEqual({
+            symbol,
+            ns,
+            name: 'test',
+            toCode: expect.any(Function),
+          });
+        });
+        it('resolves on symbol named after delay', async () => {
+          const symbol = new UniqueSymbol('test', { comment: 'Test symbol' });
+          const whenNamed = ns.refer(symbol).whenNamed();
+
+          await Promise.resolve();
+          await Promise.resolve();
+          await Promise.resolve();
+          ns.nameSymbol(symbol);
+
+          await expect(whenNamed).resolves.toEqual({
+            symbol,
+            ns,
+            name: 'test',
+            toCode: expect.any(Function),
+          });
+        });
+        it('rejects on invisible symbol', async () => {
+          const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
+          const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
+          const symbol = new UniqueSymbol('test');
+
+          expect(nested1.nameSymbol(symbol).name).toBe('test');
+          await expect(() => nested2.refer(symbol).whenNamed()).rejects.toThrow(
+            new ReferenceError(
+              `${symbol} is invisible to /* nested 2 */. It is named in /* nested 1 */`,
+            ),
+          );
+        });
       });
     });
   });
@@ -292,33 +348,36 @@ describe('EsNamespace', () => {
         const symbol = new NonUniqueSymbol('test');
 
         expect(ns.nameSymbol(symbol).name).toBe('test');
-        expect(ns.refer(symbol).name).toBe('test');
+        expect(ns.refer(symbol).getNaming().name).toBe('test');
       });
       it('returns visible symbol naming', () => {
         const nested = bundle.spawn().spawn().spawn().ns;
         const symbol = new NonUniqueSymbol('test');
 
         expect(ns.nameSymbol(symbol).name).toBe('test');
-        expect(nested.refer(symbol).name).toBe('test');
+        expect(nested.refer(symbol).getNaming().name).toBe('test');
       });
-      it('throws for unnamed symbol', () => {
-        const symbol = new NonUniqueSymbol('test', { comment: 'Test symbol' });
 
-        expect(() => ns.refer(symbol)).toThrow(
-          new ReferenceError(`test /* [Symbol] Test symbol */ is unnamed`),
-        );
-      });
-      it('throws for invisible symbol', () => {
-        const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
-        const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
-        const symbol = new NonUniqueSymbol('test');
+      describe('getNaming', () => {
+        it('throws for unnamed symbol', () => {
+          const symbol = new NonUniqueSymbol('test', { comment: 'Test symbol' });
 
-        expect(nested1.nameSymbol(symbol).name).toBe('test');
-        expect(() => nested2.refer(symbol)).toThrow(
-          new ReferenceError(
-            `${symbol} is invisible to /* nested 2 */. It is named in /* nested 1 */`,
-          ),
-        );
+          expect(() => ns.refer(symbol).getNaming()).toThrow(
+            new ReferenceError(`test /* [Symbol] Test symbol */ is unnamed`),
+          );
+        });
+        it('throws for invisible symbol', () => {
+          const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
+          const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
+          const symbol = new NonUniqueSymbol('test');
+
+          expect(nested1.nameSymbol(symbol).name).toBe('test');
+          expect(() => nested2.refer(symbol).getNaming()).toThrow(
+            new ReferenceError(
+              `${symbol} is invisible to /* nested 2 */. It is named in /* nested 1 */`,
+            ),
+          );
+        });
       });
     });
   });

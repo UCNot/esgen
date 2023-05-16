@@ -151,6 +151,54 @@ export interface EsReference<
 }
 
 /**
+ * Resolution of {@link EsNamespace#refer referred symbol}.
+ *
+ * @typeParam TNaming - Type of symbol naming.
+ * @typeParam TSymbol - Type of symbol.
+ */
+export interface EsResolution<
+  out TNaming extends EsNaming = EsNaming,
+  out TSymbol extends EsAnySymbol<TNaming> = EsAnySymbol<TNaming>,
+> extends EsReference<TNaming, TSymbol>,
+    EsEmitter {
+  /**
+   * Referred symbol.
+   */
+  readonly symbol: TSymbol;
+
+  /**
+   * Obtains immediately available {@link EsNamespace#nameSymbol naming} of the {@link symbol}.
+   *
+   * Fails if the symbol is not named yet. Alternatively, it is possible to {@link whenNamed wait} for naming.
+   *
+   * @returns Symbol naming
+   *
+   * @throws [ReferenceError] if symbol is unnamed or invisible to target namespace.
+   *
+   * [ReferenceError]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError
+   */
+  getNaming(): TNaming;
+
+  /**
+   * Awaits for the {@link symbol} {@link EsNamespace#nameSymbol naming}.
+   *
+   * The naming may not be {@link getNaming immediately available}. This method allows to wait for it.
+   *
+   * This method won't wait infinitely and would fail if the symbol is not named for some time.
+   *
+   * @returns Promise resolved to symbol naming, or rejected if symbol is not named after some timeout.
+   */
+  whenNamed(): Promise<TNaming>;
+
+  /**
+   * Emits the code containing {@link symbol} name.
+   *
+   * @returns Code emission result.
+   */
+  emit(this: void): EsEmissionResult;
+}
+
+/**
  * Information on symbol {@link EsNamespace#findSymbol naming} within namespace.
  */
 export interface EsNaming extends EsProducer {

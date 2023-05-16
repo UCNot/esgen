@@ -1,6 +1,13 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsEmission } from '../emission/es-emission.js';
-import { EsAnySymbol, EsNaming, EsNamingConstraints, EsReference, EsSymbol } from './es-symbol.js';
+import {
+  EsAnySymbol,
+  EsNaming,
+  EsNamingConstraints,
+  EsReference,
+  EsResolution,
+  EsSymbol,
+} from './es-symbol.js';
 
 /**
  * Namespace used to resolve naming conflicts.
@@ -88,7 +95,7 @@ export class EsNamespace {
    *
    * @throws [TypeError] if the `symbol` is already named within another namespace.
    *
-   * [TypeError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
+   * [TypeError]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError
    */
   nameSymbol<TNaming extends EsNaming, TConstraints extends EsNamingConstraints>(
     symbol: EsSymbol<TNaming, TConstraints>,
@@ -252,40 +259,47 @@ export class EsNamespace {
   /**
    * Refers the symbol visible in this namespace.
    *
-   * In contrast to {@link findSymbol} method, this one throws if the symbol is unnamed yet.
-   *
    * @param ref - Reference to symbol previously named in this namespace or one of enclosing ones.
    *
    * @returns Referred symbol naming.
-   *
-   * @throws [ReferenceError] if symbol is unnamed or invisible to this namespace.
-   *
-   * [ReferenceError]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError
    */
-  refer<TNaming extends EsNaming>(ref: EsReference<TNaming>): TNaming;
+  refer<TNaming extends EsNaming>(ref: EsReference<TNaming>): EsResolution<TNaming>;
 
-  refer<TNaming extends EsNaming>({ symbol }: EsReference<TNaming>): TNaming {
-    return symbol.isUnique() ? this.#referUniqueSymbol(symbol) : this.#referNonUniqueSymbol(symbol);
+  refer<TNaming extends EsNaming>({ symbol }: EsReference<TNaming>): EsResolution<TNaming> {
+    const findNaming = symbol.isUnique()
+      ? () => this.#findUniqueNaming(symbol)
+      : () => this.#findNonUniqueNaming(symbol);
+    const whenNamed = async (): Promise<TNaming> => await this.#whenNamed(symbol, findNaming);
+
+    return {
+      symbol,
+      getNaming: () => this.#getNaming(symbol, findNaming),
+      whenNamed,
+      async emit() {
+        const { name } = await whenNamed();
+
+        return name;
+      },
+    };
   }
 
-  #referUniqueSymbol<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming {
+  #findUniqueNaming<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming | undefined {
     const naming = this.#shared.uniques.get(symbol) as TNaming | undefined;
 
-    if (!naming) {
-      throw new ReferenceError(`${symbol} is unnamed`);
-    }
-    if (!naming.ns.encloses(this)) {
+    if (naming && !naming.ns.encloses(this)) {
       throw new ReferenceError(`${symbol} is invisible to ${this}. It is named in ${naming.ns}`);
     }
 
     return naming;
   }
 
-  #referNonUniqueSymbol<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming {
+  #findNonUniqueNaming<TNaming extends EsNaming>(
+    symbol: EsAnySymbol<TNaming>,
+  ): TNaming | undefined {
     const found = this.#findNonUniqueSymbol(symbol);
 
     if (!found) {
-      throw new ReferenceError(`${symbol} is unnamed`);
+      return;
     }
 
     const { naming, visible } = found;
@@ -295,6 +309,47 @@ export class EsNamespace {
     }
 
     return naming;
+  }
+
+  #getNaming<TNaming extends EsNaming>(
+    symbol: EsAnySymbol<TNaming>,
+    findNaming: () => TNaming | undefined,
+  ): TNaming {
+    const naming = findNaming();
+
+    if (!naming) {
+      throw new ReferenceError(`${symbol} is unnamed`);
+    }
+
+    return naming;
+  }
+
+  async #whenNamed<TNaming extends EsNaming>(
+    symbol: EsAnySymbol<TNaming>,
+    findNaming: () => TNaming | undefined,
+  ): Promise<TNaming> {
+    // Try immediately
+    const immediateNaming = findNaming();
+
+    if (immediateNaming) {
+      return immediateNaming;
+    }
+
+    // Try after pending promises resolution.
+    await Promise.resolve();
+
+    const pendingNaming = findNaming();
+
+    if (pendingNaming) {
+      return pendingNaming;
+    }
+
+    // Try after all promises resolution.
+    await new Promise(resolve => {
+      setImmediate(resolve);
+    });
+
+    return this.#getNaming(symbol, findNaming);
   }
 
   /**

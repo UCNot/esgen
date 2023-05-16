@@ -1,5 +1,4 @@
 import { EsEmissionInit } from '../emission/es-emission.js';
-import { EsCode } from '../es-code.js';
 import { EsSource } from '../es-source.js';
 import { EsAnySymbol, EsNaming, EsReference } from '../symbols/es-symbol.js';
 import { EsSignature } from './es-signature.js';
@@ -78,13 +77,7 @@ export abstract class EsCallable<
         code.block(code => {
           code
             .inline(async ? 'async ' : '', this.signature.declare(args), ' => {')
-            .indent({
-              emit: async emission => {
-                await Promise.resolve(); // Await for arguments naming.
-
-                return new EsCode().write(body(this)).emit(emission);
-              },
-            })
+            .indent(body(this))
             .write('}');
         });
       });
@@ -120,13 +113,7 @@ export abstract class EsCallable<
               this.signature.declare(args),
               ' {',
             )
-            .indent({
-              emit: async emission => {
-                await Promise.resolve(); // Await for arguments naming.
-
-                return new EsCode().write(body(this)).emit(emission);
-              },
-            })
+            .indent(body(this))
             .write('}');
         });
       });
