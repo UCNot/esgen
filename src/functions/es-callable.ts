@@ -1,42 +1,23 @@
 import { EsEmissionInit } from '../emission/es-emission.js';
 import { EsSource } from '../es-source.js';
-import { EsAnySymbol, EsNaming, EsReference } from '../symbols/es-symbol.js';
 import { EsSignature } from './es-signature.js';
 
 /**
- * Abstract callable. E.g. {@link EsFunction function}, or {@link EsMethod method}.
- *
- * Refers the callable {@link symbol} and contains its {@link signature},
+ * Callable instance, such as {@link EsFunction function}, or {@link EsMethod method}.
  *
  * @typeParam TArgs - Type of function arguments definition.
- * @typeParam TNaming - Type of function symbol naming.
- * @typeParam TSymbol - Type of function symbol.
  */
-export abstract class EsCallable<
-  out TArgs extends EsSignature.Args,
-  out TNaming extends EsNaming = EsNaming,
-  out TSymbol extends EsAnySymbol<TNaming> = EsAnySymbol<TNaming>,
-> implements EsReference<TNaming, TSymbol> {
+export class EsCallable<out TArgs extends EsSignature.Args> {
 
-  readonly #symbol: TSymbol;
   readonly #signature: EsSignature<TArgs>;
 
   /**
    * Constructs callable.
    *
-   * @param symbol - Callable symbol.
    * @param args - Either function signature or arguments definition.
    */
-  constructor(symbol: TSymbol, args: EsSignature<TArgs> | TArgs) {
-    this.#symbol = symbol;
+  constructor(args: EsSignature<TArgs> | TArgs) {
     this.#signature = EsSignature.for(args);
-  }
-
-  /**
-   * Function symbol.
-   */
-  get symbol(): TSymbol {
-    return this.#symbol;
   }
 
   /**
