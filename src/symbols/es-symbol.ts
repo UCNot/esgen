@@ -70,6 +70,21 @@ export abstract class EsSymbol<
   }
 
   /**
+   * Adjusts this symbol resolution when it is {@link EsNamespace#refer referred}.
+   *
+   * Does nothing by default.
+   *
+   * @param resolution - Symbol resolution.
+   * @param ns - Referring namespace.
+   *
+   * @returns Adjusted resolution.
+   */
+  refer(resolution: EsResolution<TNaming, this>, ns: EsNamespace): EsResolution<TNaming, this>;
+  refer(resolution: EsResolution<TNaming, this>, _ns: EsNamespace): EsResolution<TNaming, this> {
+    return resolution;
+  }
+
+  /**
    * Binds named symbol to namespace.
    *
    * Called to perform additional actions right after the symbol received its {@link EsNamespace#nameSymbol name}.

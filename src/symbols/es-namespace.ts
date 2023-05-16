@@ -271,16 +271,19 @@ export class EsNamespace {
       : () => this.#findNonUniqueNaming(symbol);
     const whenNamed = async (): Promise<TNaming> => await this.#whenNamed(symbol, findNaming);
 
-    return {
-      symbol,
-      getNaming: () => this.#getNaming(symbol, findNaming),
-      whenNamed,
-      async emit() {
-        const { name } = await whenNamed();
+    return symbol.refer(
+      {
+        symbol,
+        getNaming: () => this.#getNaming(symbol, findNaming),
+        whenNamed,
+        async emit() {
+          const { name } = await whenNamed();
 
-        return name;
+          return name;
+        },
       },
-    };
+      this,
+    );
   }
 
   #findUniqueNaming<TNaming extends EsNaming>(symbol: EsAnySymbol<TNaming>): TNaming | undefined {

@@ -2,7 +2,14 @@ import { asArray } from '@proc7ts/primitives';
 import { EsBundle } from '../emission/es-bundle.js';
 import { EsEmission, EsEmissionResult } from '../emission/es-emission.js';
 import { EsSource } from '../es-source.js';
-import { EsAnySymbol, EsNaming, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
+import { EsNamespace } from '../symbols/es-namespace.js';
+import {
+  EsAnySymbol,
+  EsNaming,
+  EsResolution,
+  EsSymbol,
+  EsSymbolInit,
+} from '../symbols/es-symbol.js';
 
 /**
  * Symbol declared in bundle {@link EsDeclarations declarations}.
@@ -36,6 +43,15 @@ export class EsDeclaredSymbol extends EsSymbol<EsDeclarationNaming> {
    */
   get exported(): boolean {
     return this.#exported;
+  }
+
+  override refer(
+    resolution: EsResolution<EsDeclarationNaming, this>,
+    ns: EsNamespace,
+  ): EsResolution<EsDeclarationNaming, this> {
+    ns.emission.bundle.ns.nameSymbol(this);
+
+    return resolution;
   }
 
   override bind(naming: EsNaming): EsDeclarationNaming {
