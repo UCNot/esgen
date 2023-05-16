@@ -1,5 +1,6 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsEmission } from '../emission/es-emission.js';
+import { EsNameRegistry } from './es-name-registry.js';
 import {
   EsAnySymbol,
   EsNaming,
@@ -15,10 +16,10 @@ import {
 export class EsNamespace {
 
   readonly #emission: EsEmission;
-  readonly #shared: EsNamespace$SharedState;
   readonly #enclosing: EsNamespace | undefined;
+  readonly #shared: EsNamespace$SharedState;
+  readonly #names: EsNameRegistry;
   readonly #comment: string;
-  readonly #names = new Map<string, EsReservedNames>();
   readonly #nonUniques = new Map<EsAnySymbol, EsNonUniqueNaming<any>>();
   #nestedSeq = 0;
 
@@ -40,8 +41,14 @@ export class EsNamespace {
     }: EsNamespaceInit = {},
   ) {
     this.#emission = emission;
-    this.#shared = enclosing ? enclosing.#shared : { uniques: new Map() };
     this.#enclosing = enclosing;
+    if (enclosing) {
+      this.#shared = enclosing.#shared;
+      this.#names = enclosing.names.nest();
+    } else {
+      this.#shared = { uniques: new Map() };
+      this.#names = new EsNameRegistry();
+    }
     this.#comment = comment;
   }
 
@@ -57,6 +64,13 @@ export class EsNamespace {
    */
   get enclosing(): EsNamespace | undefined {
     return this.#enclosing;
+  }
+
+  /**
+   * Name registry used to reserve names.
+   */
+  get names(): EsNameRegistry {
+    return this.#names;
   }
 
   /**
@@ -188,7 +202,7 @@ export class EsNamespace {
     symbol: EsSymbol<TNaming, TConstraints>,
     constraints: TConstraints | undefined,
   ): TNaming {
-    const getName = lazyValue(() => this.reserveName(symbol.requestedName));
+    const getName = lazyValue(() => this.names.reserveName(symbol.requestedName));
 
     return symbol.bind(
       {
@@ -356,86 +370,6 @@ export class EsNamespace {
   }
 
   /**
-   * Reserves name and resolves naming conflicts.
-   *
-   * Tries to use `preferred` name. But if this name registered already, then appends unique suffix to it to resolve
-   * the conflict.
-   *
-   * @param preferred - Preferred name. Defaults to `tmp`.
-   *
-   * @returns Reserved and conflict-free name based on `preferred` one.
-   */
-  reserveName(preferred = 'tmp'): string {
-    return this.#reserveName(preferred, false);
-  }
-
-  #reserveName(preferred: string, forNested: boolean): string {
-    if (forNested) {
-      const names = this.#names.get(preferred);
-
-      if (names?.nested) {
-        return names.nested;
-      }
-    }
-
-    if (this.#enclosing) {
-      const names = this.#names.get(preferred);
-      const name = this.#saveName(
-        this.#enclosing.#reserveName(names ? this.#nextName(names) : preferred, true),
-        forNested,
-      );
-
-      if (names && name !== preferred) {
-        this.#addAlias(names, name, forNested);
-      }
-
-      return name;
-    }
-
-    return this.#saveName(preferred, forNested);
-  }
-
-  #saveName(preferred: string, forNested: boolean): string {
-    const names = this.#names.get(preferred);
-    let name: string;
-
-    if (names) {
-      name = this.#nextName(names);
-      this.#addAlias(names, name, forNested);
-    } else {
-      name = preferred;
-    }
-
-    this.#names.set(name, { list: [name], nested: forNested ? name : undefined });
-
-    return name;
-  }
-
-  #addAlias(names: EsReservedNames, alias: string, forNested: boolean): void {
-    names.list.push(alias);
-    if (forNested && !names.nested) {
-      names.nested = alias;
-    }
-  }
-
-  #nextName({ list }: EsReservedNames): string {
-    const lastName = list[list.length - 1];
-    const dollarIdx = lastName.lastIndexOf('$');
-    const lastIndex = dollarIdx < 0 ? NaN : Number(lastName.slice(dollarIdx + 1));
-    let name: string;
-
-    if (Number.isFinite(lastIndex)) {
-      name = `${lastName.slice(0, dollarIdx)}$${lastIndex + 1}`;
-    } else {
-      name = `${lastName}$0`;
-    }
-
-    const conflict = this.#names.get(name);
-
-    return conflict ? this.#nextName(conflict) : name;
-  }
-
-  /**
    * Creates nested namespace.
    *
    * @param emission - Code emission control the nested namespace created for.
@@ -473,11 +407,6 @@ export interface EsNamespaceInit {
 }
 
 let EsNamespace$seq = 0;
-
-interface EsReservedNames {
-  readonly list: string[];
-  nested: string | undefined;
-}
 
 interface EsNamespace$SharedState {
   readonly uniques: Map<EsAnySymbol, EsNaming>;

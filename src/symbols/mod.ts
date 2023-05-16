@@ -4,6 +4,7 @@ export * from './es-imported.symbol.js';
 export * from './es-imports.js';
 export * from './es-local.symbol.js';
 export * from './es-module.js';
+export * from './es-name-registry.js';
 export * from './es-namespace.js';
 export * from './es-symbol-string.js';
 export * from './es-symbol.js';

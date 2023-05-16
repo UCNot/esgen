@@ -12,65 +12,6 @@ describe('EsNamespace', () => {
     ns = bundle.ns;
   });
 
-  describe('reserveName', () => {
-    it('uses preferred name by default', () => {
-      expect(ns.reserveName('test')).toBe('test');
-    });
-    it('declares "tmp" name by default', () => {
-      expect(ns.reserveName()).toBe('tmp');
-    });
-    it('permits duplicate names in nested namespaces', () => {
-      expect(bundle.spawn().ns.reserveName('test')).toBe('test');
-      expect(bundle.spawn().ns.reserveName('test')).toBe('test');
-    });
-    it('generates alias for duplicate in nested namespace', () => {
-      expect(ns.reserveName('test')).toBe('test');
-      expect(bundle.spawn().ns.reserveName('test')).toBe('test$0');
-      expect(bundle.spawn().ns.reserveName('test')).toBe('test$0');
-    });
-    it('prevents duplicate of the declared in nested namespace', () => {
-      expect(bundle.spawn().ns.reserveName('test')).toBe('test');
-      expect(ns.reserveName('test')).toBe('test$0');
-      expect(bundle.spawn().ns.reserveName('test')).toBe('test');
-    });
-    it('assigns counter to aliases', () => {
-      ns.reserveName('test');
-
-      expect(ns.reserveName('test')).toBe('test$0');
-      expect(ns.reserveName('test')).toBe('test$1');
-      expect(ns.reserveName('test')).toBe('test$2');
-    });
-    it('assigns counter to aliases with $', () => {
-      ns.reserveName('test$a');
-
-      expect(ns.reserveName('test$a')).toBe('test$a$0');
-      expect(ns.reserveName('test$a')).toBe('test$a$1');
-      expect(ns.reserveName('test$a')).toBe('test$a$2');
-    });
-    it('resolves conflict', () => {
-      ns.reserveName('test');
-      ns.reserveName('test$0');
-
-      expect(ns.reserveName('test')).toBe('test$1');
-      expect(ns.reserveName('test$1')).toBe('test$2');
-    });
-    it('resolves conflict with enclosing namespace', () => {
-      const nested = bundle.spawn().ns;
-
-      expect(ns.reserveName('test')).toBe('test');
-      expect(nested.reserveName('test')).toBe('test$0');
-    });
-    it('resolves conflict between nested and enclosing namespace', () => {
-      const nested = bundle.spawn().ns;
-
-      expect(nested.reserveName('test')).toBe('test');
-      expect(ns.reserveName('test')).toBe('test$0');
-      expect(nested.reserveName('test')).toBe('test$1');
-      expect(nested.reserveName('test$0')).toBe('test$2');
-      expect(nested.reserveName('test$1')).toBe('test$3');
-    });
-  });
-
   describe('unique symbols', () => {
     describe('nameSymbol', () => {
       it('returns the naming of the symbol within the same namespace', () => {
