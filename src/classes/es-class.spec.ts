@@ -3,6 +3,7 @@ import { EsCode } from '../es-code.js';
 import { EsSource } from '../es-source.js';
 import { EsLocalSymbol } from '../symbols/es-local.symbol.js';
 import { EsClass } from './es-class.js';
+import { EsLocalClass } from './es-local.class.js';
 import { EsMember, EsMemberContext, EsMemberVisibility } from './es-member.js';
 
 describe('EsClass', () => {
@@ -10,8 +11,8 @@ describe('EsClass', () => {
   let hostClass: EsClass;
 
   beforeEach(() => {
-    baseClass = new EsClass(new EsLocalSymbol('Base'));
-    hostClass = new EsClass(new EsLocalSymbol('Test'), { baseClass });
+    baseClass = new EsLocalClass('Base');
+    hostClass = new EsLocalClass('Test', { baseClass });
   });
 
   describe('declareMember', () => {
@@ -154,6 +155,14 @@ describe('EsClass', () => {
       expect(hostClass.declareMember(member1).name).toBe('test');
       expect(baseClass.declareMember(member2).name).toBe('test$0');
       expect(class2.declareMember(member3).name).toBe('test');
+    });
+    it('prevents duplicate member declaration', () => {
+      const member = new TestMember('test');
+
+      hostClass.declareMember(member);
+      expect(() => hostClass.declareMember(member)).toThrow(
+        new TypeError(`test already declared in Test /* [Class] */`),
+      );
     });
   });
 

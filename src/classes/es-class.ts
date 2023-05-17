@@ -8,7 +8,7 @@ import { esSafeId } from '../util/es-safe-id.js';
 import { EsAnyMember, EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
 
 /**
- * Class representation.
+ * Mutable class representation.
  *
  * Class identified by unique {@link symbol} and has {@link members}.
  *
@@ -66,7 +66,7 @@ export class EsClass<
             const { baseClass } = this;
 
             if (baseClass) {
-              code.write('extends ', baseClass.symbol);
+              code.write(' extends ', baseClass.symbol);
             }
           },
           ' {',
@@ -138,7 +138,9 @@ export class EsClass<
   /**
    * Declares class member.
    *
-   * @param member - Member instance.
+   * @typeParam TDeclaration - Type of member declaration details.
+   * @typeParam TMember - Declared member type.
+   * @param member - Declared member instance.
    * @param declaration - Member declaration details.
    *
    * @returns Declared member reference.
@@ -377,7 +379,7 @@ class EsMemberEntry<
 
   declare(...declaration: TDeclaration): EsSource {
     if (this.#declared) {
-      throw new TypeError(`${String(this.#member)} already declared in ${this.#hostClass}`);
+      throw new TypeError(`${this.#key} already declared in ${this.#hostClass}`);
     }
 
     this.#declared = true;
