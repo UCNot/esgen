@@ -99,6 +99,35 @@ describe('EsClass', () => {
       expect(hostClass.findMember(member)).toBeUndefined();
       expect([...hostClass.members()]).toEqual([]);
     });
+    it('permits arbitrary public member name', () => {
+      const member = new TestMember('test\n');
+
+      expect(hostClass.declareMember(member, { declare: () => EsCode.none }).name).toBe('test\n');
+    });
+    it('converts private member name to ECMAScript-safe identifier', () => {
+      const member = new TestMember('test\n', true);
+
+      expect(hostClass.declareMember(member, { declare: () => EsCode.none }).name).toBe(
+        '#test_xA_',
+      );
+    });
+    it('resolves private member name conflict', () => {
+      const member1 = new TestMember('test', true);
+      const member2 = new TestMember('test', true);
+
+      expect(hostClass.declareMember(member1, { declare: () => EsCode.none }).name).toBe('#test');
+      expect(hostClass.declareMember(member2, { declare: () => EsCode.none }).name).toBe('#test$0');
+    });
+    it('resolves naming conflict between base and derived classes', () => {
+      const member1 = new TestMember('test');
+      const member2 = new TestMember('test');
+      const member3 = new TestMember('test');
+      const class2 = new EsClass(new EsLocalSymbol('Test2'), { baseClass });
+
+      expect(hostClass.declareMember(member1, { declare: () => EsCode.none }).name).toBe('test');
+      expect(baseClass.declareMember(member2, { declare: () => EsCode.none }).name).toBe('test$0');
+      expect(class2.declareMember(member3, { declare: () => EsCode.none }).name).toBe('test');
+    });
   });
 
   describe('members', () => {

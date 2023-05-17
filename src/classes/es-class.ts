@@ -3,6 +3,7 @@ import { EsCode } from '../es-code.js';
 import { EsSource } from '../es-source.js';
 import { EsNameRegistry } from '../symbols/es-name-registry.js';
 import { EsAnySymbol, EsNaming, EsReference } from '../symbols/es-symbol.js';
+import { esSafeId } from '../util/es-safe-id.js';
 import { EsMember, EsMemberDeclaration, EsMemberRef } from './es-member.js';
 
 /**
@@ -198,8 +199,7 @@ export class EsClass<
 
   #addPrivateMember<TMember extends EsMember>(member: TMember): EsMemberEntry<TMember> {
     const name = this.#privateNames.reserveName(member.requestedName);
-
-    const entry = new EsMemberEntry(this, member, `#${name}`);
+    const entry = new EsMemberEntry(this, member, `#${esSafeId(name)}`);
 
     this.#privateMembers.set(member, entry);
 
