@@ -19,9 +19,7 @@ describe('EsLocalClass', () => {
         bundle
           .emit(
             cls.declare(),
-            esLocal('instance').declare(
-              ({ naming }) => esline`const ${naming} = new ${cls.symbol}();`,
-            ),
+            esLocal('instance').declare(({ naming }) => esline`const ${naming} = new ${cls}();`),
           )
           .asText(),
       ).resolves.toBe(`class Test {\n}\nconst instance = new Test();\n`);

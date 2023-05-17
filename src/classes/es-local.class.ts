@@ -19,7 +19,7 @@ export class EsLocalClass extends EsClass<EsLocalNaming, EsLocalSymbol> {
   }
 
   declare(): EsSource {
-    return this.symbol.declare(_context => this);
+    return this.symbol.declare(_context => super.declare());
   }
 
 }

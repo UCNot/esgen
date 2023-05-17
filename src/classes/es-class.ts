@@ -67,7 +67,7 @@ export class EsClass<
             const { baseClass } = this;
 
             if (baseClass) {
-              code.write(' extends ', baseClass.symbol);
+              code.write(' extends ', baseClass);
             }
           },
           ' {',
@@ -369,14 +369,25 @@ export class EsClass<
   }
 
   /**
-   * Emits class declaration.
+   * Emits class reference.
    *
    * @param emission - Code emission control.
    *
-   * @returns Code emission result that prints class declaration.
+   * @returns Code emission result that prints class name.
    */
   emit(emission: EsEmission): EsEmissionResult {
-    return this.#code.emit(emission);
+    return this.symbol.emit(emission);
+  }
+
+  /**
+   * Emits class declaration.
+   *
+   * @returns Class declaration code emission.
+   */
+  declare(): EsSource {
+    return {
+      emit: emission => this.#code.emit(emission),
+    };
   }
 
   toString(): string {

@@ -26,7 +26,7 @@ export class EsDeclaredClass extends EsClass<EsDeclarationNaming, EsDeclaredSymb
           refer(baseClass);
         }
 
-        return this;
+        return this.declare();
       },
     });
 
