@@ -5,8 +5,10 @@ import { EsClass } from './es-class.js';
  * Member of {@link EsClass class}.
  *
  * Members uniquely identifies by this instances of this type.
+ *
+ * @typeParam TDeclaration - Type of member declaration details.
  */
-export interface EsMember {
+export interface EsMember<in TDeclaration extends unknown[]> {
   /**
    * Requested member name.
    *
@@ -15,15 +17,27 @@ export interface EsMember {
   get requestedName(): string;
 
   /**
-   * Informs whether this member is [private].
-   *
-   * @returns `true` for [private] member, or `false` for [public] one.
-   *
-   * [private]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Classes/Private_class_fields
-   * [public]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Classes/Public_class_fields
+   * Visibility of this member.
    */
-  isPrivate(): boolean;
+  get visibility(): EsMemberVisibility;
+
+  /**
+   * Declares class member.
+   *
+   * Called by class to {@link EsClass#declare declare} this member.
+   *
+   * @param context - Member declaration context.
+   * @param TDeclaration - Member declaration details specific to this member type.
+   *
+   * @returns Source of code containing member declaration.
+   */
+  declare(context: EsMemberContext<this>, ...declaration: TDeclaration): EsSource;
 }
+
+/**
+ * Any class {@link EsAnyMember member}.
+ */
+export type EsAnyMember = EsMember<any>;
 
 /**
  * Class {@link EsMember member} reference.
@@ -32,7 +46,7 @@ export interface EsMember {
  *
  * @typeParam TMember - Member type.
  */
-export interface EsMemberRef<out TMember extends EsMember = EsMember> {
+export interface EsMemberRef<out TMember extends EsAnyMember = EsAnyMember> {
   /**
    * Member instance.
    */
@@ -46,6 +60,20 @@ export interface EsMemberRef<out TMember extends EsMember = EsMember> {
   readonly name: string;
 
   /**
+   * Member key string.
+   *
+   * Either ECMAScript-safe member identifier, or indexed member accessor like `['0unsafe']` otherwise.
+   */
+  readonly key: string;
+
+  /**
+   * Member accessor expression.
+   *
+   * Either `.${name}` in case of ECMAScript-safe member name, or indexed member accessor like `['0unsafe']` otherwise.
+   */
+  readonly accessor: string;
+
+  /**
    * Whether the member is declared in host class.
    *
    * `false` value means the member is declared in one of the {@link EsClass#baseClass base classes}, and not yet
@@ -55,25 +83,51 @@ export interface EsMemberRef<out TMember extends EsMember = EsMember> {
 }
 
 /**
- * Class {@link EsMember member} {@link EsClass#declareMember declaration} details.
+ * Class member {@link EsDeclaration#declare declaration} context.
  *
+ * @typeParam TDeclaration - Type of member declaration details.
  * @typeParam TMember - Member type.
  */
-export interface EsMemberDeclaration<out TMember extends EsMember> {
+export interface EsMemberContext<out TMember extends EsAnyMember>
+  extends Omit<EsMemberRef<TMember>, 'declared'> {
   /**
-   * Declares class member.
-   *
-   * @param context - Member declaration context.
-   *
-   * @returns Source of code containing member declaration.
+   * Host class the member declared in.
    */
-  declare(this: void, context: EsMemberContext<TMember>): EsSource;
+  readonly hostClass: EsClass;
+
+  /**
+   * Declared member.
+   */
+  readonly member: TMember;
 }
 
 /**
- *
+ * Class {@link EsMember member} visibility.
  */
-export interface EsMemberContext<out TMember extends EsMember> {
-  readonly hostClass: EsClass;
-  readonly member: TMember;
+export enum EsMemberVisibility {
+  /**
+   * Member is [public] (the default).
+   *
+   * [public]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Classes/Public_class_fields
+   */
+  Public = 'public',
+
+  /**
+   * Member is [private].
+   *
+   * [private]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Classes/Private_class_fields
+   */
+  Private = 'private',
+}
+
+/**
+ * Class member initialization options.
+ */
+export interface EsMemberInit {
+  /**
+   * Member visibility, either `public` or `private`
+   *
+   * @defaultValue {@link EsMemberVisibility#Public Public} by default.
+   */
+  readonly visibility?: EsMemberVisibility;
 }
