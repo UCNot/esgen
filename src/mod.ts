@@ -1,6 +1,7 @@
 /**
  * @module esgen
  */
+export * from './classes/mod.js';
 export * from './declarations/mod.js';
 export * from './emission/mod.js';
 export * from './es-code.js';
