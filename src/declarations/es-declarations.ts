@@ -4,7 +4,7 @@ import { EsBundle } from '../emission/es-bundle.js';
 import { EsCode } from '../es-code.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsSource } from '../es-source.js';
-import { EsAnySymbol, EsNaming, EsSymbol } from '../symbols/es-symbol.js';
+import { EsAnySymbol, EsNaming, EsReference, EsSymbol } from '../symbols/es-symbol.js';
 import { EsDeclaredSymbol } from './es-declared.symbol.js';
 
 /**
@@ -214,7 +214,7 @@ class EsDeclSnippet {
 
   readonly #symbol: EsDeclaredSymbol;
   readonly #naming: EsNaming;
-  readonly #refs = new Set<EsSymbol>();
+  readonly #refs = new Set<EsAnySymbol>();
 
   constructor(symbol: EsDeclaredSymbol, naming: EsNaming) {
     this.#symbol = symbol;
@@ -268,8 +268,8 @@ class EsDeclSnippet {
     };
   }
 
-  #refer(ref: EsSymbol): void {
-    this.#refs.add(ref);
+  #refer({ symbol }: EsReference): void {
+    this.#refs.add(symbol);
   }
 
 }

@@ -4,8 +4,8 @@ import { EsEmission, EsEmissionResult } from '../emission/es-emission.js';
 import { EsSource } from '../es-source.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import {
-  EsAnySymbol,
   EsNaming,
+  EsReference,
   EsResolution,
   EsSymbol,
   EsSymbolInit,
@@ -19,7 +19,7 @@ import {
 export class EsDeclaredSymbol extends EsSymbol<EsDeclarationNaming> {
 
   readonly #exported: boolean;
-  readonly #refers: readonly EsAnySymbol[];
+  readonly #refers: readonly EsReference[];
   readonly #declare: (context: EsDeclarationContext) => EsSource;
 
   /**
@@ -114,7 +114,7 @@ export interface EsDeclarationInit extends EsSymbolInit {
    *
    * Referred symbols supposed to be declared _before_ the referrer.
    */
-  readonly refers?: EsAnySymbol | readonly EsAnySymbol[] | undefined;
+  readonly refers?: EsReference | readonly EsReference[] | undefined;
 
   /**
    * Declares the symbol.
@@ -151,5 +151,5 @@ export interface EsDeclarationContext {
    *
    * @param ref - Referred symbol.
    */
-  refer(this: void, ref: EsAnySymbol): void;
+  refer(this: void, ref: EsReference): void;
 }
