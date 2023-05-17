@@ -29,6 +29,7 @@ describe('EsClass', () => {
         key: 'test',
         accessor: '.test',
         declared: true,
+        handle: hostClass,
       });
       expect([...hostClass.members()]).toEqual([
         {
@@ -37,6 +38,7 @@ describe('EsClass', () => {
           key: 'test',
           accessor: '.test',
           declared: true,
+          handle: hostClass,
         },
       ]);
     });
@@ -53,6 +55,7 @@ describe('EsClass', () => {
         key: 'test',
         accessor: '.test',
         declared: false,
+        handle: baseClass,
       });
       expect([...hostClass.members()]).toEqual([
         {
@@ -61,6 +64,7 @@ describe('EsClass', () => {
           key: 'test',
           accessor: '.test',
           declared: false,
+          handle: baseClass,
         },
       ]);
 
@@ -72,6 +76,7 @@ describe('EsClass', () => {
         key: 'test',
         accessor: '.test',
         declared: true,
+        handle: hostClass,
       });
       expect([...hostClass.members()]).toEqual([
         {
@@ -80,6 +85,7 @@ describe('EsClass', () => {
           key: 'test',
           accessor: '.test',
           declared: true,
+          handle: hostClass,
         },
       ]);
     });
@@ -96,6 +102,7 @@ describe('EsClass', () => {
         key: '#test',
         accessor: '.#test',
         declared: true,
+        handle: hostClass,
       });
       expect([...hostClass.members()]).toEqual([
         {
@@ -104,6 +111,7 @@ describe('EsClass', () => {
           key: '#test',
           accessor: '.#test',
           declared: true,
+          handle: hostClass,
         },
       ]);
     });
@@ -126,6 +134,7 @@ describe('EsClass', () => {
         key: "['test\\n']",
         accessor: "['test\\n']",
         declared: true,
+        handle: hostClass,
       });
     });
     it('converts private member name to ECMAScript-safe identifier', () => {
@@ -137,6 +146,7 @@ describe('EsClass', () => {
         key: '#test_xA_',
         accessor: '.#test_xA_',
         declared: true,
+        handle: hostClass,
       });
     });
     it('resolves private member name conflict', () => {
@@ -161,7 +171,24 @@ describe('EsClass', () => {
 
       hostClass.declareMember(member);
       expect(() => hostClass.declareMember(member)).toThrow(
-        new TypeError(`test already declared in Test /* [Class] */`),
+        new TypeError(`.test already declared in Test /* [Class] */`),
+      );
+    });
+  });
+
+  describe('member', () => {
+    it('returns declared field handle', () => {
+      const member = new TestMember('test');
+
+      hostClass.declareMember(member);
+
+      expect(hostClass.member(member)).toBe(hostClass);
+    });
+    it('fails for undeclared member', () => {
+      const member = new TestMember('test');
+
+      expect(() => hostClass.member(member)).toThrow(
+        `.test is not available in Test /* [Class] */`,
       );
     });
   });
@@ -178,6 +205,7 @@ describe('EsClass', () => {
           key: 'test',
           accessor: '.test',
           declared: false,
+          handle: baseClass,
         },
       ]);
       expect([...hostClass.members({ derived: false })]).toEqual([]);
@@ -193,6 +221,7 @@ describe('EsClass', () => {
           key: '#test',
           accessor: '.#test',
           declared: true,
+          handle: hostClass,
         },
       ]);
       expect([...hostClass.members({ visibility: 'public' })]).toEqual([]);
@@ -208,6 +237,7 @@ describe('EsClass', () => {
           key: 'test',
           accessor: '.test',
           declared: true,
+          handle: hostClass,
         },
       ]);
       expect([...hostClass.members({ derived: false })]).toEqual([
@@ -217,6 +247,7 @@ describe('EsClass', () => {
           key: 'test',
           accessor: '.test',
           declared: true,
+          handle: hostClass,
         },
       ]);
       expect([...hostClass.members({ visibility: 'private' })]).toEqual([]);
@@ -230,7 +261,7 @@ describe('EsClass', () => {
   });
 });
 
-class TestMember implements EsMember<[]> {
+class TestMember implements EsMember<[], EsClass> {
 
   readonly #requestedName: string;
   readonly #visibility: EsMemberVisibility;
@@ -248,8 +279,8 @@ class TestMember implements EsMember<[]> {
     return this.#visibility;
   }
 
-  declare(_context: EsMemberContext<this>): EsSource {
-    return EsCode.none;
+  declare({ hostClass }: EsMemberContext<this>): [EsSource, EsClass] {
+    return [EsCode.none, hostClass];
   }
 
 }

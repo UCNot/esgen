@@ -1,3 +1,4 @@
+import { lazyValue } from '@proc7ts/primitives';
 import { jsStringLiteral } from 'httongue';
 import { EsEmission, EsEmissionResult, EsEmitter } from '../emission/es-emission.js';
 import { EsCode } from '../es-code.js';
@@ -94,45 +95,86 @@ export class EsClass<
    * Searches for the `member` declaration.
    *
    * @typeParam TMember - Member type.
+   * @typeParam THandle - Handle type.
    * @param member - Member to find.
    *
    * @returns Either found member reference, or `undefined` if the member neither declared in this class, nor in one of
    * its {@link baseClass base classes}.
    */
-  findMember<TMember extends EsAnyMember>(member: TMember): EsMemberRef<TMember> | undefined {
-    const found = this.#findMember(member);
+  findMember<TMember extends EsAnyMember<THandle>, THandle = EsMember.HandleOf<TMember>>(
+    member: TMember,
+  ): EsMemberRef<TMember, THandle> | undefined {
+    const found = this.#findMember<unknown[], THandle, TMember>(member);
 
     return found?.toRef();
   }
 
-  #findMember<TDeclaration extends unknown[], TMember extends EsMember<TDeclaration>>(
+  /**
+   * Obtains `member`'s handle.
+   *
+   * @typeParam TMember - Member type.
+   * @typeParam THandle - Handle type.
+   * @param member - Member to access.
+   *
+   * @returns Member handle, either declared in this class, or derived from the {@link baseClass base} one.
+   *
+   * @throws [ReferenceError] if the `member` is neither declared in this class, nor derived from one of the
+   * {@link baseClass base} ones.
+   *
+   * [ReferenceError]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError
+   */
+  member<TMember extends EsAnyMember<THandle>, THandle = EsMember.HandleOf<TMember>>(
     member: TMember,
-  ): EsMemberEntry<TDeclaration, TMember> | undefined {
+  ): THandle {
+    const found = this.#findMember<unknown[], THandle, TMember>(member);
+
+    if (found) {
+      return found.handle();
+    }
+
+    throw new ReferenceError(
+      `${esMemberAccessor(member.requestedName).accessor} is not available in ${this}`,
+    );
+  }
+
+  #findMember<
+    TDeclaration extends unknown[],
+    THandle,
+    TMember extends EsMember<TDeclaration, THandle>,
+  >(member: TMember): EsMemberEntry<TDeclaration, THandle, TMember> | undefined {
     return member.visibility === EsMemberVisibility.Public
       ? this.#findPublicMember(member)
       : this.#findPrivateMember(member);
   }
 
-  #findPublicMember<TDeclaration extends unknown[], TMember extends EsMember<TDeclaration>>(
-    member: TMember,
-  ): EsMemberEntry<TDeclaration, TMember> | undefined {
-    const present = this.#members.get(member) as EsMemberEntry<TDeclaration, TMember> | undefined;
+  #findPublicMember<
+    TDeclaration extends unknown[],
+    THandle,
+    TMember extends EsMember<TDeclaration, THandle>,
+  >(member: TMember): EsMemberEntry<TDeclaration, THandle, TMember> | undefined {
+    const present = this.#members.get(member) as
+      | EsMemberEntry<TDeclaration, THandle, TMember>
+      | undefined;
 
     if (present) {
       return present;
     }
 
-    if (!this.#baseClass?.findMember(member)) {
+    if (!this.#baseClass?.findMember<TMember, THandle>(member)) {
       return;
     }
 
     return this.#addPublicMember(member);
   }
 
-  #findPrivateMember<TDeclaration extends unknown[], TMember extends EsMember<TDeclaration>>(
-    member: TMember,
-  ): EsMemberEntry<TDeclaration, TMember> | undefined {
-    return this.#privateMembers.get(member) as EsMemberEntry<TDeclaration, TMember> | undefined;
+  #findPrivateMember<
+    TDeclaration extends unknown[],
+    THandle,
+    TMember extends EsMember<TDeclaration, THandle>,
+  >(member: TMember): EsMemberEntry<TDeclaration, THandle, TMember> | undefined {
+    return this.#privateMembers.get(member) as
+      | EsMemberEntry<TDeclaration, THandle, TMember>
+      | undefined;
   }
 
   /**
@@ -149,22 +191,24 @@ export class EsClass<
    *
    * [TypeError]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError
    */
-  declareMember<TDeclaration extends unknown[], TMember extends EsMember<TDeclaration>>(
-    member: TMember,
-    ...declaration: TDeclaration
-  ): EsMemberRef<TMember> {
+  declareMember<
+    TDeclaration extends unknown[],
+    THandle,
+    TMember extends EsMember<TDeclaration, THandle>,
+  >(member: TMember, ...declaration: TDeclaration): EsMemberRef<TMember, THandle> {
     return (
       member.visibility === EsMemberVisibility.Public
-        ? this.#declarePublicMember(member, declaration)
-        : this.#declarePrivateMember(member, declaration)
+        ? this.#declarePublicMember<TDeclaration, THandle, TMember>(member, declaration)
+        : this.#declarePrivateMember<TDeclaration, THandle, TMember>(member, declaration)
     ).toRef();
   }
 
-  #declarePublicMember<TDeclaration extends unknown[], TMember extends EsMember<TDeclaration>>(
-    member: TMember,
-    declaration: TDeclaration,
-  ): EsMemberEntry<TDeclaration, TMember> {
-    let entry = this.#findPublicMember<TDeclaration, TMember>(member);
+  #declarePublicMember<
+    TDeclaration extends unknown[],
+    THandle,
+    TMember extends EsMember<TDeclaration, THandle>,
+  >(member: TMember, declaration: TDeclaration): EsMemberEntry<TDeclaration, THandle, TMember> {
+    let entry = this.#findPublicMember<TDeclaration, THandle, TMember>(member);
 
     if (!entry) {
       entry = this.#addPublicMember(member);
@@ -175,9 +219,11 @@ export class EsClass<
     return entry;
   }
 
-  #addPublicMember<TDeclaration extends unknown[], TMember extends EsMember<TDeclaration>>(
-    member: TMember,
-  ): EsMemberEntry<TDeclaration, TMember> {
+  #addPublicMember<
+    TDeclaration extends unknown[],
+    THandle,
+    TMember extends EsMember<TDeclaration, THandle>,
+  >(member: TMember): EsMemberEntry<TDeclaration, THandle, TMember> {
     const { memberNames } = this.#shared;
     let name = memberNames.get(member);
 
@@ -186,18 +232,19 @@ export class EsClass<
       memberNames.set(member, name);
     }
 
-    const entry = new EsMemberEntry<TDeclaration, TMember>(this, member, name);
+    const newEntry = new EsMemberEntry<TDeclaration, THandle, TMember>(this, member, name);
 
-    this.#members.set(member, entry);
+    this.#members.set(member, newEntry);
 
-    return entry;
+    return newEntry;
   }
 
-  #declarePrivateMember<TDeclaration extends unknown[], TMember extends EsMember<TDeclaration>>(
-    member: TMember,
-    declaration: TDeclaration,
-  ): EsMemberEntry<TDeclaration, TMember> {
-    let entry = this.#findPrivateMember<TDeclaration, TMember>(member);
+  #declarePrivateMember<
+    TDeclaration extends unknown[],
+    THandle,
+    TMember extends EsMember<TDeclaration, THandle>,
+  >(member: TMember, declaration: TDeclaration): EsMemberEntry<TDeclaration, THandle, TMember> {
+    let entry = this.#findPrivateMember<TDeclaration, THandle, TMember>(member);
 
     if (!entry) {
       entry = this.#addPrivateMember(member);
@@ -208,15 +255,21 @@ export class EsClass<
     return entry;
   }
 
-  #addPrivateMember<TDeclaration extends unknown[], TMember extends EsMember<TDeclaration>>(
-    member: TMember,
-  ): EsMemberEntry<TDeclaration, TMember> {
+  #addPrivateMember<
+    TDeclaration extends unknown[],
+    THandle,
+    TMember extends EsMember<TDeclaration, THandle>,
+  >(member: TMember): EsMemberEntry<TDeclaration, THandle, TMember> {
     const name = this.#privateNames.reserveName(member.requestedName);
-    const entry = new EsMemberEntry(this, member, `#${esSafeId(name)}`);
+    const newEntry = new EsMemberEntry<TDeclaration, THandle, TMember>(
+      this,
+      member,
+      `#${esSafeId(name)}`,
+    );
 
-    this.#privateMembers.set(member, entry);
+    this.#privateMembers.set(member, newEntry);
 
-    return entry;
+    return newEntry;
   }
 
   /**
@@ -344,7 +397,8 @@ export interface EsClassInit {
 
 class EsMemberEntry<
   in TDeclaration extends unknown[] = any,
-  out TMember extends EsMember<TDeclaration> = EsMember<TDeclaration>,
+  out THandle = unknown,
+  out TMember extends EsMember<TDeclaration, THandle> = EsMember<TDeclaration, THandle>,
 > {
 
   readonly #hostClass: EsClass;
@@ -353,24 +407,24 @@ class EsMemberEntry<
   readonly #key: string;
   readonly #accessor: string;
   #declared = false;
+  handle: () => THandle;
 
   constructor(hostClass: EsClass, member: TMember, name: string) {
     this.#hostClass = hostClass;
     this.#member = member;
     this.#name = name;
     if (member.visibility === EsMemberVisibility.Public) {
-      const safeId = esSafeId(name);
+      const { key, accessor } = esMemberAccessor(name);
 
-      if (safeId === name) {
-        this.#key = name;
-        this.#accessor = `.${name}`;
-      } else {
-        this.#key = this.#accessor = `[${jsStringLiteral(name)}]`;
-      }
+      this.#key = key;
+      this.#accessor = accessor;
     } else {
       this.#key = name;
       this.#accessor = `.${name}`;
     }
+
+    // Obtain handle from base class, unless declared explicitly.
+    this.handle = lazyValue(() => this.#hostClass.baseClass!.member(member));
   }
 
   isDeclared(): boolean {
@@ -379,12 +433,12 @@ class EsMemberEntry<
 
   declare(...declaration: TDeclaration): EsSource {
     if (this.#declared) {
-      throw new TypeError(`${this.#key} already declared in ${this.#hostClass}`);
+      throw new TypeError(`${this.#accessor} already declared in ${this.#hostClass}`);
     }
 
     this.#declared = true;
 
-    return this.#member.declare(
+    const [source, handle] = this.#member.declare(
       {
         member: this.#member,
         name: this.#name,
@@ -394,15 +448,20 @@ class EsMemberEntry<
       },
       ...declaration,
     );
+
+    this.handle = () => handle;
+
+    return source;
   }
 
-  toRef(): EsMemberRef<TMember> {
+  toRef(): EsMemberRef<TMember, THandle> {
     return {
       member: this.#member,
       name: this.#name,
       key: this.#key,
       accessor: this.#accessor,
       declared: this.#declared,
+      handle: this.handle(),
     };
   }
 
@@ -410,4 +469,16 @@ class EsMemberEntry<
 
 interface EsClass$SharedState {
   readonly memberNames: Map<EsAnyMember, string>;
+}
+
+function esMemberAccessor(name: string): { key: string; accessor: string } {
+  const safeId = esSafeId(name);
+
+  if (safeId === name) {
+    return { key: name, accessor: `.${name}` };
+  }
+
+  const key = `[${jsStringLiteral(name)}]`;
+
+  return { key, accessor: key };
 }

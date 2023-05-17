@@ -7,8 +7,9 @@ import { EsClass } from './es-class.js';
  * Members uniquely identifies by this instances of this type.
  *
  * @typeParam TDeclaration - Type of member declaration details.
+ * @typeParam THandle - Type of member handle.
  */
-export interface EsMember<in TDeclaration extends unknown[]> {
+export interface EsMember<in TDeclaration extends unknown[], out THandle = void> {
   /**
    * Requested member name.
    *
@@ -26,18 +27,36 @@ export interface EsMember<in TDeclaration extends unknown[]> {
    *
    * Called by class to {@link EsClass#declare declare} this member.
    *
+   * Each declared member provides a {@link EsMemberRef#handle handle} that can be used to access it.
+   *
    * @param context - Member declaration context.
    * @param TDeclaration - Member declaration details specific to this member type.
    *
-   * @returns Source of code containing member declaration.
+   * @returns Tuple containing source of code declaring the member, as well as member handle.
    */
-  declare(context: EsMemberContext<this>, ...declaration: TDeclaration): EsSource;
+  declare(
+    context: EsMemberContext<this>,
+    ...declaration: TDeclaration
+  ): readonly [source: EsSource, handle: THandle];
 }
 
 /**
  * Any class {@link EsAnyMember member}.
+ *
+ * @typeParam THandle - Member handle type.
  */
-export type EsAnyMember = EsMember<any>;
+export type EsAnyMember<THandle = unknown> = EsMember<any, THandle>;
+
+export namespace EsMember {
+  /**
+   * Handle type extracted from member.
+   *
+   * @typeParam TMember - Member type.
+   */
+  export type HandleOf<TMember extends EsAnyMember> = TMember extends EsAnyMember<infer THandle>
+    ? THandle
+    : never;
+}
 
 /**
  * Class {@link EsMember member} reference.
@@ -46,7 +65,7 @@ export type EsAnyMember = EsMember<any>;
  *
  * @typeParam TMember - Member type.
  */
-export interface EsMemberRef<out TMember extends EsAnyMember = EsAnyMember> {
+export interface EsMemberRef<out TMember extends EsAnyMember = EsAnyMember, out THandle = unknown> {
   /**
    * Member instance.
    */
@@ -80,6 +99,11 @@ export interface EsMemberRef<out TMember extends EsAnyMember = EsAnyMember> {
    * overridden in host class.
    */
   readonly declared: boolean;
+
+  /**
+   * Member handle.
+   */
+  readonly handle: THandle;
 }
 
 /**
@@ -89,7 +113,7 @@ export interface EsMemberRef<out TMember extends EsAnyMember = EsAnyMember> {
  * @typeParam TMember - Member type.
  */
 export interface EsMemberContext<out TMember extends EsAnyMember>
-  extends Omit<EsMemberRef<TMember>, 'declared'> {
+  extends Omit<EsMemberRef<TMember>, 'declared' | 'handle'> {
   /**
    * Host class the member declared in.
    */

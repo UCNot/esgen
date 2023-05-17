@@ -5,7 +5,7 @@ import { EsMember, EsMemberContext, EsMemberInit, EsMemberVisibility } from './e
 /**
  * Class field representation.
  */
-export class EsField implements EsMember<[EsFieldDeclaration?]> {
+export class EsField implements EsMember<[EsFieldDeclaration?], EsFieldHandle> {
 
   readonly #requestedName: string;
   readonly #visibility: EsMemberVisibility;
@@ -33,11 +33,23 @@ export class EsField implements EsMember<[EsFieldDeclaration?]> {
     return this.#visibility;
   }
 
-  declare(context: EsMemberContext<this>, declaration?: EsFieldDeclaration): EsSource;
-  declare(context: EsMemberContext<this>, { initializer }: EsFieldDeclaration = {}): EsSource {
-    const { key } = context;
+  declare(
+    context: EsMemberContext<this>,
+    declaration?: EsFieldDeclaration,
+  ): [EsSource, EsFieldHandle];
+  declare(
+    context: EsMemberContext<this>,
+    { initializer }: EsFieldDeclaration = {},
+  ): [EsSource, EsFieldHandle] {
+    const { key, accessor } = context;
 
-    return initializer ? esline`${key} = ${initializer(context)};` : esline`${key};`;
+    return [
+      initializer ? esline`${key} = ${initializer(context)};` : esline`${key};`,
+      {
+        get: target => esline`${target}${accessor}`,
+        set: (target, value) => esline`${target}${accessor} = ${value}`,
+      },
+    ];
   }
 
 }
@@ -50,4 +62,30 @@ export interface EsFieldDeclaration {
    * Field value initializer.
    */
   readonly initializer?: ((this: void, context: EsMemberContext<EsField>) => EsSource) | undefined;
+}
+
+/**
+ * {@link EsField field} handle.
+ *
+ * Grants access to the field stored in class instance.
+ */
+export interface EsFieldHandle {
+  /**
+   * Read field value.
+   *
+   * @param target - Class instance expression.
+   *
+   * @returns Value read expression.
+   */
+  get(this: void, target: EsSource): EsSource;
+
+  /**
+   * Assigns field value.
+   *
+   * @param target - Class instance expression.
+   * @param value - Assigned value expression.
+   *
+   * @returns Value assignment expression.
+   */
+  set(this: void, target: EsSource, value: EsSource): EsSource;
 }
