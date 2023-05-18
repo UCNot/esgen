@@ -20,7 +20,7 @@ describe('EsField', () => {
   it('declares field without initializer', async () => {
     const field = new EsField('test field\n');
 
-    hostClass.declareMember(field);
+    field.declareIn(hostClass);
     bundle.ns.refer(hostClass);
 
     const { Test } = (await bundle.emit().asExports()) as {
@@ -34,7 +34,7 @@ describe('EsField', () => {
   it('declares initialized field', async () => {
     const field = new EsField('test');
 
-    hostClass.declareMember(field, { initializer: () => esline`2 + 3` });
+    field.declareIn(hostClass, { initializer: () => esline`2 + 3` });
     bundle.ns.refer(hostClass);
 
     const { Test } = (await bundle.emit().asExports()) as {
@@ -51,7 +51,7 @@ describe('EsField', () => {
       const bundle = new EsBundle();
       const field = new EsField('test');
 
-      hostClass.declareMember(field, { initializer: () => esline`2 + 3` });
+      field.declareIn(hostClass, { initializer: () => esline`2 + 3` });
 
       await expect(
         bundle

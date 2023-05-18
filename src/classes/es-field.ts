@@ -1,67 +1,49 @@
 import { EsSource } from '../es-source.js';
 import { esline } from '../esline.tag.js';
-import { EsMember, EsMemberContext, EsMemberInit, EsMemberVisibility } from './es-member.js';
+import { EsClass } from './es-class.js';
+import { EsMember, EsMemberRef } from './es-member.js';
 
 /**
  * Class field representation.
  */
-export class EsField implements EsMember<[EsFieldDeclaration?], EsFieldHandle> {
-
-  readonly #requestedName: string;
-  readonly #visibility: EsMemberVisibility;
+export class EsField extends EsMember<EsFieldHandle> {
 
   /**
-   * Constructs class field.
+   * Declares this field in the given class.
    *
-   * @param requestedName - Requested field name.
-   * @param init - Field initialization options.
+   * @param hostClass - Host class to declare member in.
+   * @param declaration - Field declaration details.
+   *
+   * @returns Declared field handle.
    */
-  constructor(requestedName: string, init?: EsMemberInit);
-  constructor(
-    requestedName: string,
-    { visibility = EsMemberVisibility.Public }: EsMemberInit = {},
-  ) {
-    this.#requestedName = requestedName;
-    this.#visibility = visibility;
-  }
+  declareIn(hostClass: EsClass, declaration?: EsFieldDeclaration): EsFieldHandle;
 
-  get requestedName(): string {
-    return this.#requestedName;
-  }
+  declareIn(hostClass: EsClass, { initializer }: EsFieldDeclaration = {}): EsFieldHandle {
+    const handle: EsFieldHandle = {
+      get: target => esline`${target}${ref.accessor}`,
+      set: (target, value) => esline`${target}${ref.accessor} = ${value}`,
+    };
+    const ref = hostClass.addMember(this, handle, code => {
+      code.write(
+        initializer ? esline`${ref.key} = ${initializer(hostClass, ref)};` : esline`${ref.key};`,
+      );
+    });
 
-  get visibility(): EsMemberVisibility {
-    return this.#visibility;
-  }
-
-  declare(
-    context: EsMemberContext<this>,
-    declaration?: EsFieldDeclaration,
-  ): [EsSource, EsFieldHandle];
-  declare(
-    context: EsMemberContext<this>,
-    { initializer }: EsFieldDeclaration = {},
-  ): [EsSource, EsFieldHandle] {
-    const { key, accessor } = context;
-
-    return [
-      initializer ? esline`${key} = ${initializer(context)};` : esline`${key};`,
-      {
-        get: target => esline`${target}${accessor}`,
-        set: (target, value) => esline`${target}${accessor} = ${value}`,
-      },
-    ];
+    return handle;
   }
 
 }
 
 /**
- * Class {@link EsField field} declaration details.
+ * Class field {@link EsField#declareIn declaration} details.
  */
 export interface EsFieldDeclaration {
   /**
    * Field value initializer.
    */
-  readonly initializer?: ((this: void, context: EsMemberContext<EsField>) => EsSource) | undefined;
+  readonly initializer?:
+    | ((this: void, hostClass: EsClass, member: EsMemberRef<EsField>) => EsSource)
+    | undefined;
 }
 
 /**

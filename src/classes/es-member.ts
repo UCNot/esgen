@@ -1,4 +1,3 @@
-import { EsSource } from '../es-source.js';
 import { EsClass } from './es-class.js';
 
 /**
@@ -6,38 +5,42 @@ import { EsClass } from './es-class.js';
  *
  * Members uniquely identifies by this instances of this type.
  *
- * @typeParam TDeclaration - Type of member declaration details.
  * @typeParam THandle - Type of member handle.
  */
-export interface EsMember<in TDeclaration extends unknown[], out THandle = void> {
+export abstract class EsMember<out THandle = void> {
+
+  readonly #requestedName: string;
+  readonly #visibility: EsMemberVisibility;
+
+  constructor(requestedName: string, init?: EsMemberInit);
+  constructor(requestedName: string, init?: EsMemberInit) {
+    this.#requestedName = requestedName;
+    this.#visibility = init?.visibility ?? EsMemberVisibility.Public;
+  }
+
   /**
    * Requested member name.
    *
    * Note that the class may decide to rename it in order to resolve naming conflicts.
    */
-  get requestedName(): string;
+  get requestedName(): string {
+    return this.#requestedName;
+  }
 
   /**
    * Visibility of this member.
    */
-  get visibility(): EsMemberVisibility;
+  get visibility(): EsMemberVisibility {
+    return this.#visibility;
+  }
 
+}
+
+export interface EsMember<out THandle = void> {
   /**
-   * Declares class member.
-   *
-   * Called by class to {@link EsClass#declare declare} this member.
-   *
-   * Each declared member provides a {@link EsMemberRef#handle handle} that can be used to access it.
-   *
-   * @param context - Member declaration context.
-   * @param TDeclaration - Member declaration details specific to this member type.
-   *
-   * @returns Tuple containing source of code declaring the member, as well as member handle.
+   * Brand field to make type inference work.
    */
-  declare(
-    context: EsMemberContext<this>,
-    ...declaration: TDeclaration
-  ): readonly [source: EsSource, handle: THandle];
+  __handle__?: THandle;
 }
 
 /**
@@ -45,7 +48,7 @@ export interface EsMember<in TDeclaration extends unknown[], out THandle = void>
  *
  * @typeParam THandle - Member handle type.
  */
-export type EsAnyMember<THandle = unknown> = EsMember<any, THandle>;
+export type EsAnyMember = EsMember<any>;
 
 export namespace EsMember {
   /**
@@ -53,7 +56,7 @@ export namespace EsMember {
    *
    * @typeParam TMember - Member type.
    */
-  export type HandleOf<TMember extends EsAnyMember> = TMember extends EsAnyMember<infer THandle>
+  export type HandleOf<TMember extends EsAnyMember> = TMember extends EsMember<infer THandle>
     ? THandle
     : never;
 }
@@ -65,7 +68,10 @@ export namespace EsMember {
  *
  * @typeParam TMember - Member type.
  */
-export interface EsMemberRef<out TMember extends EsAnyMember = EsAnyMember, out THandle = unknown> {
+export interface EsMemberRef<
+  out TMember extends EsAnyMember = EsAnyMember,
+  out THandle = EsMember.HandleOf<TMember>,
+> {
   /**
    * Member instance.
    */
@@ -74,7 +80,7 @@ export interface EsMemberRef<out TMember extends EsAnyMember = EsAnyMember, out 
   /**
    * Actual member name.
    *
-   * {@link EsMember#isPrivate Private} class names always start with `#`.
+   * {@link EsMemberVisibility.Private Private} class names always start with `#`.
    */
   readonly name: string;
 
@@ -104,25 +110,6 @@ export interface EsMemberRef<out TMember extends EsAnyMember = EsAnyMember, out 
    * Member handle.
    */
   readonly handle: THandle;
-}
-
-/**
- * Class member {@link EsDeclaration#declare declaration} context.
- *
- * @typeParam TDeclaration - Type of member declaration details.
- * @typeParam TMember - Member type.
- */
-export interface EsMemberContext<out TMember extends EsAnyMember>
-  extends Omit<EsMemberRef<TMember>, 'declared' | 'handle'> {
-  /**
-   * Host class the member declared in.
-   */
-  readonly hostClass: EsClass;
-
-  /**
-   * Declared member.
-   */
-  readonly member: TMember;
 }
 
 /**
