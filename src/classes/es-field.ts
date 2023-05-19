@@ -20,6 +20,7 @@ export class EsField extends EsMember<EsFieldHandle> {
 
   declareIn(hostClass: EsClass, { initializer }: EsFieldDeclaration = {}): EsFieldHandle {
     const handle: EsFieldHandle = {
+      field: this,
       get: target => esline`${target}${ref.accessor}`,
       set: (target, value) => esline`${target}${ref.accessor} = ${value}`,
     };
@@ -52,11 +53,16 @@ export interface EsFieldDeclaration {
 }
 
 /**
- * {@link EsField field} handle.
+ * Class {@link EsField field} handle used to read and assign field value.
  *
  * Grants access to the field stored in class instance.
  */
 export interface EsFieldHandle {
+  /**
+   * Target field.
+   */
+  readonly field: EsField;
+
   /**
    * Read field value.
    *
