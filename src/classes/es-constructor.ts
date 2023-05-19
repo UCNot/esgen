@@ -149,7 +149,7 @@ export class EsConstructor<out TArgs extends EsSignature.Args = EsSignature.Args
   /**
    * Declares constructor in the given class.
    *
-   * Typically called by {@link EsConstructor#declareConstructor}.
+   * Typically called by {@link EsClass#declareConstructor}.
    *
    * @param hostClass - Host class to declare member in.
    * @param declaration - Constructor declaration details.
