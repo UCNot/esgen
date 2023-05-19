@@ -7,7 +7,7 @@ import { EsSignature } from './es-signature.js';
 /**
  * Function representation.
  *
- * Refers the function {@link symbol} and contains arguments {@link signature},
+ * Function identified by unique {@link symbol} and has arguments {@link signature},
  *
  * @typeParam TArgs - Type of function arguments definition.
  * @typeParam TNaming - Type of function symbol naming.
