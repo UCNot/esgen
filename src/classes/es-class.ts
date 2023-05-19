@@ -1,11 +1,13 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { jsStringLiteral } from 'httongue';
 import { EsEmission, EsEmissionResult, EsEmitter } from '../emission/es-emission.js';
 import { EsCode } from '../es-code.js';
 import { EsSource } from '../es-source.js';
+import { EsSignature } from '../functions/es-signature.js';
+import { esMemberAccessor } from '../impl/es-member-accessor.js';
 import { EsNameRegistry } from '../symbols/es-name-registry.js';
 import { EsAnySymbol, EsNaming, EsReference } from '../symbols/es-symbol.js';
 import { esSafeId } from '../util/es-safe-id.js';
+import { EsConstructor, EsConstructorDeclaration, EsConstructorInit } from './es-constructor.js';
 import { EsAnyMember, EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
 
 /**
@@ -13,18 +15,22 @@ import { EsAnyMember, EsMember, EsMemberRef, EsMemberVisibility } from './es-mem
  *
  * Class identified by unique {@link symbol} and has {@link members}.
  *
+ * @typeParam TArgs - Type of class constructor arguments definition.
  * @typeParam TNaming - Type of class symbol naming.
  * @typeParam TSymbol - Type of class symbol.
  */
 export class EsClass<
+  out TArgs extends EsSignature.Args = EsSignature.Args,
   out TNaming extends EsNaming = EsNaming,
   out TSymbol extends EsAnySymbol<TNaming> = EsAnySymbol<TNaming>,
 > implements EsReference<TNaming, TSymbol>, EsEmitter {
 
   readonly #symbol: TSymbol;
   readonly #baseClass: EsClass | undefined;
+  readonly #classConstructor: EsConstructor<TArgs>;
+
   readonly #shared: EsClass$SharedState;
-  readonly #code = new EsCode();
+  #code?: EsCode;
   readonly #privateBody = new EsCode();
   readonly #body = new EsCode();
 
@@ -42,39 +48,32 @@ export class EsClass<
    * @param symbol - Class symbol.
    * @param init - Class initialization options.
    */
-  constructor(symbol: TSymbol, init: EsClassInit = {}) {
+  constructor(
+    symbol: TSymbol,
+    ...init: EsSignature.NoArgs extends TArgs ? [EsClassInit<TArgs>?] : [EsClassInit<TArgs>]
+  );
+
+  constructor(symbol: TSymbol, init: Partial<EsClassInit<TArgs>> = {}) {
     this.#symbol = symbol;
 
-    const baseClass = init?.baseClass;
+    const { baseClass, classConstructor } = init;
 
     this.#baseClass = baseClass;
     if (baseClass) {
+      this.#classConstructor = (
+        classConstructor ? EsConstructor.for(classConstructor) : baseClass.classConstructor
+      ) as EsConstructor<TArgs>;
       this.#shared = baseClass.#shared;
       this.#names = baseClass.#names.nest();
       this.#allMembersDerived = false;
     } else {
+      this.#classConstructor = EsConstructor.for(classConstructor) as EsConstructor<TArgs>;
       this.#shared = { memberNames: new Map() };
       this.#names = new EsNameRegistry();
       this.#allMembersDerived = true;
     }
 
-    this.#code.block(code => {
-      code
-        .inline(
-          'class ',
-          this.symbol,
-          code => {
-            const { baseClass } = this;
-
-            if (baseClass) {
-              code.write(' extends ', baseClass);
-            }
-          },
-          ' {',
-        )
-        .indent(this.#privateBody, this.#body)
-        .write('}');
-    });
+    this.#addPublicMember(this.classConstructor);
   }
 
   /**
@@ -85,10 +84,45 @@ export class EsClass<
   }
 
   /**
-   * Case class this one extends, if any.
+   * The base class this one extends, if any.
    */
   get baseClass(): EsClass | undefined {
     return this.#baseClass;
+  }
+
+  /**
+   * Class constructor.
+   */
+  get classConstructor(): EsConstructor<TArgs> {
+    return this.#classConstructor;
+  }
+
+  /**
+   * Obtains class handle.
+   *
+   * Shorthand for `this.member(this.classConstructor)`.
+   */
+  getHandle(): EsClassHandle<TArgs> {
+    return this.member(this.classConstructor);
+  }
+
+  /**
+   * Instantiates this class.
+   *
+   * Shorthand for `this.getHandle().instantiate(args).
+   *
+   * @param args - Named argument values.
+   *
+   * @returns Source of code containing class instantiation.
+   */
+  instantiate(
+    ...args: EsSignature.RequiredKeyOf<TArgs> extends never
+      ? [EsSignature.ValuesOf<TArgs>?]
+      : [EsSignature.ValuesOf<TArgs>]
+  ): EsSource;
+
+  instantiate(args: EsSignature.ValuesOf<TArgs>): EsSource {
+    return this.getHandle().instantiate(args);
   }
 
   /**
@@ -127,12 +161,10 @@ export class EsClass<
     const found = this.#findMember<TMember, THandle>(member);
 
     if (found) {
-      return found.handle();
+      return found.getHandle();
     }
 
-    throw new ReferenceError(
-      `${esMemberAccessor(member.requestedName).accessor} is not available in ${this}`,
-    );
+    throw new ReferenceError(`${member} is not available in ${this}`);
   }
 
   #findMember<TMember extends EsMember<THandle>, THandle>(
@@ -166,7 +198,20 @@ export class EsClass<
   }
 
   /**
+   * Explicitly declares {@link classConstructor class constructor}.
+   *
+   * @param init - Declaration details.
+   *
+   * @returns Class handle.
+   */
+  declareConstructor(declaration: EsConstructorDeclaration<TArgs>): EsClassHandle<TArgs> {
+    return this.classConstructor.declareIn(this, declaration);
+  }
+
+  /**
    * Adds class member.
+   *
+   * Called typically by member declaration method.
    *
    * @typeParam TMember - Member type.
    * @typeParam THandle - Type of member handle.
@@ -240,8 +285,8 @@ export class EsClass<
   #addPrivateMember<TMember extends EsMember<THandle>, THandle>(
     member: TMember,
   ): EsMemberEntry<TMember, THandle> {
-    const name = this.#privateNames.reserveName(member.requestedName);
-    const newEntry = new EsMemberEntry<TMember, THandle>(this, member, `#${esSafeId(name)}`);
+    const name = this.#privateNames.reserveName(esSafeId(member.requestedName));
+    const newEntry = new EsMemberEntry<TMember, THandle>(this, member, name);
 
     this.#privateMembers.set(member, newEntry);
 
@@ -362,8 +407,30 @@ export class EsClass<
    */
   declare(): EsSource {
     return {
-      emit: emission => this.#code.emit(emission),
+      emit: emission => this.#getCode().emit(emission),
     };
+  }
+
+  #getCode(): EsCode {
+    return (this.#code ??= new EsCode().block(code => {
+      this.getHandle(); // Ensure class constructor is valid.
+
+      code
+        .inline(
+          'class ',
+          this.symbol,
+          code => {
+            const { baseClass } = this;
+
+            if (baseClass) {
+              code.write(' extends ', baseClass);
+            }
+          },
+          ' {',
+        )
+        .indent(this.#privateBody, this.#body)
+        .write('}');
+    }));
   }
 
   toString(): string {
@@ -374,12 +441,99 @@ export class EsClass<
 
 /**
  * {@link EsClass class} initialization options.
+ *
+ * @typeParam TArgs - Type of class constructor arguments definition.
  */
-export interface EsClassInit {
+export type EsClassInit<TArgs extends EsSignature.Args> =
+  | EsClassInit.Custom<TArgs>
+  | EsClassInit.Inherited<TArgs>
+  | (TArgs extends EsSignature.NoArgs ? EsClassInit.NoArgs : never);
+
+export namespace EsClassInit {
   /**
-   * Base class the constructed one extends.
+   * Custom {@link EsClass class} initialization options with explicit constructor.
+   *
+   * @typeParam TArgs - Type of class constructor arguments definition.
    */
-  readonly baseClass?: EsClass;
+  export interface Custom<out TArgs extends EsSignature.Args> {
+    /**
+     * Either required class constructor or its initialization options.
+     *
+     * The constructor has to be {@link EsClass#declareConstructor declared}, unless it has signature compatible with
+     * {@link baseClass base class}.
+     */
+    readonly classConstructor: EsConstructor<TArgs> | EsConstructorInit<TArgs>;
+
+    /**
+     * Optional base class.
+     */
+    readonly baseClass?: EsClass | undefined;
+  }
+
+  /**
+   * Inherited {@link EsClass class} initialization options with derived constructor.
+   *
+   * @typeParam TArgs - Type of class constructor arguments definition.
+   */
+  export interface Inherited<out TArgs extends EsSignature.Args> {
+    /**
+     * Either optional class constructor or its initialization options.
+     *
+     * Will be inherited from the {@link baseClass base class} when omitted.
+     */
+    readonly classConstructor?: EsConstructor<TArgs> | EsConstructorInit<TArgs> | undefined;
+
+    /**
+     * Mandatory base class.
+     */
+    readonly baseClass: EsClass<TArgs>;
+  }
+
+  /**
+   * No-args {@link EsClass class} initialization options with derived constructor.
+   */
+  export interface NoArgs {
+    /**
+     * Either optional {@link EsSignature.NoArgs no-args} class constructor or its initialization options.
+     *
+     * Will be inherited from the {@link baseClass base class} when omitted. If there the {@link baseClass base class}
+     * unspecified, a no-args constructor will be created.
+     */
+    readonly classConstructor?:
+      | EsConstructor<EsSignature.NoArgs>
+      | EsConstructorInit<EsSignature.NoArgs>
+      | undefined;
+
+    /**
+     * Optional base class.
+     */
+    readonly baseClass?: EsClass<EsSignature.NoArgs> | undefined;
+  }
+}
+
+/**
+ * {@link EsClass Class} handle used to instantiate new class instances.
+ *
+ * @typeParam TArgs - Type of class constructor arguments definition.
+ */
+export interface EsClassHandle<out TArgs extends EsSignature.Args = EsSignature.Args> {
+  /**
+   * Host class.
+   */
+  readonly hostClass: EsClass<TArgs>;
+
+  /**
+   * Instantiates class.
+   *
+   * @param args - Named argument values.
+   *
+   * @returns Source of code containing class instantiation.
+   */
+  instantiate(
+    ...args: EsSignature.RequiredKeyOf<TArgs> extends never
+      ? [EsSignature.ValuesOf<TArgs>?]
+      : [EsSignature.ValuesOf<TArgs>]
+  ): EsSource;
 }
 
 class EsMemberEntry<
@@ -393,24 +547,29 @@ class EsMemberEntry<
   readonly #key: string;
   readonly #accessor: string;
   #declared = false;
-  handle: () => THandle;
+  getHandle: () => THandle;
 
   constructor(hostClass: EsClass, member: TMember, name: string) {
     this.#hostClass = hostClass;
     this.#member = member;
-    this.#name = name;
-    if (member.visibility === EsMemberVisibility.Public) {
-      const { key, accessor } = esMemberAccessor(name);
+    this.#name = member.visibility === EsMemberVisibility.Private ? `#${name}` : name;
 
-      this.#key = key;
-      this.#accessor = accessor;
-    } else {
-      this.#key = name;
-      this.#accessor = `.${name}`;
-    }
+    const { key, accessor } = esMemberAccessor(name, member.visibility);
+
+    this.#key = key;
+    this.#accessor = accessor;
 
     // Obtain handle from base class, unless declared explicitly.
-    this.handle = lazyValue(() => this.#hostClass.baseClass!.member(member));
+    this.getHandle = lazyValue(() => this.#getDefaultHandle());
+  }
+
+  #getDefaultHandle(): THandle {
+    const { baseClass } = this.#hostClass;
+    const inherited = baseClass?.findMember<TMember, THandle>(this.#member);
+
+    return inherited
+      ? this.#member.inherit(this.#hostClass, inherited, baseClass!)
+      : this.#member.autoDeclare(this.#hostClass, this.toRef());
   }
 
   isDeclared(): boolean {
@@ -423,7 +582,7 @@ class EsMemberEntry<
     }
 
     this.#declared = true;
-    this.handle = () => handle;
+    this.getHandle = () => handle;
   }
 
   toRef(): EsMemberRef<TMember, THandle> {
@@ -433,7 +592,7 @@ class EsMemberEntry<
       key: this.#key,
       accessor: this.#accessor,
       declared: this.#declared,
-      handle: this.handle(),
+      getHandle: this.getHandle,
     };
   }
 
@@ -441,16 +600,4 @@ class EsMemberEntry<
 
 interface EsClass$SharedState {
   readonly memberNames: Map<EsAnyMember, string>;
-}
-
-function esMemberAccessor(name: string): { key: string; accessor: string } {
-  const safeId = esSafeId(name);
-
-  if (safeId === name) {
-    return { key: name, accessor: `.${name}` };
-  }
-
-  const key = `[${jsStringLiteral(name)}]`;
-
-  return { key, accessor: key };
 }

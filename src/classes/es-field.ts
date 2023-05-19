@@ -11,7 +11,7 @@ export class EsField extends EsMember<EsFieldHandle> {
   /**
    * Declares this field in the given class.
    *
-   * @param hostClass - Host class to declare member in.
+   * @param hostClass - Host class to declare field in.
    * @param declaration - Field declaration details.
    *
    * @returns Declared field handle.
@@ -25,7 +25,7 @@ export class EsField extends EsMember<EsFieldHandle> {
     };
     const ref = hostClass.addMember(this, handle, code => {
       code.write(
-        initializer ? esline`${ref.key} = ${initializer(hostClass, ref)};` : esline`${ref.key};`,
+        initializer ? esline`${ref.key} = ${initializer(ref, hostClass)};` : esline`${ref.key};`,
       );
     });
 
@@ -39,10 +39,15 @@ export class EsField extends EsMember<EsFieldHandle> {
  */
 export interface EsFieldDeclaration {
   /**
-   * Field value initializer.
+   * Emits field value initializer.
+   *
+   * @param member - Declared field reference.
+   * @param hostClass - Class to declare the field for.
+   *
+   * @returns Source of code containing field declaration.
    */
   readonly initializer?:
-    | ((this: void, hostClass: EsClass, member: EsMemberRef<EsField>) => EsSource)
+    | ((this: void, member: EsMemberRef<EsField>, hostClass: EsClass) => EsSource)
     | undefined;
 }
 

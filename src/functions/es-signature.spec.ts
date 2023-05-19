@@ -101,6 +101,39 @@ describe('EsSignature', () => {
     });
   });
 
+  describe('acceptsArgsFor', () => {
+    it('permits extra arguments', () => {
+      const sgn1 = new EsSignature({ arg1: {} });
+      const sgn2 = new EsSignature({ arg1: {}, arg2: {} });
+
+      expect(sgn1.acceptsArgsFor(sgn2)).toBe(true);
+    });
+    it('permits missing optional arguments', () => {
+      const sgn1 = new EsSignature({ arg1: {}, 'arg2?': {} });
+      const sgn2 = new EsSignature({ arg1: {} });
+
+      expect(sgn1.acceptsArgsFor(sgn2)).toBe(true);
+    });
+    it('prohibits arguments with different names', () => {
+      const sgn1 = new EsSignature({ arg1: {}, test: {} });
+      const sgn2 = new EsSignature({ arg1: {}, other: {} });
+
+      expect(sgn1.acceptsArgsFor(sgn2)).toBe(false);
+    });
+    it('prohibits non-vararg argument in place of vararg', () => {
+      const sgn1 = new EsSignature({ arg1: {}, '...rest': {} });
+      const sgn2 = new EsSignature({ arg1: {}, rest: {} });
+
+      expect(sgn1.acceptsArgsFor(sgn2)).toBe(false);
+    });
+    it('prohibits optional argument in place of required', () => {
+      const sgn1 = new EsSignature({ arg1: {}, rest: {} });
+      const sgn2 = new EsSignature({ arg1: {}, 'rest?': {} });
+
+      expect(sgn1.acceptsArgsFor(sgn2)).toBe(false);
+    });
+  });
+
   describe('call', () => {
     let bundle: EsBundle;
 
@@ -149,6 +182,14 @@ describe('EsSignature', () => {
       await expect(bundle.emit(signature.call({ rest: ['1', '2'] })).asText()).resolves.toBe(
         `(undefined, 1, 2)\n`,
       );
+    });
+  });
+
+  describe('Iterable', () => {
+    it('iterates over argument symbols', () => {
+      const signature = new EsSignature({ arg1: {}, 'arg2?': {} });
+
+      expect([...signature]).toEqual(Object.values(signature.args));
     });
   });
 

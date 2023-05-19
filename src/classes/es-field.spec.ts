@@ -3,6 +3,7 @@ import { EsDeclarationNaming, EsDeclaredSymbol } from '../declarations/es-declar
 import { EsBundleFormat } from '../emission/es-bundle-format.js';
 import { EsBundle } from '../emission/es-bundle.js';
 import { esline } from '../esline.tag.js';
+import { EsSignature } from '../functions/es-signature.js';
 import { esLocal } from '../symbols/es-local.symbol.js';
 import { EsClass } from './es-class.js';
 import { EsDeclaredClass } from './es-declared.class.js';
@@ -10,7 +11,7 @@ import { EsField } from './es-field.js';
 
 describe('EsField', () => {
   let bundle: EsBundle;
-  let hostClass: EsClass<EsDeclarationNaming, EsDeclaredSymbol>;
+  let hostClass: EsClass<EsSignature.NoArgs, EsDeclarationNaming, EsDeclaredSymbol>;
 
   beforeEach(() => {
     bundle = new EsBundle({ format: EsBundleFormat.IIFE });

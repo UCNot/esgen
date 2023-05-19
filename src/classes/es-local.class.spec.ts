@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { EsBundle } from '../emission/es-bundle.js';
 import { esline } from '../esline.tag.js';
+import { EsSignature } from '../functions/es-signature.js';
 import { esLocal } from '../symbols/es-local.symbol.js';
 import { EsLocalClass } from './es-local.class.js';
 
@@ -13,7 +14,7 @@ describe('EsLocalClass', () => {
 
   describe('declare', () => {
     it('declares local class', async () => {
-      const cls = new EsLocalClass('Test');
+      const cls = new EsLocalClass<EsSignature.NoArgs>('Test');
 
       await expect(
         bundle

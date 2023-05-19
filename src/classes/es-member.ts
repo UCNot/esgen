@@ -1,3 +1,4 @@
+import { esMemberAccessor } from '../impl/es-member-accessor.js';
 import { EsClass } from './es-class.js';
 
 /**
@@ -32,6 +33,51 @@ export abstract class EsMember<out THandle = void> {
    */
   get visibility(): EsMemberVisibility {
     return this.#visibility;
+  }
+
+  /**
+   * Declares member automatically rather explicitly.
+   *
+   * Called by host class if this member is not declared in the base class.
+   *
+   * Automatic declaration would be disposed of once the member is declared explicitly.
+   *
+   * @param hostClass - Host class to declare member for.
+   * @param ref - Incomplete member reference.
+   *
+   * @throws [ReferenceError] by default.
+   *
+   * [ReferenceError]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError
+   */
+  autoDeclare(hostClass: EsClass, ref: Omit<EsMemberRef<this, THandle>, 'getHandle'>): THandle {
+    throw new ReferenceError(`${this.toString(ref)} is not declared in ${hostClass}`);
+  }
+
+  /**
+   * Inherits this member from the base class.
+   *
+   * Called by host class to update inherited member handle.
+   *
+   * Returns the `handle` as is by default.
+   *
+   * @param hostClass - Host class to inherit member for.
+   * @param ref - Inherited member reference.
+   * @param baseClass - Base class the member inherited from.
+   *
+   * @returns Member handle updated for inherited member.
+   */
+  inherit(hostClass: EsClass, ref: EsMemberRef<this, THandle>, baseClass: EsClass): THandle;
+
+  inherit(_hostClass: EsClass, ref: EsMemberRef<this, THandle>, _baseClass: EsClass): THandle {
+    return ref.getHandle();
+  }
+
+  toString({
+    accessor = esMemberAccessor(this.requestedName, this.visibility).accessor,
+  }: {
+    readonly accessor?: string | undefined;
+  } = {}): string {
+    return accessor;
   }
 
 }
@@ -107,9 +153,9 @@ export interface EsMemberRef<
   readonly declared: boolean;
 
   /**
-   * Member handle.
+   * Obtains member handle.
    */
-  readonly handle: THandle;
+  getHandle(this: void): THandle;
 }
 
 /**

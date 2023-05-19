@@ -22,23 +22,20 @@ describe('EsClass', () => {
 
       member.declareIn(hostClass);
 
-      expect(hostClass.findMember(member)).toEqual({
+      const ref = hostClass.findMember(member);
+
+      expect(ref).toEqual({
         member,
         name: 'test',
         key: 'test',
         accessor: '.test',
         declared: true,
-        handle: hostClass,
+        getHandle: expect.any(Function),
       });
+      expect(ref?.getHandle()).toBe(hostClass);
       expect([...hostClass.members()]).toEqual([
-        {
-          member,
-          name: 'test',
-          key: 'test',
-          accessor: '.test',
-          declared: true,
-          handle: hostClass,
-        },
+        hostClass.findMember(hostClass.classConstructor),
+        ref,
       ]);
     });
     it('declares override class member', () => {
@@ -48,44 +45,38 @@ describe('EsClass', () => {
 
       member.declareIn(baseClass);
 
-      expect(hostClass.findMember(member)).toEqual({
+      const ref1 = hostClass.findMember(member);
+
+      expect(ref1).toEqual({
         member,
         name: 'test',
         key: 'test',
         accessor: '.test',
         declared: false,
-        handle: baseClass,
+        getHandle: expect.any(Function),
       });
+      expect(ref1?.getHandle()).toBe(baseClass);
       expect([...hostClass.members()]).toEqual([
-        {
-          member,
-          name: 'test',
-          key: 'test',
-          accessor: '.test',
-          declared: false,
-          handle: baseClass,
-        },
+        hostClass.findMember(hostClass.classConstructor),
+        ref1,
       ]);
 
       member.declareIn(hostClass);
 
-      expect(hostClass.findMember(member)).toEqual({
+      const ref2 = hostClass.findMember(member);
+
+      expect(ref2).toEqual({
         member,
         name: 'test',
         key: 'test',
         accessor: '.test',
         declared: true,
-        handle: hostClass,
+        getHandle: expect.any(Function),
       });
+      expect(ref2?.getHandle()).toBe(hostClass);
       expect([...hostClass.members()]).toEqual([
-        {
-          member,
-          name: 'test',
-          key: 'test',
-          accessor: '.test',
-          declared: true,
-          handle: hostClass,
-        },
+        hostClass.findMember(hostClass.classConstructor),
+        ref2,
       ]);
     });
     it('declares private class member', () => {
@@ -95,23 +86,20 @@ describe('EsClass', () => {
 
       member.declareIn(hostClass);
 
-      expect(hostClass.findMember(member)).toEqual({
+      const ref = hostClass.findMember(member);
+
+      expect(ref).toEqual({
         member,
         name: '#test',
         key: '#test',
         accessor: '.#test',
         declared: true,
-        handle: hostClass,
+        getHandle: expect.any(Function),
       });
+      expect(ref?.getHandle()).toBe(hostClass);
       expect([...hostClass.members()]).toEqual([
-        {
-          member,
-          name: '#test',
-          key: '#test',
-          accessor: '.#test',
-          declared: true,
-          handle: hostClass,
-        },
+        ref,
+        hostClass.findMember(hostClass.classConstructor),
       ]);
     });
     it('declares private member of base class only', () => {
@@ -122,7 +110,7 @@ describe('EsClass', () => {
       member.declareIn(baseClass);
 
       expect(hostClass.findMember(member)).toBeUndefined();
-      expect([...hostClass.members()]).toEqual([]);
+      expect([...hostClass.members()]).toEqual([hostClass.findMember(hostClass.classConstructor)]);
     });
     it('permits arbitrary public member name', () => {
       const member = new TestMember('test\n');
@@ -133,7 +121,7 @@ describe('EsClass', () => {
         key: "['test\\n']",
         accessor: "['test\\n']",
         declared: true,
-        handle: hostClass,
+        getHandle: expect.any(Function),
       });
     });
     it('converts private member name to ECMAScript-safe identifier', () => {
@@ -145,7 +133,7 @@ describe('EsClass', () => {
         key: '#test_xA_',
         accessor: '.#test_xA_',
         declared: true,
-        handle: hostClass,
+        getHandle: expect.any(Function),
       });
     });
     it('resolves private member name conflict', () => {
@@ -198,13 +186,14 @@ describe('EsClass', () => {
 
       member.declareIn(baseClass);
       expect([...hostClass.members({ derived: true })]).toEqual([
+        hostClass.findMember(hostClass.classConstructor),
         {
           member,
           name: 'test',
           key: 'test',
           accessor: '.test',
           declared: false,
-          handle: baseClass,
+          getHandle: expect.any(Function),
         },
       ]);
       expect([...hostClass.members({ derived: false })]).toEqual([]);
@@ -220,23 +209,26 @@ describe('EsClass', () => {
           key: '#test',
           accessor: '.#test',
           declared: true,
-          handle: hostClass,
+          getHandle: expect.any(Function),
         },
       ]);
-      expect([...hostClass.members({ visibility: 'public' })]).toEqual([]);
+      expect([...hostClass.members({ visibility: 'public' })]).toEqual([
+        hostClass.findMember(hostClass.classConstructor),
+      ]);
     });
     it('iterates over public class members', () => {
       const member = new TestMember('test');
 
       member.declareIn(hostClass);
       expect([...hostClass.members({ visibility: 'public' })]).toEqual([
+        hostClass.findMember(hostClass.classConstructor),
         {
           member,
           name: 'test',
           key: 'test',
           accessor: '.test',
           declared: true,
-          handle: hostClass,
+          getHandle: expect.any(Function),
         },
       ]);
       expect([...hostClass.members({ derived: false })]).toEqual([
@@ -246,7 +238,7 @@ describe('EsClass', () => {
           key: 'test',
           accessor: '.test',
           declared: true,
-          handle: hostClass,
+          getHandle: expect.any(Function),
         },
       ]);
       expect([...hostClass.members({ visibility: 'private' })]).toEqual([]);

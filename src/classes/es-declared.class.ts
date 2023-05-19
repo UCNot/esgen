@@ -3,12 +3,19 @@ import {
   EsDeclarationNaming,
   EsDeclaredSymbol,
 } from '../declarations/es-declared.symbol.js';
+import { EsSignature } from '../functions/es-signature.js';
 import { EsClass, EsClassInit } from './es-class.js';
 
 /**
  * Class declared in bundle {@link EsDeclarations declarations}.
+ *
+ * @typeParam TArgs - Type of class constructor arguments definition.
  */
-export class EsDeclaredClass extends EsClass<EsDeclarationNaming, EsDeclaredSymbol> {
+export class EsDeclaredClass<out TArgs extends EsSignature.Args> extends EsClass<
+  TArgs,
+  EsDeclarationNaming,
+  EsDeclaredSymbol
+> {
 
   /**
    * Constructs declared class.
@@ -16,7 +23,14 @@ export class EsDeclaredClass extends EsClass<EsDeclarationNaming, EsDeclaredSymb
    * @param requestedName - Requested class name.
    * @param init - Initialization options.
    */
-  constructor(requestedName: string, init?: EsDeclaredClassInit) {
+  constructor(
+    requestedName: string,
+    ...init: EsSignature.NoArgs extends TArgs
+      ? [EsDeclaredClassInit<TArgs>?]
+      : [EsDeclaredClassInit<TArgs>]
+  );
+
+  constructor(requestedName: string, init?: EsDeclaredClassInit<TArgs>) {
     const symbol = new EsDeclaredSymbol(requestedName, {
       ...init,
       declare: ({ refer }) => {
@@ -30,12 +44,18 @@ export class EsDeclaredClass extends EsClass<EsDeclarationNaming, EsDeclaredSymb
       },
     });
 
-    super(symbol, init);
+    super(symbol, init as EsClassInit<TArgs>);
   }
 
 }
 
 /**
  * Declared {@link EsDeclaredClass class} initialization options.
+ *
+ * @typeParam TArgs - Type of class constructor arguments definition.
  */
-export interface EsDeclaredClassInit extends Omit<EsDeclarationInit, 'declare'>, EsClassInit {}
+export type EsDeclaredClassInit<TArgs extends EsSignature.Args> = Omit<
+  EsDeclarationInit,
+  'declare'
+> &
+  EsClassInit<TArgs>;

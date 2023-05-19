@@ -12,7 +12,8 @@ import { EsArg, EsArgKind, EsArgSymbol } from './es-arg.symbol.js';
  *
  * @typeParam TArgs - Type of arguments definition.
  */
-export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args> {
+export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
+  implements Iterable<EsArgSymbol> {
 
   /**
    * Creates signature for the given arguments definition.
@@ -175,6 +176,39 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args> 
   }
 
   /**
+   * Checks whether a function with this signature accepts arguments provided for another one.
+   *
+   * Requires argument {@link EsArgSymbol#requestedName names} to match, and all required arguments present.
+   *
+   * @param another - Another signature the substituted arguments provided for.
+   *
+   * @returns `true` is signatures compatible, or `false` otherwise.
+   */
+  acceptsArgsFor(another: EsSignature): boolean {
+    const providedArgs = Object.values<EsArgSymbol>(another.args);
+
+    for (const arg of Object.values<EsArgSymbol>(this.args)) {
+      if (providedArgs.length > arg.position) {
+        const providedArg = providedArgs[arg.position];
+
+        if (arg.requestedName !== providedArg.requestedName) {
+          return false;
+        }
+
+        if (arg.kind !== EsArgKind.Optional && providedArg.kind !== arg.kind) {
+          // Required argument may be omitted.
+          return false;
+        }
+      } else {
+        // Required arguments have to be provided.
+        return arg.kind !== EsArgKind.Required;
+      }
+    }
+
+    return true;
+  }
+
+  /**
    * Calls a function.
    *
    * @param args - Named argument values.
@@ -253,6 +287,13 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args> 
     return argValues;
   }
 
+  /**
+   * Iterates over argument symbols.
+   */
+  *[Symbol.iterator](): IterableIterator<EsArgSymbol> {
+    yield* Object.values<EsArgSymbol>(this.args);
+  }
+
   toString(): string {
     return (
       `(`
@@ -279,6 +320,11 @@ export namespace EsSignature {
   export type Args<TKey extends EsArg.Key = EsArg.Key> = {
     readonly [name in TKey]: EsArg;
   };
+
+  /**
+   * Definition of signature without arguments.
+   */
+  export type NoArgs = Args<never>;
 
   /**
    * Signature argument symbols for the {@link EsArg.NameOf named} arguments.
