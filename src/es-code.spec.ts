@@ -40,17 +40,6 @@ describe('EsCode', () => {
       await expect(new EsBundle().emit(code).asText()).resolves.toBe('{\n\n}\n');
     });
     it('accepts another code fragment', async () => {
-      code.write({
-        toCode() {
-          return code => {
-            code.write('foo();');
-          };
-        },
-      });
-
-      await expect(new EsBundle().emit(code).asText()).resolves.toBe('foo();\n');
-    });
-    it('accepts another EsCode instance', async () => {
       code.write(new EsCode().write('foo();'));
 
       await expect(new EsBundle().emit(code).asText()).resolves.toBe('foo();\n');

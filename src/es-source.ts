@@ -8,12 +8,12 @@ import { EsEmitter, EsScope } from './scopes/es-scope.js';
  * One of:
  *
  * - string containing source code,
+ * - another {@link EsCode code fragment},
  * - code {@link EsPrinter printer},
- * - code {@link EsEmitter emitter}, including {@link EsCode writable code fragment},
- * - code source {@link EsProducer producer} instance, or
+ * - code {@link EsEmitter emitter}, or
  * - code {@link EsBuilder builder} function.
  */
-export type EsSource = string | EsPrinter | EsEmitter | EsProducer | EsBuilder;
+export type EsSource = string | EsPrinter | EsEmitter | EsBuilder;
 
 /**
  * Code builder signature.
@@ -28,15 +28,3 @@ export type EsSource = string | EsPrinter | EsEmitter | EsProducer | EsBuilder;
  * @returns None when code built synchronously, or promise-like instance resolved when code built asynchronously.
  */
 export type EsBuilder = (this: void, code: EsCode, scope: EsScope) => void | PromiseLike<void>;
-
-/**
- * Code source producer interface.
- */
-export interface EsProducer {
-  /**
-   * Produces arbitrary code source.
-   *
-   * @returns Produced code source.
-   */
-  toCode(): EsSource;
-}

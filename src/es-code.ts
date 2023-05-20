@@ -1,6 +1,6 @@
 import { noop } from '@proc7ts/primitives';
 import { EsOutput, EsPrinter } from './es-output.js';
-import { EsBuilder, EsProducer, EsSource } from './es-source.js';
+import { EsBuilder, EsSource } from './es-source.js';
 import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit } from './scopes/es-scope.js';
 
 /**
@@ -70,8 +70,6 @@ export class EsCode implements EsEmitter {
         throw new TypeError('Can not insert code fragment into itself');
       }
       this.#addEmitter(source);
-    } else if (isEsProducer(source)) {
-      this.#addSource(source.toCode());
     } else if (source === '') {
       this.#addEmitter(EsCode$NewLine);
     } else {
@@ -218,10 +216,6 @@ export class EsCode implements EsEmitter {
 
 function isEsPrinter(source: EsSource): source is EsEmitter {
   return typeof source === 'object' && 'emit' in source && typeof source.emit === 'function';
-}
-
-function isEsProducer(source: EsSource): source is EsProducer {
-  return typeof source === 'object' && 'toCode' in source && typeof source.toCode === 'function';
 }
 
 function EsCode$none(_code: EsCode): void {
