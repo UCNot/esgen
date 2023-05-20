@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>EsEmission | ECMAScript Generator</title><meta name="description" content="Documentation for ECMAScript Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
+<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>EsScope | ECMAScript Generator</title><meta name="description" content="Documentation for ECMAScript Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
 <div class="tsd-toolbar-contents container">
 <div class="table-cell" id="tsd-search" data-base="..">
 <div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M15.7824 13.833L12.6666 10.7177C12.5259 10.5771 12.3353 10.499 12.1353 10.499H11.6259C12.4884 9.39596 13.001 8.00859 13.001 6.49937C13.001 2.90909 10.0914 0 6.50048 0C2.90959 0 0 2.90909 0 6.49937C0 10.0896 2.90959 12.9987 6.50048 12.9987C8.00996 12.9987 9.39756 12.4863 10.5008 11.6239V12.1332C10.5008 12.3332 10.5789 12.5238 10.7195 12.6644L13.8354 15.7797C14.1292 16.0734 14.6042 16.0734 14.8948 15.7797L15.7793 14.8954C16.0731 14.6017 16.0731 14.1267 15.7824 13.833ZM6.50048 10.499C4.29094 10.499 2.50018 8.71165 2.50018 6.49937C2.50018 4.29021 4.28781 2.49976 6.50048 2.49976C8.71001 2.49976 10.5008 4.28708 10.5008 6.49937C10.5008 8.70852 8.71314 10.499 6.50048 10.499Z" fill="var(--color-text)"></path></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div>
@@ -13,24 +13,26 @@
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb">
 <li><a href="../modules.html">ECMAScript Generator</a></li>
-<li><a href="EsEmission.html">EsEmission</a></li></ul>
-<h1>Interface EsEmission</h1></div>
+<li><a href="EsScope.html">EsScope</a></li></ul>
+<h1>Interface EsScope</h1></div>
 <section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>Code emission control.</p>
+<div class="tsd-comment tsd-typography"><p>Code emission scope.</p>
 <p>Ensures that all code <a href="EsEmitter.html#emit" class="tsd-kind-method">emitted</a> <em>before</em> the code printed.</p>
 <p>Code may be emitted in multiple <a href="EsEmissionSpan.html" class="tsd-kind-interface">spans</a> in arbitrary order.</p>
-<p>Emissions may <a href="EsEmission.html#spawn" class="tsd-kind-method">spawn</a> more emissions, e.g. for nested namespaces.</p>
+<p>Scopes may be <a href="EsScope.html#nest" class="tsd-kind-method">nested</a>.</p>
 </div></section>
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
-<li><span class="target">EsEmission</span></li></ul></section>
+<li><a href="EsNamingHost.html" class="tsd-signature-type tsd-kind-interface">EsNamingHost</a>
+<ul class="tsd-hierarchy">
+<li><span class="target">EsScope</span></li></ul></li></ul></section>
 <section class="tsd-panel">
 <h4>Implemented by</h4>
 <ul class="tsd-hierarchy">
 <li><a href="../classes/EsBundle.html" class="tsd-signature-type tsd-kind-class">EsBundle</a></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/463365e/src/emission/es-emission.ts#L17">run-z/esgen/src/emission/es-emission.ts:17</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/6b2e443/src/scopes/es-scope.ts#L17">run-z/esgen/src/scopes/es-scope.ts:17</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -38,18 +40,18 @@
 <div class="tsd-accordion-details">
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Accessors</h3>
-<div class="tsd-index-list"><a href="EsEmission.html#bundle" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4D4D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-262144-path"></rect><path d="M8.85 16L11.13 7.24H12.582L14.85 16H13.758L13.182 13.672H10.53L9.954 16H8.85ZM10.746 12.76H12.954L12.282 10.06C12.154 9.548 12.054 9.12 11.982 8.776C11.91 8.432 11.866 8.208 11.85 8.104C11.834 8.208 11.79 8.432 11.718 8.776C11.646 9.12 11.546 9.544 11.418 10.048L10.746 12.76Z" fill="var(--color-text)" id="icon-262144-text"></path></svg><span>bundle</span></a>
-<a href="EsEmission.html#declarations" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>declarations</span></a>
-<a href="EsEmission.html#format" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>format</span></a>
-<a href="EsEmission.html#imports" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>imports</span></a>
-<a href="EsEmission.html#ns" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>ns</span></a>
+<div class="tsd-index-list"><a href="EsScope.html#bundle" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4D4D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-262144-path"></rect><path d="M8.85 16L11.13 7.24H12.582L14.85 16H13.758L13.182 13.672H10.53L9.954 16H8.85ZM10.746 12.76H12.954L12.282 10.06C12.154 9.548 12.054 9.12 11.982 8.776C11.91 8.432 11.866 8.208 11.85 8.104C11.834 8.208 11.79 8.432 11.718 8.776C11.646 9.12 11.546 9.544 11.418 10.048L10.746 12.76Z" fill="var(--color-text)" id="icon-262144-text"></path></svg><span>bundle</span></a>
+<a href="EsScope.html#declarations" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>declarations</span></a>
+<a href="EsScope.html#format" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>format</span></a>
+<a href="EsScope.html#imports" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>imports</span></a>
+<a href="EsScope.html#ns" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>ns</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Methods</h3>
-<div class="tsd-index-list"><a href="EsEmission.html#isActive" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-2048-path"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)" id="icon-2048-text"></path></svg><span>is<wbr/>Active</span></a>
-<a href="EsEmission.html#span" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>span</span></a>
-<a href="EsEmission.html#spawn" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>spawn</span></a>
-<a href="EsEmission.html#whenDone" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>when<wbr/>Done</span></a>
+<div class="tsd-index-list"><a href="EsScope.html#isActive" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-2048-path"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)" id="icon-2048-text"></path></svg><span>is<wbr/>Active</span></a>
+<a href="EsScope.html#nest" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>nest</span></a>
+<a href="EsScope.html#span" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>span</span></a>
+<a href="EsScope.html#whenDone" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>when<wbr/>Done</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Accessors</h2>
@@ -58,21 +60,21 @@
 <ul class="tsd-signatures">
 <li class="tsd-signature" id="bundle.bundle-1"><span class="tsd-signature-symbol">get</span> bundle<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/EsBundle.html" class="tsd-signature-type tsd-kind-class">EsBundle</a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Code bundle control that <a href="EsEmission.html#spawn" class="tsd-kind-method">spawned</a> this emission.</p>
+<div class="tsd-comment tsd-typography"><p>Enclosing code bundle.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <a href="../classes/EsBundle.html" class="tsd-signature-type tsd-kind-class">EsBundle</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/463365e/src/emission/es-emission.ts#L21">run-z/esgen/src/emission/es-emission.ts:21</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/6b2e443/src/scopes/es-scope.ts#L21">run-z/esgen/src/scopes/es-scope.ts:21</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="declarations" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>declarations</span><a href="#declarations" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature" id="declarations.declarations-1"><span class="tsd-signature-symbol">get</span> declarations<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/EsDeclarations.html" class="tsd-signature-type tsd-kind-class">EsDeclarations</a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Declarations of the <a href="EsEmission.html#bundle" class="tsd-kind-accessor">bundle</a>.</p>
+<div class="tsd-comment tsd-typography"><p>Declarations of the <a href="EsScope.html#bundle" class="tsd-kind-accessor">bundle</a>.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <a href="../classes/EsDeclarations.html" class="tsd-signature-type tsd-kind-class">EsDeclarations</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/463365e/src/emission/es-emission.ts#L36">run-z/esgen/src/emission/es-emission.ts:36</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/6b2e443/src/scopes/es-scope.ts#L36">run-z/esgen/src/scopes/es-scope.ts:36</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="format" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>format</span><a href="#format" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -82,27 +84,28 @@
 </div>
 <h4 class="tsd-returns-title">Returns <a href="../enums/EsBundleFormat.html" class="tsd-signature-type tsd-kind-enum">EsBundleFormat</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/463365e/src/emission/es-emission.ts#L26">run-z/esgen/src/emission/es-emission.ts:26</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/6b2e443/src/scopes/es-scope.ts#L26">run-z/esgen/src/scopes/es-scope.ts:26</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="imports" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>imports</span><a href="#imports" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature" id="imports.imports-1"><span class="tsd-signature-symbol">get</span> imports<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/EsImports.html" class="tsd-signature-type tsd-kind-class">EsImports</a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Import declarations of the <a href="EsEmission.html#bundle" class="tsd-kind-accessor">bundle</a>.</p>
+<div class="tsd-comment tsd-typography"><p>Import declarations of the <a href="EsScope.html#bundle" class="tsd-kind-accessor">bundle</a>.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <a href="../classes/EsImports.html" class="tsd-signature-type tsd-kind-class">EsImports</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/463365e/src/emission/es-emission.ts#L31">run-z/esgen/src/emission/es-emission.ts:31</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/6b2e443/src/scopes/es-scope.ts#L31">run-z/esgen/src/scopes/es-scope.ts:31</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="ns" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>ns</span><a href="#ns" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature" id="ns.ns-1"><span class="tsd-signature-symbol">get</span> ns<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/EsNamespace.html" class="tsd-signature-type tsd-kind-class">EsNamespace</a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Namespace to <a href="../classes/EsNamespace.html#nameSymbol" class="tsd-kind-method">bind local symbols</a> to.</p>
+<div class="tsd-comment tsd-typography"><p>Namespace used to name the symbols.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <a href="../classes/EsNamespace.html" class="tsd-signature-type tsd-kind-class">EsNamespace</a></h4><aside class="tsd-sources">
+<p>Overrides EsNamingHost.ns</p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/463365e/src/emission/es-emission.ts#L41">run-z/esgen/src/emission/es-emission.ts:41</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/6b2e443/src/scopes/es-scope.ts#L41">run-z/esgen/src/scopes/es-scope.ts:41</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member"><a id="isActive" class="tsd-anchor"></a>
@@ -115,7 +118,25 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><p><code>true</code> if emission is in process, or <code>false</code> if emission is <a href="../classes/EsBundle.html#done" class="tsd-kind-method">completed</a>.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/463365e/src/emission/es-emission.ts#L48">run-z/esgen/src/emission/es-emission.ts:48</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/6b2e443/src/scopes/es-scope.ts#L48">run-z/esgen/src/scopes/es-scope.ts:48</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="nest" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>nest</span><a href="#nest" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="nest.nest-1"><span class="tsd-kind-call-signature">nest</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">init</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="EsScope.html" class="tsd-signature-type tsd-kind-interface">EsScope</a><a href="#nest.nest-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Creates nested emission scope.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">init</span>: <a href="EsScopeInit.html" class="tsd-signature-type tsd-kind-interface">EsScopeInit</a></h5>
+<div class="tsd-comment tsd-typography"><p>Nested emission scope options.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="EsScope.html" class="tsd-signature-type tsd-kind-interface">EsScope</a></h4><p>New code emission scope.</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/6b2e443/src/scopes/es-scope.ts#L57">run-z/esgen/src/scopes/es-scope.ts:57</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="span" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>span</span><a href="#span" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -133,25 +154,7 @@
 <h4 class="tsd-returns-title">Returns <a href="EsEmissionSpan.html" class="tsd-signature-type tsd-kind-interface">EsEmissionSpan</a></h4><p>New code emission span.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/463365e/src/emission/es-emission.ts#L66">run-z/esgen/src/emission/es-emission.ts:66</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="spawn" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>spawn</span><a href="#spawn" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="spawn.spawn-1"><span class="tsd-kind-call-signature">spawn</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">init</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="EsEmission.html" class="tsd-signature-type tsd-kind-interface">EsEmission</a><a href="#spawn.spawn-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Spawns another emission.</p>
-</div>
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">init</span>: <a href="EsEmissionInit.html" class="tsd-signature-type tsd-kind-interface">EsEmissionInit</a></h5>
-<div class="tsd-comment tsd-typography"><p>Nested emission options.</p>
-</div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="EsEmission.html" class="tsd-signature-type tsd-kind-interface">EsEmission</a></h4><p>New emission instance.</p>
-<aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/463365e/src/emission/es-emission.ts#L57">run-z/esgen/src/emission/es-emission.ts:57</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/6b2e443/src/scopes/es-scope.ts#L66">run-z/esgen/src/scopes/es-scope.ts:66</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="whenDone" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>when<wbr/>Done</span><a href="#whenDone" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -162,7 +165,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><p>Promise resolved when all code emission completes.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/463365e/src/emission/es-emission.ts#L73">run-z/esgen/src/emission/es-emission.ts:73</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/6b2e443/src/scopes/es-scope.ts#L73">run-z/esgen/src/scopes/es-scope.ts:73</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -187,8 +190,8 @@
 <li><a href="#imports" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>imports</span></a></li>
 <li><a href="#ns" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>ns</span></a></li>
 <li><a href="#isActive" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>is<wbr/>Active</span></a></li>
+<li><a href="#nest" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>nest</span></a></li>
 <li><a href="#span" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>span</span></a></li>
-<li><a href="#spawn" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>spawn</span></a></li>
 <li><a href="#whenDone" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>when<wbr/>Done</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-4-path"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)" id="icon-4-text"></path></svg><span>ECMAScript <wbr/>Generator</span></a>
@@ -204,15 +207,10 @@
 <details class="tsd-index-accordion" data-key="EsClassInit"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/EsClassInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>Es<wbr/>Class<wbr/>Init</span></a></summary>
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
+<li><a href="EsClassInit.BaseInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Base<wbr/>Init</span></a></li>
 <li><a href="EsClassInit.Custom.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Custom</span></a></li>
 <li><a href="EsClassInit.Inherited.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Inherited</span></a></li>
 <li><a href="EsClassInit.NoArgs.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>No<wbr/>Args</span></a></li></ul></div></details></li>
-<li>
-<details class="tsd-index-accordion" data-key="EsLocalDeclarer"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/EsLocalDeclarer.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>Es<wbr/>Local<wbr/>Declarer</span></a></summary>
-<div class="tsd-accordion-details">
-<ul class="tsd-nested-navigation">
-<li><a href="EsLocalDeclarer.Object.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Object</span></a></li>
-<li><a href="../types/EsLocalDeclarer.Function.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Function</span></a></li></ul></div></details></li>
 <li>
 <details class="tsd-index-accordion" data-key="EsMember"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/EsMember.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>Es<wbr/>Member</span></a></summary>
 <div class="tsd-accordion-details">
@@ -242,18 +240,11 @@
 <li><a href="../classes/EsCode.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Code</span></a></li>
 <li><a href="../classes/EsConstructor.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Constructor</span></a></li>
 <li><a href="../classes/EsDeclarations.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Declarations</span></a></li>
-<li><a href="../classes/EsDeclaredClass.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Declared<wbr/>Class</span></a></li>
-<li><a href="../classes/EsDeclaredFunction.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Declared<wbr/>Function</span></a></li>
-<li><a href="../classes/EsDeclaredLambda.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Declared<wbr/>Lambda</span></a></li>
-<li><a href="../classes/EsDeclaredSymbol.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Declared<wbr/>Symbol</span></a></li>
 <li><a href="../classes/EsExternalModule.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>External<wbr/>Module</span></a></li>
 <li><a href="../classes/EsField.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Field</span></a></li>
 <li><a href="../classes/EsFunction.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Function</span></a></li>
 <li><a href="../classes/EsImportedSymbol.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Imported<wbr/>Symbol</span></a></li>
 <li><a href="../classes/EsImports.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Imports</span></a></li>
-<li><a href="../classes/EsLocalClass.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Local<wbr/>Class</span></a></li>
-<li><a href="../classes/EsLocalFunction.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Local<wbr/>Function</span></a></li>
-<li><a href="../classes/EsLocalSymbol.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Local<wbr/>Symbol</span></a></li>
 <li><a href="../classes/EsMember-1.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Member</span></a></li>
 <li><a href="../classes/EsMethod.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Method</span></a></li>
 <li><a href="../classes/EsModule.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Module</span></a></li>
@@ -264,34 +255,26 @@
 <li><a href="../classes/EsSymbol.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Symbol</span></a></li>
 <li><a href="EsArgInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Arg<wbr/>Init</span></a></li>
 <li><a href="EsArgNaming.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Arg<wbr/>Naming</span></a></li>
-<li><a href="EsArgNamingConstraints.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Arg<wbr/>Naming<wbr/>Constraints</span></a></li>
 <li><a href="EsBundleInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Bundle<wbr/>Init</span></a></li>
 <li><a href="EsBundleResult.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Bundle<wbr/>Result</span></a></li>
 <li><a href="EsClassHandle.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Class<wbr/>Handle</span></a></li>
 <li><a href="EsConstInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Const<wbr/>Init</span></a></li>
 <li><a href="EsConstructorDeclaration.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Constructor<wbr/>Declaration</span></a></li>
 <li><a href="EsConstructorInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Constructor<wbr/>Init</span></a></li>
-<li><a href="EsDeclaration.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Declaration</span></a></li>
 <li><a href="EsDeclarationContext.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Declaration<wbr/>Context</span></a></li>
-<li><a href="EsDeclarationInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Declaration<wbr/>Init</span></a></li>
-<li><a href="EsDeclarationNaming.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Declaration<wbr/>Naming</span></a></li>
-<li><a href="EsEmission.html" class="current"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Emission</span></a></li>
-<li><a href="EsEmissionInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Emission<wbr/>Init</span></a></li>
+<li><a href="EsDeclarationPolicy.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Declaration<wbr/>Policy</span></a></li>
+<li><a href="EsDeclarationRequest.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Declaration<wbr/>Request</span></a></li>
 <li><a href="EsEmissionSpan.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Emission<wbr/>Span</span></a></li>
 <li><a href="EsEmitter.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Emitter</span></a></li>
 <li><a href="EsFieldDeclaration.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Field<wbr/>Declaration</span></a></li>
 <li><a href="EsFieldHandle.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Field<wbr/>Handle</span></a></li>
-<li><a href="EsFunctionDeclaration.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Function<wbr/>Declaration</span></a></li>
-<li><a href="EsFunctionDeclarationInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Function<wbr/>Declaration<wbr/>Init</span></a></li>
+<li><a href="EsFunctionDeclarationPolicy.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Function<wbr/>Declaration<wbr/>Policy</span></a></li>
+<li><a href="EsFunctionDeclarationRequest.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Function<wbr/>Declaration<wbr/>Request</span></a></li>
 <li><a href="EsFunctionExpression.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Function<wbr/>Expression</span></a></li>
+<li><a href="EsFunctionInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Function<wbr/>Init</span></a></li>
 <li><a href="EsImportInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Import<wbr/>Init</span></a></li>
 <li><a href="EsImportNaming.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Import<wbr/>Naming</span></a></li>
-<li><a href="EsLambdaDeclaration.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Lambda<wbr/>Declaration</span></a></li>
-<li><a href="EsLambdaDeclarationInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Lambda<wbr/>Declaration<wbr/>Init</span></a></li>
 <li><a href="EsLambdaExpression.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Lambda<wbr/>Expression</span></a></li>
-<li><a href="EsLocalContext.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Local<wbr/>Context</span></a></li>
-<li><a href="EsLocalNaming.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Local<wbr/>Naming</span></a></li>
-<li><a href="EsLocalNamingConstraints.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Local<wbr/>Naming<wbr/>Constraints</span></a></li>
 <li><a href="EsMemberInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Member<wbr/>Init</span></a></li>
 <li><a href="EsMemberRef.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Member<wbr/>Ref</span></a></li>
 <li><a href="EsMethodDeclaration.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Method<wbr/>Declaration</span></a></li>
@@ -300,27 +283,25 @@
 <li><a href="EsModuleImports.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Module<wbr/>Imports</span></a></li>
 <li><a href="EsNamespaceInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Namespace<wbr/>Init</span></a></li>
 <li><a href="EsNaming.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Naming</span></a></li>
-<li><a href="EsNamingConstraints.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Naming<wbr/>Constraints</span></a></li>
+<li><a href="EsNamingHost.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Naming<wbr/>Host</span></a></li>
 <li><a href="EsPrinter.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Printer</span></a></li>
-<li><a href="EsProducer.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Producer</span></a></li>
 <li><a href="EsReference.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Reference</span></a></li>
 <li><a href="EsResolution.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Resolution</span></a></li>
+<li><a href="EsScope.html" class="current"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Scope</span></a></li>
+<li><a href="EsScopeInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Scope<wbr/>Init</span></a></li>
 <li><a href="EsSymbolInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Symbol<wbr/>Init</span></a></li>
+<li><a href="EsVarDeclaration.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Var<wbr/>Declaration</span></a></li>
 <li><a href="../types/EsAnyMember.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Any<wbr/>Member</span></a></li>
-<li><a href="../types/EsAnySymbol.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Any<wbr/>Symbol</span></a></li>
 <li><a href="../types/EsArg-1.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Arg</span></a></li>
 <li><a href="../types/EsBuilder.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Builder</span></a></li>
+<li><a href="../types/EsClassDeclarationPolicy.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Class<wbr/>Declaration<wbr/>Policy</span></a></li>
 <li><a href="../types/EsClassInit-1.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Class<wbr/>Init</span></a></li>
-<li><a href="../types/EsDeclaredClassInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Declared<wbr/>Class<wbr/>Init</span></a></li>
+<li><a href="../types/EsDeclarationLocation.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Declaration<wbr/>Location</span></a></li>
 <li><a href="../types/EsEmissionResult.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Emission<wbr/>Result</span></a></li>
-<li><a href="../types/EsLocalClassInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Local<wbr/>Class<wbr/>Init</span></a></li>
-<li><a href="../types/EsLocalDeclarer-1.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Local<wbr/>Declarer</span></a></li>
-<li><a href="../types/EsSource.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Source</span></a></li>
+<li><a href="../types/EsSnippet.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Es<wbr/>Snippet</span></a></li>
 <li><a href="../functions/esConst.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-function)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-64-path"></rect><path d="M9.39 16V7.24H14.55V8.224H10.446V11.128H14.238V12.112H10.47V16H9.39Z" fill="var(--color-text)" id="icon-64-text"></path></svg><span>es<wbr/>Const</span></a></li>
-<li><a href="../functions/esDeclare.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>es<wbr/>Declare</span></a></li>
+<li><a href="../functions/esDeclareVar.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>es<wbr/>Declare<wbr/>Var</span></a></li>
 <li><a href="../functions/esImport.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>es<wbr/>Import</span></a></li>
-<li><a href="../functions/esLocal.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>es<wbr/>Local</span></a></li>
-<li><a href="../functions/esLocalFunction-1.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>es<wbr/>Local<wbr/>Function</span></a></li>
 <li><a href="../functions/esSafeId.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>es<wbr/>Safe<wbr/>Id</span></a></li>
 <li><a href="../functions/esSymbolString.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>es<wbr/>Symbol<wbr/>String</span></a></li>
 <li><a href="../functions/esline.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>esline</span></a></li></ul></nav></div></div></div>
