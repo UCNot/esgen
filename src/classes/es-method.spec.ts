@@ -3,9 +3,8 @@ import { jsStringLiteral } from 'httongue';
 import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsBundle } from '../scopes/es-bundle.js';
-import { esLocal } from '../symbols/es-local.symbol.js';
+import { EsSymbol } from '../symbols/es-symbol.js';
 import { EsClass } from './es-class.js';
-import { EsDeclaredClass } from './es-declared.class.js';
 import { EsMethod } from './es-method.js';
 
 describe('EsMethod', () => {
@@ -16,7 +15,9 @@ describe('EsMethod', () => {
   });
 
   it('declares method', async () => {
-    const hostClass: EsClass<EsSignature.NoArgs> = new EsDeclaredClass('Test');
+    const hostClass: EsClass<EsSignature.NoArgs> = new EsClass('Test', {
+      declare: { at: 'bundle' },
+    });
     const method = new EsMethod('test', { args: { arg1: {}, 'arg2?': {} } });
 
     method.declareIn(hostClass, {
@@ -27,13 +28,13 @@ describe('EsMethod', () => {
     await expect(
       bundle
         .emit(code => {
-          const instance = esLocal('instance');
+          const instance = new EsSymbol('instance');
 
           code
             .write(
-              instance.declare(
-                ({ naming }) => esline`const ${naming} = ${hostClass.instantiate()};`,
-              ),
+              instance.requestDeclaration({
+                as: ({ naming }) => [esline`const ${naming} = ${hostClass.instantiate()};`, naming],
+              }),
             )
             .write(esline`${hostClass.member(method).call(instance, { arg1: '13' })};`);
         })

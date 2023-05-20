@@ -1,5 +1,10 @@
 import { EsSnippet } from '../es-snippet.js';
-import { EsDeclarationContext, EsDeclarationInit, EsDeclaredSymbol } from './es-declared.symbol.js';
+import {
+  EsDeclarationContext,
+  EsDeclarationPolicy,
+  EsSymbol,
+  EsSymbolInit,
+} from '../symbols/es-symbol.js';
 
 /**
  * Declares variable in bundle {@link EsDeclarations declarations}.
@@ -9,23 +14,31 @@ import { EsDeclarationContext, EsDeclarationInit, EsDeclaredSymbol } from './es-
  *
  * @returns Declared variable symbol.
  */
-export function esDeclare(requestedName: string, init: EsDeclaration): EsDeclaredSymbol {
+export function esDeclareVar(requestedName: string, init: EsVarDeclaration): EsSymbol {
   const { spec = 'const', value } = init;
 
-  return new EsDeclaredSymbol(requestedName, {
+  return new EsSymbol(requestedName, {
     ...init,
-    declare(context) {
-      return code => {
-        code.line(spec, ' ', context.naming.name, ' = ', value(context), ';');
-      };
+    declare: {
+      ...init,
+      as(context) {
+        return [
+          code => {
+            code.line(spec, ' ', context.naming, ' = ', value(context), ';');
+          },
+          context.naming,
+        ];
+      },
     },
   });
 }
 
 /**
- * Variable {@link esDeclare declaration} details.
+ * Variable {@link esDeclareVar declaration} details.
  */
-export interface EsDeclaration extends Omit<EsDeclarationInit, 'declare'> {
+export interface EsVarDeclaration
+  extends Omit<EsSymbolInit, 'declare'>,
+    Omit<EsDeclarationPolicy, 'as'> {
   /**
    * Variable declaration specifier (`const`, `let`, or `var`).
    *

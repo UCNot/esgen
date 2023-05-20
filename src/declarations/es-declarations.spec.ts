@@ -11,8 +11,8 @@ describe('EsDeclarations', () => {
   });
 
   it('exports multiple symbols', async () => {
-    const symbol1 = esConst('first', `1`, { exported: true });
-    const symbol2 = esConst('second', `2`, { exported: true });
+    const symbol1 = esConst('first', `1`, { at: 'exports' });
+    const symbol2 = esConst('second', `2`, { at: 'exports' });
 
     bundle.ns.refer(symbol1);
     bundle.ns.refer(symbol2);
@@ -23,7 +23,7 @@ describe('EsDeclarations', () => {
   });
   it('renames conflicting exports', async () => {
     const symbol1 = esConst('test', `1`, { prefix: '' });
-    const symbol2 = esConst('test', `2`, { exported: true });
+    const symbol2 = esConst('test', `2`, { at: 'exports' });
 
     expect(bundle.ns.refer(symbol1).getNaming().name).toBe('test');
     expect(bundle.ns.refer(symbol2).getNaming().name).toBe('test$0');
@@ -33,8 +33,8 @@ describe('EsDeclarations', () => {
     );
   });
   it('prevents declarations when printed', async () => {
-    const symbol1 = esConst('first', `1`, { exported: true });
-    const symbol2 = esConst('second', `2`, { exported: true });
+    const symbol1 = esConst('first', `1`, { at: 'exports' });
+    const symbol2 = esConst('second', `2`, { at: 'exports' });
 
     bundle.ns.refer(symbol1);
 
@@ -47,7 +47,7 @@ describe('EsDeclarations', () => {
     it('renames conflicting exports', async () => {
       const bundle = new EsBundle({ format: EsBundleFormat.IIFE });
       const symbol1 = esConst('test', `1`, { prefix: '' });
-      const symbol2 = esConst('test', `2`, { exported: true });
+      const symbol2 = esConst('test', `2`, { at: 'exports' });
 
       expect(bundle.ns.refer(symbol1).getNaming().name).toBe('test');
       expect(bundle.ns.refer(symbol2).getNaming().name).toBe('test$0');

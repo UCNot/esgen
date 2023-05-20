@@ -63,9 +63,9 @@ describe('esConst', () => {
     expect(esConst('TEST2', '123')).toBe(symbol);
   });
   it('does not cache exported symbol with the same identifier', () => {
-    const symbol = esConst('TEST', '123', { exported: true });
+    const symbol = esConst('TEST', '123', { at: 'exports' });
 
-    expect(esConst('TEST', '123', { exported: true })).not.toBe(symbol);
+    expect(esConst('TEST', '123', { at: 'exports' })).not.toBe(symbol);
   });
   it('does not cache symbol referring another one', () => {
     const symbol = esConst('TEST', '123', { refers: esConst('REF', '991') });
@@ -75,7 +75,7 @@ describe('esConst', () => {
 
   describe('ES2015', () => {
     it('exports constant', async () => {
-      const symbol = esConst('TEST', `13`, { exported: true });
+      const symbol = esConst('TEST', `13`, { at: 'exports' });
 
       bundle.ns.refer(symbol);
       await expect(bundle.emit().asText()).resolves.toBe(`export const TEST = 13;\n`);
@@ -85,7 +85,7 @@ describe('esConst', () => {
   describe('IIFE', () => {
     it('exports constant', async () => {
       const bundle = new EsBundle({ format: EsBundleFormat.IIFE });
-      const symbol = esConst('TEST', `13`, { exported: true });
+      const symbol = esConst('TEST', `13`, { at: 'exports' });
 
       bundle.ns.refer(symbol);
       await expect(bundle.emit().asExports()).resolves.toEqual({ TEST: 13 });

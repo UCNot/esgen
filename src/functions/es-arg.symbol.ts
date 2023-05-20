@@ -170,11 +170,11 @@ export enum EsArgKind {
 /**
  * Definition of function argument.
  */
-export type EsArg = EsSymbolInit;
+export type EsArg = Omit<EsSymbolInit, 'declare'>;
 
 export namespace EsArg {
   /**
-   * Custom argument {@link EsArgSymbol#declare declaration}.
+   * Custom argument {@link EsArgSymbol#requestDeclaration declaration}.
    */
   export interface Declaration {
     /**
@@ -234,7 +234,7 @@ export interface EsArgNaming extends EsNaming {
   readonly symbol: EsArgSymbol;
 
   /**
-   * Emits argument {@link EsArgSymbol#declare declaration} code.
+   * Emits argument {@link EsArgSymbol#requestDeclaration declaration} code.
    *
    * @returns Argument declaration code.
    */

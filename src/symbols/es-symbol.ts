@@ -1,3 +1,5 @@
+import { noop } from '@proc7ts/primitives';
+import { EsSnippet } from '../es-snippet.js';
 import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsNamespace } from './es-namespace.js';
@@ -13,10 +15,11 @@ import { esSymbolString } from './es-symbol-string.js';
  *
  * @typeParam TNaming - Type of symbol naming.
  */
-export abstract class EsSymbol<out TNaming extends EsNaming = EsNaming>
+export class EsSymbol<out TNaming extends EsNaming = EsNaming>
   implements EsReference<TNaming>, EsEmitter {
 
   readonly #requestedName: string;
+  readonly #declare: EsDeclarationPolicy<TNaming> | undefined;
   readonly #comment: string | undefined;
 
   /**
@@ -25,9 +28,13 @@ export abstract class EsSymbol<out TNaming extends EsNaming = EsNaming>
    * @param requestedName - Requested symbol name. Will be converted to {@link esSafeId ECMAScript-safe} identifier.
    * @param init - Initialization options.
    */
-  constructor(requestedName: string, init?: EsSymbolInit) {
+  constructor(requestedName: string, init: EsSymbolInit<TNaming> = {}) {
     this.#requestedName = esSafeId(requestedName);
-    this.#comment = init?.comment;
+
+    const { declare, comment } = init;
+
+    this.#declare = declare;
+    this.#comment = comment;
   }
 
   /**
@@ -67,16 +74,59 @@ export abstract class EsSymbol<out TNaming extends EsNaming = EsNaming>
   /**
    * Adjusts this symbol resolution when it is {@link EsNamespace#refer referred}.
    *
-   * Does nothing by default.
+   * Automatically declares the symbol if automatic declaration {@link EsSymbolInit#declare requested}, or does nothing
+   * otherwise.
    *
    * @param resolution - Symbol resolution.
    * @param ns - Referring namespace.
    *
    * @returns Adjusted resolution.
    */
-  refer(resolution: EsResolution<TNaming, this>, ns: EsNamespace): EsResolution<TNaming, this>;
-  refer(resolution: EsResolution<TNaming, this>, _ns: EsNamespace): EsResolution<TNaming, this> {
+  refer(resolution: EsResolution<TNaming, this>, ns: EsNamespace): EsResolution<TNaming, this> {
+    if (this.#declare) {
+      this.#autoDeclareIn(ns, this.#declare);
+    }
+
     return resolution;
+  }
+
+  #autoDeclareIn(ns: EsNamespace, policy: EsDeclarationPolicy<TNaming>): TNaming {
+    return (
+      ns.findSymbol(this)
+      ?? ns.addSymbol(this, naming => ns.scope.bundle.declarations.declareSymbol(this, naming, policy))
+    );
+  }
+
+  /**
+   * Requests symbol declaration.
+   *
+   * The symbol can be used after that.
+   *
+   * @param request - Symbol declaration request.
+   *
+   * @returns Symbol's declaration statement.
+   */
+  requestDeclaration(request: EsDeclarationRequest<TNaming>): EsSnippet {
+    return (code, scope) => {
+      code.write(this.#declareIn(scope, request));
+    };
+  }
+
+  #declareIn(scope: EsScope, { as }: EsDeclarationRequest<TNaming>): EsSnippet {
+    let snippet!: EsSnippet;
+
+    scope.ns.addSymbol(this, naming => {
+      const [declSnippet, symbolNaming] = as({
+        naming,
+        refer: noop, // Local declaration order is not maintained.
+      });
+
+      snippet = declSnippet;
+
+      return symbolNaming;
+    });
+
+    return snippet;
   }
 
   /**
@@ -116,14 +166,99 @@ export abstract class EsSymbol<out TNaming extends EsNaming = EsNaming>
 }
 
 /**
- * Symbol initialization options.
+ * {@link EsSymbol Symbol} initialization options.
+ *
+ * @typeParam TNaming - Type of symbol naming.
  */
-export interface EsSymbolInit {
+export interface EsSymbolInit<out TNaming extends EsNaming = EsNaming> {
+  /**
+   * Automatic symbol declaration policy.
+   *
+   * When specified, the symbol will be automatically declared once referenced.
+   *
+   * When omitted, the symbol declaration has to be explicitly {@link EsSymbol#requestDeclaration requested} prior to
+   * being used.
+   */
+  readonly declare?: EsDeclarationPolicy<TNaming> | undefined;
+
   /**
    * Human-readable symbol comment used in its string representation.
    */
   readonly comment?: string | undefined;
 }
+
+/**
+ * Explicit symbol {@link EsSymbol#requestDeclaration declaration} request.
+ *
+ * @typeParam TNaming - Type of symbol naming.
+ */
+export interface EsDeclarationRequest<out TNaming extends EsNaming = EsNaming> {
+  /**
+   * Declares symbol.
+   *
+   * @param context - Symbol declaration context.
+   *
+   * @returns Tuple of code snippet containing symbol declaration, and symbol naming.
+   */
+  as(this: void, context: EsDeclarationContext): readonly [declaration: EsSnippet, naming: TNaming];
+}
+
+/**
+ * Automatic {@link EsSymbol symbol} declaration policy.
+ *
+ * @typeParam TNaming - Type of symbol naming.
+ */
+export interface EsDeclarationPolicy<out TNaming extends EsNaming = EsNaming> {
+  /**
+   * Where to place the symbol declaration.
+   */
+  readonly at: EsDeclarationLocation;
+
+  /**
+   * Other symbols the declared one refers.
+   *
+   * Referred symbols supposed to be declared _before_ the referrer.
+   */
+  readonly refers?: EsReference | readonly EsReference[] | undefined;
+
+  /**
+   * Declares symbol on demand.
+   *
+   * @param context - Symbol declaration context.
+   *
+   * @returns Tuple of code snippet containing symbol declaration, and symbol naming.
+   */
+  as(this: void, context: EsDeclarationContext): readonly [declaration: EsSnippet, naming: TNaming];
+}
+
+/**
+ * Symbol declaration context.
+ */
+export interface EsDeclarationContext {
+  /**
+   * Declared symbol naming.
+   */
+  readonly naming: EsNaming;
+
+  /**
+   * Refers the given symbol.
+   *
+   * Referred symbols supposed to be declared _before_ the referrer.
+   *
+   * @param ref - Referred symbol.
+   */
+  refer(this: void, ref: EsReference): void;
+}
+
+/**
+ * Location of symbol declaration.
+ *
+ * One of:
+ *
+ * - `bundle` - for top-level symbol internal to the bundle,
+ * - `exports` - for top-level symbol exported from the bundle.
+ */
+export type EsDeclarationLocation = 'bundle' | 'exports';
 
 /**
  * Symbol reference.

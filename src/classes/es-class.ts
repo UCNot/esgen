@@ -5,7 +5,7 @@ import { EsSignature } from '../functions/es-signature.js';
 import { esMemberAccessor } from '../impl/es-member-accessor.js';
 import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { EsNameRegistry } from '../symbols/es-name-registry.js';
-import { EsNaming, EsReference, EsSymbol } from '../symbols/es-symbol.js';
+import { EsDeclarationPolicy, EsReference, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsConstructor, EsConstructorDeclaration, EsConstructorInit } from './es-constructor.js';
 import { EsAnyMember, EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
@@ -19,13 +19,10 @@ import { EsAnyMember, EsMember, EsMemberRef, EsMemberVisibility } from './es-mem
  * @typeParam TNaming - Type of class symbol naming.
  * @typeParam TSymbol - Type of class symbol.
  */
-export class EsClass<
-  out TArgs extends EsSignature.Args = EsSignature.Args,
-  out TNaming extends EsNaming = EsNaming,
-  out TSymbol extends EsSymbol<TNaming> = EsSymbol<TNaming>,
-> implements EsReference<TNaming, TSymbol>, EsEmitter {
+export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
+  implements EsReference, EsEmitter {
 
-  readonly #symbol: TSymbol;
+  readonly #symbol: EsSymbol;
   readonly #baseClass: EsClass | undefined;
   readonly #classConstructor: EsConstructor<TArgs>;
 
@@ -45,18 +42,30 @@ export class EsClass<
   /**
    * Constructs class representation.
    *
-   * @param symbol - Class symbol.
+   * @param requestedName - Requested class name.
    * @param init - Class initialization options.
    */
   constructor(
-    symbol: TSymbol,
+    requestedName: string,
     ...init: EsSignature.NoArgs extends TArgs ? [EsClassInit<TArgs>?] : [EsClassInit<TArgs>]
   );
 
-  constructor(symbol: TSymbol, init: Partial<EsClassInit<TArgs>> = {}) {
-    this.#symbol = symbol;
+  constructor(requestedName: string, init: Partial<EsClassInit<TArgs>> = {}) {
+    const { baseClass, declare, classConstructor } = init;
 
-    const { baseClass, classConstructor } = init;
+    this.#symbol = new EsSymbol(requestedName, {
+      ...init,
+      declare: declare && {
+        ...declare,
+        as: context => {
+          if (baseClass) {
+            context.refer(baseClass);
+          }
+
+          return [this.asDeclaration(), context.naming];
+        },
+      },
+    });
 
     this.#baseClass = baseClass;
     if (baseClass) {
@@ -79,7 +88,7 @@ export class EsClass<
   /**
    * Unique class symbol.
    */
-  get symbol(): TSymbol {
+  get symbol(): EsSymbol {
     return this.#symbol;
   }
 
@@ -401,11 +410,22 @@ export class EsClass<
   }
 
   /**
-   * Emits class declaration.
+   * Declares class.
    *
    * @returns Class declaration statement.
    */
   declare(): EsSnippet {
+    return this.symbol.requestDeclaration({
+      as: context => [this.asDeclaration(), context.naming],
+    });
+  }
+
+  /**
+   * Emits class declaration statement.
+   *
+   * @returns Class declaration statement.
+   */
+  asDeclaration(): EsSnippet {
     return {
       emit: scope => this.#getCode().emit(scope),
     };
@@ -451,11 +471,25 @@ export type EsClassInit<TArgs extends EsSignature.Args> =
 
 export namespace EsClassInit {
   /**
+   * Base {@link EsClass class} initialization options.
+   */
+  export interface BaseInit extends Omit<EsSymbolInit, 'declare'> {
+    /**
+     * Automatic class declaration policy.
+     *
+     * When specified, the class will be automatically declared once referenced.
+     *
+     * When omitted, the class has to be explicitly {@link EsClass#declare declared} prior to being used.
+     */
+    readonly declare?: EsClassDeclarationPolicy | undefined;
+  }
+
+  /**
    * Custom {@link EsClass class} initialization options with explicit constructor.
    *
    * @typeParam TArgs - Type of class constructor arguments definition.
    */
-  export interface Custom<out TArgs extends EsSignature.Args> {
+  export interface Custom<out TArgs extends EsSignature.Args> extends BaseInit {
     /**
      * Either required class constructor or its initialization options.
      *
@@ -475,7 +509,7 @@ export namespace EsClassInit {
    *
    * @typeParam TArgs - Type of class constructor arguments definition.
    */
-  export interface Inherited<out TArgs extends EsSignature.Args> {
+  export interface Inherited<out TArgs extends EsSignature.Args> extends BaseInit {
     /**
      * Either optional class constructor or its initialization options.
      *
@@ -492,7 +526,7 @@ export namespace EsClassInit {
   /**
    * No-args {@link EsClass class} initialization options with derived constructor.
    */
-  export interface NoArgs {
+  export interface NoArgs extends BaseInit {
     /**
      * Either optional {@link EsSignature.NoArgs no-args} class constructor or its initialization options.
      *
@@ -510,6 +544,11 @@ export namespace EsClassInit {
     readonly baseClass?: EsClass<EsSignature.NoArgs> | undefined;
   }
 }
+
+/**
+ * Automatic {@link EsClass class} declaration policy.
+ */
+export type EsClassDeclarationPolicy = Omit<EsDeclarationPolicy, 'as'>;
 
 /**
  * {@link EsClass Class} handle used to instantiate new class instances.

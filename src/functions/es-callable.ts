@@ -131,39 +131,16 @@ export interface EsLambdaExpression<out TArgs extends EsSignature.Args> {
  * @typeParam TArgs - Type of function arguments definition.
  */
 export interface EsFunctionExpression<out TArgs extends EsSignature.Args>
-  extends EsFunctionDeclaration<TArgs> {
+  extends EsLambdaExpression<TArgs> {
+  /**
+   * Whether generator function declared.
+   */
+  readonly generator?: boolean | undefined;
+
   /**
    * Function name.
    *
    * Defaults to none.
    */
   readonly name?: string | undefined;
-}
-
-/**
- * Details of variable declaration initialized with {@link EsCallable#lambda lambda expression}.
- *
- * @typeParam TArgs - Type of lambda arguments definition.
- */
-export interface EsLambdaDeclaration<out TArgs extends EsSignature.Args>
-  extends EsLambdaExpression<TArgs> {
-  /**
-   * Variable declaration specifier (`const`, `let`, or `var`).
-   *
-   * @defaultValue `const`.
-   */
-  readonly spec?: 'const' | 'let' | 'var';
-}
-
-/**
- * Details of function declaration.
- *
- * @typeParam TArgs - Type of lambda arguments definition.
- */
-export interface EsFunctionDeclaration<out TArgs extends EsSignature.Args>
-  extends EsLambdaExpression<TArgs> {
-  /**
-   * Whether generator function declared.
-   */
-  readonly generator?: boolean | undefined;
 }
