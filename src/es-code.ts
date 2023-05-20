@@ -6,8 +6,8 @@ import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit } from './scopes/es-sco
 /**
  * Writable fragment of code.
  *
- * By default, represents a {@link block} of code, where each written code source is placed on a new line.
- * When {@link inline}, the written code sources placed without new lines between them.
+ * By default, represents a {@link multiLine multi-line} code, where each written code source is placed on a new line.
+ * When {@link line inline}, the written code sources placed without new lines between them.
  */
 export class EsCode implements EsEmitter {
 
@@ -34,9 +34,9 @@ export class EsCode implements EsEmitter {
   /**
    * Writes code to this fragment.
    *
-   * Writes a new line without `sources` specified, unless this is an {@link inline} code fragment.
+   * Writes a new line without `sources` specified, unless this is an {@link line inline} code fragment.
    *
-   * Places each source on a new line, unless this is an {@link inline} code fragment.
+   * Places each source on a new line, unless this is an {@link line inline} code fragment.
    *
    * @param sources - Written code sources.
    *
@@ -98,16 +98,16 @@ export class EsCode implements EsEmitter {
   }
 
   /**
-   * Writes inline code to this fragment.
+   * Writes a line of code to this fragment.
    *
-   * Unlike {@link write}, the sources are placed on the same line.
+   * Unlike {@link multiLine}, the sources are placed on the same line.
    *
    * @param sources - Inline code sources.
    *
    * @returns `this` instance.
    */
-  inline(...sources: EsSource[]): this {
-    this.#addEmitter(new EsCode$Inline(new EsCode(this).write(...sources)));
+  line(...sources: EsSource[]): this {
+    this.#addEmitter(new EsCode$Line(new EsCode(this).write(...sources)));
 
     return this;
   }
@@ -115,8 +115,8 @@ export class EsCode implements EsEmitter {
   /**
    * Writes indented code to this fragment.
    *
-   * Always places each source on a new line, and prepends it with indentation symbols. Even for {@link inline}
-   * code fragment.
+   * Always places each source on a new line and prepends it with indentation symbols. Even when inside an
+   * {@link line inline} code fragment.
    *
    * Indentations may be nested. Nested indentations adjust enclosing ones.
    *
@@ -131,16 +131,16 @@ export class EsCode implements EsEmitter {
   }
 
   /**
-   * Writes block of code to this fragment.
+   * Writes multiple lines of code to this fragment.
    *
-   * Always places each source on a new line. Even for {@link inline} code fragment. Unlike {@link indent}, does not
-   * adjust indentation.
+   * Always places each source on a new line. Even when inside an {@link line inline} code fragment.
+   * Unlike {@link indent}, does not adjust indentation.
    *
-   * @param sources - Block code sources.
+   * @param sources - Multi-line code sources.
    *
    * @returns `this` instance.
    */
-  block(...sources: EsSource[]): this {
+  multiLine(...sources: EsSource[]): this {
     this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...sources), ''));
 
     return this;
@@ -250,7 +250,7 @@ class EsCode$NewLine$ implements EsEmitter {
 
 const EsCode$NewLine = /*#__PURE__*/ new EsCode$NewLine$();
 
-class EsCode$Inline implements EsEmitter {
+class EsCode$Line implements EsEmitter {
 
   readonly #code: EsCode;
 
@@ -263,7 +263,7 @@ class EsCode$Inline implements EsEmitter {
 
     return {
       printTo: out => {
-        out.inline(span => span.print(record));
+        out.line(span => span.print(record));
       },
     };
   }

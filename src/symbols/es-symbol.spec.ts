@@ -26,7 +26,7 @@ describe('EsSymbol', () => {
       await expect(
         bundle
           .emit(code => {
-            code.inline(symbol, '();');
+            code.line(symbol, '();');
           })
           .asText(),
       ).resolves.toBe(`${name}();\n`);

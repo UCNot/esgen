@@ -64,7 +64,7 @@ describe('EsField', () => {
               .write(
                 instance.declare(({ naming }) => esline`const ${naming} = new ${hostClass}();`),
               )
-              .inline(handle.set(instance, esline`${handle.get(instance)} + 1`), `;`);
+              .line(handle.set(instance, esline`${handle.get(instance)} + 1`), `;`);
           })
           .asText(),
       ).resolves.toBe(

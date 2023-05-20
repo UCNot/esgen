@@ -21,7 +21,7 @@ describe('EsLocalSymbol', () => {
                 .write(
                   local.declare({ declareLocal: ({ naming: { name } }) => `let ${name} = 13;` }),
                 )
-                .inline(`console.log(`, local, `);`);
+                .line(`console.log(`, local, `);`);
             });
           })
           .asText(),
@@ -39,7 +39,7 @@ describe('EsLocalSymbol', () => {
                   local.declare(({ naming: { name } }) => `let ${name} = 1;`),
                   local.declare(({ naming: { name } }) => `let ${name} = 2;`),
                 )
-                .inline(`console.log(`, local, `);`);
+                .line(`console.log(`, local, `);`);
             });
           })
           .asText(),

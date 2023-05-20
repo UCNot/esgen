@@ -59,7 +59,7 @@ export class EsMethod<out TArgs extends EsSignature.Args> extends EsMember<EsMet
     const ref = hostClass.addMember(this, handle, code => {
       code.scope(code => {
         code
-          .inline(ref.key, this.signature.declare(args), ' {')
+          .line(ref.key, this.signature.declare(args), ' {')
           .indent(body(ref, hostClass))
           .write('}');
       });

@@ -149,7 +149,7 @@ export class EsBundle implements EsScope {
   #printIIFE(content: EsPrinter): EsPrinter {
     return {
       printTo: out => {
-        out.inline(out => {
+        out.line(out => {
           out
             .print(`(async () => {`)
             .indent(out => out.print(content, ''))
@@ -170,7 +170,7 @@ export class EsBundle implements EsScope {
   }
 
   async #returnExports(bundle: EsPrinter): Promise<unknown> {
-    const text = await new EsOutput().inline(out => out.print('return ', bundle, ';')).asText();
+    const text = await new EsOutput().line(out => out.print('return ', bundle, ';')).asText();
 
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
     const factory = Function(text);

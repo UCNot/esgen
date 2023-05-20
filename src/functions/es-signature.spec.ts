@@ -56,7 +56,7 @@ describe('EsSignature', () => {
       bundle = new EsBundle();
     });
 
-    it('prints arg with comment inline', async () => {
+    it('prints arg and comment on one line', async () => {
       const signature = new EsSignature({ test: { comment: 'Test' } });
 
       await expect(
@@ -70,7 +70,7 @@ describe('EsSignature', () => {
         `(\n  arg1 /* Arg 1 */,\n  arg2,\n)\n`,
       );
     });
-    it('prints thee args without comments inline', async () => {
+    it('prints thee args without comments on one line', async () => {
       const signature = new EsSignature({ arg1: {}, arg2: {}, arg3: {} });
 
       await expect(bundle.emit(signature.declare()).asText()).resolves.toBe(`(arg1, arg2, arg3)\n`);
@@ -148,7 +148,7 @@ describe('EsSignature', () => {
         `test();\n`,
       );
     });
-    it('prints three args inline', async () => {
+    it('prints three args on one line', async () => {
       const signature = new EsSignature({ foo: {}, bar: {}, baz: {} });
 
       await expect(

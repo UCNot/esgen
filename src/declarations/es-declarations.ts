@@ -256,8 +256,8 @@ class EsDeclSnippet {
           });
 
           if (prefix) {
-            code.inline(prefix, code => {
-              code.block(snippet);
+            code.line(prefix, code => {
+              code.multiLine(snippet);
             });
           } else {
             code.write(snippet);

@@ -11,7 +11,7 @@ describe('EsCode', () => {
   });
 
   describe('none', () => {
-    it('produces no code', async () => {
+    it('emits no code', async () => {
       code.write(EsCode.none);
 
       await expect(new EsBundle().emit(code).asText()).resolves.toBe('');
@@ -55,15 +55,15 @@ describe('EsCode', () => {
     });
   });
 
-  describe('inline', () => {
-    it('joins lines', async () => {
+  describe('line', () => {
+    it('joins fragments', async () => {
       code
         .write('{')
         .indent(code => {
           code
             .write('{')
             .indent(code => {
-              code.inline(code => {
+              code.line(code => {
                 code.write('foo();', 'bar();');
               });
             })
@@ -77,12 +77,12 @@ describe('EsCode', () => {
     });
   });
 
-  describe('indent inside inline', () => {
+  describe('indent inside line of code', () => {
     it('respects outer indentation', async () => {
       code
         .write('const test = {')
         .indent(code => {
-          code.inline(
+          code.line(
             'a: ',
             '{',
             code => {
@@ -99,16 +99,16 @@ describe('EsCode', () => {
     });
   });
 
-  describe('block inside inline', () => {
+  describe('multi-line inside line of code', () => {
     it('respects outer indentation only', async () => {
       code
         .write('const test = {')
         .indent(code => {
-          code.inline(
+          code.line(
             'a: ',
             '{',
             code => {
-              code.block('foo: 1,', 'bar: 2');
+              code.multiLine('foo: 1,', 'bar: 2');
             },
             '},',
           );

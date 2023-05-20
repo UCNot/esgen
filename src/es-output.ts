@@ -12,7 +12,7 @@ export class EsOutput implements EsPrinter {
   /**
    * Prints code records.
    *
-   * Each record is placed on a new line, unless this is an {@link inline} output.
+   * Each record is placed on a new line, unless this is an {@link line} output.
    *
    * @param records - Written code records, either strings or {@link EsPrinter code printers}.
    *
@@ -54,15 +54,13 @@ export class EsOutput implements EsPrinter {
   }
 
   /**
-   * Prints inline code records.
-   *
-   * Unlike {@link print}, the records are placed on the same line.
+   * Prints code records on single line.
    *
    * @param print - A function that receives an inline output to print the records to.
    *
    * @returns `this` instance.
    */
-  inline(print: (out: EsOutput) => void): this {
+  line(print: (out: EsOutput) => void): this {
     const inline = new EsOutput();
 
     inline.#nl = '';
@@ -75,7 +73,7 @@ export class EsOutput implements EsPrinter {
   /**
    * Prints indented code records.
    *
-   * Always places each record on a new line, and prepends it with indentation symbols. Even for {@link inline} output.
+   * Always places each record on a new line, and prepends it with indentation symbols. Even for {@link line} output.
    *
    * @param print - A function that receives an indented output to print the records to.
    * @param indent - Indentation symbols. Two spaces by default.
@@ -117,7 +115,7 @@ export class EsOutput implements EsPrinter {
     const prefix = this.#indent + from.#indent;
 
     if (this.#nl) {
-      // Insert into block.
+      // Insert into multi-line code.
       const lastLine = lines[lines.length - 1];
 
       if (!lastLine.endsWith('\n')) {
@@ -125,7 +123,7 @@ export class EsOutput implements EsPrinter {
         lines[lines.length - 1] += this.#nl;
       }
     } else {
-      // Insert into inline.
+      // Insert into line.
       if (from.#indent) {
         // Insert newline before indented code.
         this.#records.push([from.#nl]);

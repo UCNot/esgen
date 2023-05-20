@@ -143,15 +143,15 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
 
       if (decls.length > 3 || (hasCustomDeclaration && decls.length > 1)) {
         // Each declaration on a new line.
-        code.block(code => {
+        code.multiLine(code => {
           code
             .write('(')
             .indent(code => {
               decls.forEach((decl, index, { length }) => {
                 if (index + 1 < length || !this.vararg) {
-                  code.inline(decl, ',');
+                  code.line(decl, ',');
                 } else {
-                  code.inline(decl);
+                  code.line(decl);
                 }
               });
             })
@@ -159,7 +159,7 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
         });
       } else {
         // Few declarations on the same line.
-        code.inline(
+        code.line(
           '(',
           code => {
             decls.forEach((decl, index, { length }) => {
@@ -227,12 +227,12 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
     if (argValues.length > 3) {
       // Each value on new line.
       return code => {
-        code.block(code => {
+        code.multiLine(code => {
           code
             .write('(')
             .indent(code => {
               for (const argValue of argValues) {
-                code.inline(argValue, ',');
+                code.line(argValue, ',');
               }
             })
             .write(')');
@@ -240,13 +240,13 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
       };
     }
 
-    // Inline arguments.
+    // Values on one line.
     return code => {
-      code.inline(code => {
+      code.line(code => {
         code.write('(');
         argValues.forEach((argValue, index, { length }) => {
           if (index + 1 < length) {
-            code.inline(argValue, ', ');
+            code.line(argValue, ', ');
           } else {
             code.write(argValue);
           }

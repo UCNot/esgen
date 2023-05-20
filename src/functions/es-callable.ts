@@ -55,9 +55,9 @@ export class EsCallable<out TArgs extends EsSignature.Args> {
   ): EsSource {
     return code => {
       code.scope(scope, code => {
-        code.block(code => {
+        code.multiLine(code => {
           code
-            .inline(async ? 'async ' : '', this.signature.declare(args), ' => {')
+            .line(async ? 'async ' : '', this.signature.declare(args), ' => {')
             .indent(body(this))
             .write('}');
         });
@@ -84,9 +84,9 @@ export class EsCallable<out TArgs extends EsSignature.Args> {
   ): EsSource {
     return code => {
       code.scope(scope, code => {
-        code.block(code => {
+        code.multiLine(code => {
           code
-            .inline(
+            .line(
               async ? 'async ' : '',
               'function ',
               generator ? '*' : '',

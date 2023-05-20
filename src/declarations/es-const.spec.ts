@@ -16,7 +16,7 @@ describe('esConst', () => {
     await expect(
       bundle
         .emit(code => {
-          code.inline(`console.log(`, symbol, ');');
+          code.line(`console.log(`, symbol, ');');
         })
         .asText(),
     ).resolves.toBe(`const CONST_TEST = 13;\nconsole.log(CONST_TEST);\n`);
@@ -27,7 +27,7 @@ describe('esConst', () => {
     await expect(
       bundle
         .emit(code => {
-          code.inline(`console.log(`, symbol, ');');
+          code.line(`console.log(`, symbol, ');');
         })
         .asText(),
     ).resolves.toBe(`const _x31x0x20xA_ = 42;\nconsole.log(_x31x0x20xA_);\n`);
@@ -38,7 +38,7 @@ describe('esConst', () => {
     await expect(
       bundle
         .emit(code => {
-          code.inline(`console.log(`, symbol, ');');
+          code.line(`console.log(`, symbol, ');');
         })
         .asText(),
     ).resolves.toBe(`const __new__ = 43;\nconsole.log(__new__);\n`);
@@ -50,7 +50,7 @@ describe('esConst', () => {
     await expect(
       bundle
         .emit(code => {
-          code.inline(`console.log(`, symbol2, ', ', symbol1, ');');
+          code.line(`console.log(`, symbol2, ', ', symbol1, ');');
         })
         .asText(),
     ).resolves.toBe(

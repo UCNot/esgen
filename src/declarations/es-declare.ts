@@ -16,7 +16,7 @@ export function esDeclare(requestedName: string, init: EsDeclaration): EsDeclare
     ...init,
     declare(context) {
       return code => {
-        code.inline(spec, ' ', context.naming.name, ' = ', value(context), ';');
+        code.line(spec, ' ', context.naming.name, ' = ', value(context), ';');
       };
     },
   });

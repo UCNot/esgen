@@ -1,7 +1,7 @@
 import { EsSource } from './es-source.js';
 
 /**
- * Tagged template producing {@link EsCode#inline line of code}.
+ * Tagged template emitting a {@link EsCode#line line of code}.
  *
  * @param strings - Template strings.
  * @param sources - Substituted code sources.
@@ -21,6 +21,6 @@ export function esline(strings: TemplateStringsArray, ...sources: EsSource[]): E
   src[src.length - 1] = strings[strings.length - 1];
 
   return code => {
-    code.inline(...src);
+    code.line(...src);
   };
 }

@@ -173,7 +173,7 @@ export class EsConstructor<out TArgs extends EsSignature.Args = EsSignature.Args
     const ref = hostClass.addMember(this, handle, code => {
       code.scope(code => {
         code
-          .inline('constructor', signature.declare(args), ' {')
+          .line('constructor', signature.declare(args), ' {')
           .indent(body(ref, hostClass))
           .write('}');
       });

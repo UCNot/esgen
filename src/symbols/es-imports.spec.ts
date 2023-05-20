@@ -17,7 +17,7 @@ describe('EsImports', () => {
           .emit(code => {
             const test = esImport('test-module', 'test');
 
-            code.inline(test, `();`);
+            code.line(test, `();`);
           })
           .asText(),
       ).resolves.toBe(`import { test } from 'test-module';\ntest();\n`);
@@ -29,12 +29,12 @@ describe('EsImports', () => {
             code => {
               const test = esImport('test-module', 'test');
 
-              code.inline(test, `(1);`);
+              code.line(test, `(1);`);
             },
             code => {
               const test = esImport('test-module', 'test');
 
-              code.inline(test, `(2);`);
+              code.line(test, `(2);`);
             },
           )
           .asText(),
@@ -46,7 +46,7 @@ describe('EsImports', () => {
           .emit(code => {
             const test = esImport('test-module', 'test', { as: 'myTest' });
 
-            code.inline(test, `();`);
+            code.line(test, `();`);
           })
           .asText(),
       ).resolves.toBe(`import { test as myTest } from 'test-module';\nmyTest();\n`);
@@ -58,7 +58,7 @@ describe('EsImports', () => {
             const test1 = esImport('test-module1', 'test');
             const test2 = esImport('test-module2', 'test');
 
-            code.inline(test1, `(1);`).inline(test2, `(2);`);
+            code.line(test1, `(1);`).line(test2, `(2);`);
           })
           .asText(),
       ).resolves.toBe(
@@ -75,7 +75,7 @@ describe('EsImports', () => {
             const test1 = esImport('test-module', 'test1');
             const test2 = esImport('test-module', 'test2');
 
-            code.inline(test1, `();`).inline(test2, `();`);
+            code.line(test1, `();`).line(test2, `();`);
           })
           .asText(),
       ).resolves.toBe(`import {\n  test1,\n  test2,\n} from 'test-module';\ntest1();\ntest2();\n`);
@@ -95,7 +95,7 @@ describe('EsImports', () => {
           .emit(code => {
             const test = esImport('test-module', 'test');
 
-            code.inline(test, `();`);
+            code.line(test, `();`);
           })
           .asText(),
       ).resolves.toBe(
@@ -112,12 +112,12 @@ describe('EsImports', () => {
             code => {
               const test = esImport('test-module', 'test');
 
-              code.inline(test, `(1);`);
+              code.line(test, `(1);`);
             },
             code => {
               const test = esImport('test-module', 'test');
 
-              code.inline(test, `(2);`);
+              code.line(test, `(2);`);
             },
           )
           .asText(),
@@ -135,7 +135,7 @@ describe('EsImports', () => {
           .emit(code => {
             const test = esImport('test-module', 'test', { as: 'myTest' });
 
-            code.inline(test, `();`);
+            code.line(test, `();`);
           })
           .asText(),
       ).resolves.toBe(
@@ -152,7 +152,7 @@ describe('EsImports', () => {
             const test1 = esImport('test-module1', 'test');
             const test2 = esImport('test-module2', 'test');
 
-            code.inline(test1, `(1);`).inline(test2, `(2);`);
+            code.line(test1, `(1);`).line(test2, `(2);`);
           })
           .asText(),
       ).resolves.toBe(
@@ -171,7 +171,7 @@ describe('EsImports', () => {
             const test1 = esImport('test-module', 'test1');
             const test2 = esImport('test-module', 'test2');
 
-            code.inline(test1, `();`).inline(test2, `();`);
+            code.line(test1, `();`).line(test2, `();`);
           })
           .asText(),
       ).resolves.toBe(

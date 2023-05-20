@@ -412,11 +412,11 @@ export class EsClass<
   }
 
   #getCode(): EsCode {
-    return (this.#code ??= new EsCode().block(code => {
+    return (this.#code ??= new EsCode().multiLine(code => {
       this.getHandle(); // Ensure class constructor is valid.
 
       code
-        .inline(
+        .line(
           'class ',
           this.symbol,
           code => {

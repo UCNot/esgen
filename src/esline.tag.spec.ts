@@ -10,7 +10,7 @@ describe('esline', () => {
     bundle = new EsBundle();
   });
 
-  it('emits inline code', async () => {
+  it('emits a line of code', async () => {
     const test = esImport('test-module', 'test');
 
     await expect(bundle.emit(esline`console.log(${test});`).asText()).resolves.toBe(
