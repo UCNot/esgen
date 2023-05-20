@@ -49,14 +49,14 @@ describe('EsOutput', () => {
     });
   });
 
-  describe('inline', () => {
+  describe('line', () => {
     it('joins lines', async () => {
       await expect(
         output
           .print('{')
           .indent(out => out
               .print('{')
-              .indent(out => out.inline(out => out.print('foo();', 'bar();')))
+              .indent(out => out.line(out => out.print('foo();', 'bar();')))
               .print('}'))
           .print('}')
           .asText(),
@@ -64,12 +64,12 @@ describe('EsOutput', () => {
     });
   });
 
-  describe('indent inside inline', () => {
+  describe('indent inside line', () => {
     it('respects outer indentation', async () => {
       output
         .print('{')
         .indent(out => {
-          out.inline(out => {
+          out.line(out => {
             out
               .print('foo(')
               .indent(out => out.print('a,', 'b,', 'c,', ''))

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsBundle } from '../emission/es-bundle.js';
-import { EsNamespace } from './es-namespace.js';
+import { asis } from '@proc7ts/primitives';
+import { EsBundle } from '../scopes/es-bundle.js';
+import { EsNamespace, EsNamingHost } from './es-namespace.js';
 import { EsNaming, EsSymbol } from './es-symbol.js';
 
 describe('EsNamespace', () => {
@@ -13,31 +14,32 @@ describe('EsNamespace', () => {
   });
 
   describe('unique symbols', () => {
-    describe('nameSymbol', () => {
-      it('returns the naming of the symbol within the same namespace', () => {
+    describe('addSymbol', () => {
+      it('prevents symbol renaming within the same namespace', () => {
         const symbol = new UniqueSymbol('test');
-        const naming = ns.nameSymbol(symbol);
 
-        expect(naming).toEqual({
+        expect(symbol.declareIn(ns)).toEqual({
           symbol,
           ns,
           name: 'test',
           emit: expect.any(Function),
         });
-        expect(ns.nameSymbol(symbol)).toBe(naming);
+        expect(() => symbol.declareIn(ns)).toThrow(
+          new TypeError(`Can not rename test /* [Symbol] */ in /* Bundle */`),
+        );
       });
-      it('prevents symbol renaming', () => {
-        const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
-        const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
+      it('prevents symbol renaming in another namespace', () => {
+        const nested1 = bundle.nest({ ns: { comment: 'nested 1' } }).ns;
+        const nested2 = bundle.nest({ ns: { comment: 'nested 2' } }).ns;
         const symbol = new UniqueSymbol('test');
 
-        expect(nested1.nameSymbol(symbol)).toEqual({
+        expect(symbol.declareIn(nested1)).toEqual({
           symbol,
           ns: nested1,
           name: 'test',
           emit: expect.any(Function),
         });
-        expect(() => nested2.nameSymbol(symbol)).toThrow(
+        expect(() => symbol.declareIn(nested2)).toThrow(
           new TypeError(
             `Can not assign new name to test /* [Symbol] */ in /* nested 2 */. It is already named in /* nested 1 */`,
           ),
@@ -48,14 +50,14 @@ describe('EsNamespace', () => {
     describe('findSymbol', () => {
       it('returns the named symbol', () => {
         const symbol = new UniqueSymbol('test');
-        const naming = ns.nameSymbol(symbol);
+        const naming = symbol.declareIn(ns);
 
         expect(ns.findSymbol(symbol)).toBe(naming);
       });
       it('returns the naming of visible symbol', () => {
-        const nested = bundle.spawn().spawn().spawn().ns;
+        const nested = bundle.nest().nest().nest().ns;
         const symbol = new UniqueSymbol('test');
-        const naming = ns.nameSymbol(symbol);
+        const naming = symbol.declareIn(ns);
 
         expect(nested.findSymbol(symbol)).toBe(naming);
       });
@@ -63,10 +65,10 @@ describe('EsNamespace', () => {
         expect(ns.findSymbol(new UniqueSymbol('test'))).toBeUndefined();
       });
       it('returns none for symbol named in nested namespace', () => {
-        const nested = bundle.spawn().spawn().spawn().ns;
+        const nested = bundle.nest().nest().nest().ns;
         const symbol = new UniqueSymbol('test');
 
-        expect(nested.nameSymbol(symbol)).toEqual({
+        expect(symbol.declareIn(nested)).toEqual({
           symbol,
           ns: nested,
           name: 'test',
@@ -75,11 +77,11 @@ describe('EsNamespace', () => {
         expect(ns.findSymbol(symbol)).toBeUndefined();
       });
       it('returns none for invisible symbol', () => {
-        const nested1 = bundle.spawn().ns;
-        const nested2 = bundle.spawn().ns;
+        const nested1 = bundle.nest().ns;
+        const nested2 = bundle.nest().ns;
         const symbol = new UniqueSymbol('test');
 
-        expect(nested1.nameSymbol(symbol)).toEqual({
+        expect(symbol.declareIn(nested1)).toEqual({
           symbol,
           ns: nested1,
           name: 'test',
@@ -93,14 +95,14 @@ describe('EsNamespace', () => {
       it('returns symbol naming', () => {
         const symbol = new UniqueSymbol('test');
 
-        expect(ns.nameSymbol(symbol).name).toBe('test');
+        expect(symbol.declareIn(ns).name).toBe('test');
         expect(ns.refer(symbol).getNaming().name).toBe('test');
       });
       it('returns visible symbol naming', () => {
-        const nested = bundle.spawn().spawn().spawn().ns;
+        const nested = bundle.nest().nest().nest().ns;
         const symbol = new UniqueSymbol('test');
 
-        expect(ns.nameSymbol(symbol).name).toBe('test');
+        expect(symbol.declareIn(ns).name).toBe('test');
         expect(nested.refer(symbol).getNaming().name).toBe('test');
       });
 
@@ -113,11 +115,11 @@ describe('EsNamespace', () => {
           );
         });
         it('throws for invisible symbol', () => {
-          const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
-          const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
+          const nested1 = bundle.nest({ ns: { comment: 'nested 1' } }).ns;
+          const nested2 = bundle.nest({ ns: { comment: 'nested 2' } }).ns;
           const symbol = new UniqueSymbol('test');
 
-          expect(nested1.nameSymbol(symbol).name).toBe('test');
+          expect(symbol.declareIn(nested1).name).toBe('test');
           expect(() => nested2.refer(symbol).getNaming()).toThrow(
             new ReferenceError(
               `${symbol} is invisible to /* nested 2 */. It is named in /* nested 1 */`,
@@ -138,7 +140,7 @@ describe('EsNamespace', () => {
           const symbol = new UniqueSymbol('test', { comment: 'Test symbol' });
           const whenNamed = ns.refer(symbol).whenNamed();
 
-          ns.nameSymbol(symbol);
+          symbol.declareIn(ns);
 
           await expect(whenNamed).resolves.toEqual({
             symbol,
@@ -154,7 +156,7 @@ describe('EsNamespace', () => {
           await Promise.resolve();
           await Promise.resolve();
           await Promise.resolve();
-          ns.nameSymbol(symbol);
+          symbol.declareIn(ns);
 
           await expect(whenNamed).resolves.toEqual({
             symbol,
@@ -164,11 +166,11 @@ describe('EsNamespace', () => {
           });
         });
         it('rejects on invisible symbol', async () => {
-          const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
-          const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
+          const nested1 = bundle.nest({ ns: { comment: 'nested 1' } }).ns;
+          const nested2 = bundle.nest({ ns: { comment: 'nested 2' } }).ns;
           const symbol = new UniqueSymbol('test');
 
-          expect(nested1.nameSymbol(symbol).name).toBe('test');
+          expect(symbol.declareIn(nested1).name).toBe('test');
           await expect(() => nested2.refer(symbol).whenNamed()).rejects.toThrow(
             new ReferenceError(
               `${symbol} is invisible to /* nested 2 */. It is named in /* nested 1 */`,
@@ -180,59 +182,65 @@ describe('EsNamespace', () => {
   });
 
   describe('non-unique symbols', () => {
-    describe('nameSymbol', () => {
-      it('returns the naming of the symbol within the same namespace', () => {
-        const symbol = new NonUniqueSymbol('test');
-        const naming = ns.nameSymbol(symbol);
-
-        expect(naming).toEqual({ symbol, ns, name: 'test', emit: expect.any(Function) });
-        expect(ns.nameSymbol(symbol)).toBe(naming);
-      });
+    describe('addSymbol', () => {
       it('names the symbol in unrelated namespace', () => {
-        const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
-        const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
+        const nested1 = bundle.nest({ ns: { comment: 'nested 1' } }).ns;
+        const nested2 = bundle.nest({ ns: { comment: 'nested 2' } }).ns;
         const symbol = new NonUniqueSymbol('test');
 
-        expect(nested1.nameSymbol(symbol)).toEqual({
+        expect(symbol.declareIn(nested1)).toEqual({
           symbol,
           ns: nested1,
           name: 'test',
           emit: expect.any(Function),
         });
-        expect(nested2.nameSymbol(symbol)).toEqual({
+        expect(symbol.declareIn(nested2)).toEqual({
           symbol,
           ns: nested2,
           name: 'test',
           emit: expect.any(Function),
         });
       });
-      it('prevents symbol renaming in nested namespace', () => {
-        const nested = bundle.spawn({ ns: { comment: 'nested' } }).ns;
+      it('prevents symbol renaming within the same namespace', () => {
         const symbol = new NonUniqueSymbol('test');
 
-        expect(ns.nameSymbol(symbol)).toEqual({
+        expect(symbol.declareIn(ns)).toEqual({
+          symbol,
+          ns,
+          name: 'test',
+          emit: expect.any(Function),
+        });
+        expect(() => symbol.declareIn(ns)).toThrow(
+          new TypeError(`Can not rename test /* [Symbol] */ in /* Bundle */`),
+        );
+      });
+      it('prevents symbol renaming in nested namespace', () => {
+        const nested = bundle.nest({ ns: { comment: 'nested' } }).ns;
+        const symbol = new NonUniqueSymbol('test');
+
+        expect(symbol.declareIn(ns)).toEqual({
           symbol,
           ns: nested,
           name: 'test',
           emit: expect.any(Function),
         });
-        expect(() => nested.nameSymbol(symbol)).toThrow(
+        expect(() => symbol.declareIn(nested)).toThrow(
           new TypeError(
             `Can not assign new name to test /* [Symbol] */ in /* nested */. It is already named in /* Bundle */`,
           ),
         );
       });
       it('prevents symbol renaming in enclosing namespace', () => {
-        const nested = bundle.spawn({ ns: { comment: 'nested' } }).ns;
+        const nested = bundle.nest({ ns: { comment: 'nested' } }).ns;
         const symbol = new NonUniqueSymbol('test');
 
-        expect(nested.nameSymbol(symbol)).toEqual({
+        expect(symbol.declareIn(nested)).toEqual({
           symbol,
           ns: nested,
           name: 'test',
           emit: expect.any(Function),
         });
-        expect(() => ns.nameSymbol(symbol)).toThrow(
+        expect(() => symbol.declareIn(ns)).toThrow(
           new TypeError(
             `Can not assign new name to test /* [Symbol] */ in /* Bundle */. It is already named in /* nested */`,
           ),
@@ -243,14 +251,14 @@ describe('EsNamespace', () => {
     describe('findSymbol', () => {
       it('returns the named symbol', () => {
         const symbol = new NonUniqueSymbol('test');
-        const naming = ns.nameSymbol(symbol);
+        const naming = symbol.declareIn(ns);
 
         expect(ns.findSymbol(symbol)).toBe(naming);
       });
       it('returns the naming of visible symbol', () => {
-        const nested = bundle.spawn().spawn().spawn().ns;
+        const nested = bundle.nest().nest().nest().ns;
         const symbol = new NonUniqueSymbol('test');
-        const naming = ns.nameSymbol(symbol);
+        const naming = symbol.declareIn(ns);
 
         expect(nested.findSymbol(symbol)).toBe(naming);
       });
@@ -258,10 +266,10 @@ describe('EsNamespace', () => {
         expect(ns.findSymbol(new NonUniqueSymbol('test'))).toBeUndefined();
       });
       it('returns none for symbol named in nested namespace', () => {
-        const nested = bundle.spawn().spawn().spawn().ns;
+        const nested = bundle.nest().nest().nest().ns;
         const symbol = new UniqueSymbol('test');
 
-        expect(nested.nameSymbol(symbol)).toEqual({
+        expect(symbol.declareIn(nested)).toEqual({
           symbol,
           ns: nested,
           name: 'test',
@@ -270,11 +278,11 @@ describe('EsNamespace', () => {
         expect(ns.findSymbol(symbol)).toBeUndefined();
       });
       it('returns none for invisible symbol', () => {
-        const nested1 = bundle.spawn().ns;
-        const nested2 = bundle.spawn().ns;
+        const nested1 = bundle.nest().ns;
+        const nested2 = bundle.nest().ns;
         const symbol = new NonUniqueSymbol('test');
 
-        expect(nested1.nameSymbol(symbol)).toEqual({
+        expect(symbol.declareIn(nested1)).toEqual({
           symbol,
           ns: nested1,
           name: 'test',
@@ -288,14 +296,14 @@ describe('EsNamespace', () => {
       it('returns symbol naming', () => {
         const symbol = new NonUniqueSymbol('test');
 
-        expect(ns.nameSymbol(symbol).name).toBe('test');
+        expect(symbol.declareIn(ns).name).toBe('test');
         expect(ns.refer(symbol).getNaming().name).toBe('test');
       });
       it('returns visible symbol naming', () => {
-        const nested = bundle.spawn().spawn().spawn().ns;
+        const nested = bundle.nest().nest().nest().ns;
         const symbol = new NonUniqueSymbol('test');
 
-        expect(ns.nameSymbol(symbol).name).toBe('test');
+        expect(symbol.declareIn(ns).name).toBe('test');
         expect(nested.refer(symbol).getNaming().name).toBe('test');
       });
 
@@ -308,11 +316,11 @@ describe('EsNamespace', () => {
           );
         });
         it('throws for invisible symbol', () => {
-          const nested1 = bundle.spawn({ ns: { comment: 'nested 1' } }).ns;
-          const nested2 = bundle.spawn({ ns: { comment: 'nested 2' } }).ns;
+          const nested1 = bundle.nest({ ns: { comment: 'nested 1' } }).ns;
+          const nested2 = bundle.nest({ ns: { comment: 'nested 2' } }).ns;
           const symbol = new NonUniqueSymbol('test');
 
-          expect(nested1.nameSymbol(symbol).name).toBe('test');
+          expect(symbol.declareIn(nested1).name).toBe('test');
           expect(() => nested2.refer(symbol).getNaming()).toThrow(
             new ReferenceError(
               `${symbol} is invisible to /* nested 2 */. It is named in /* nested 1 */`,
@@ -326,8 +334,8 @@ describe('EsNamespace', () => {
 
 class UniqueSymbol extends EsSymbol {
 
-  override bind(naming: EsNaming): EsNaming {
-    return naming;
+  declareIn({ ns }: EsNamingHost): EsNaming {
+    return ns.addSymbol(this, asis);
   }
 
 }
@@ -338,8 +346,8 @@ class NonUniqueSymbol extends EsSymbol {
     return false;
   }
 
-  override bind(naming: EsNaming): EsNaming {
-    return naming;
+  declareIn({ ns }: EsNamingHost): EsNaming {
+    return ns.addSymbol(this, asis);
   }
 
 }

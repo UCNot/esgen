@@ -1,6 +1,12 @@
 import { asArray } from '@proc7ts/primitives';
+import { esline } from '../esline.tag.js';
+import {
+  EsDeclarationLocation,
+  EsDeclarationPolicy,
+  EsSymbol,
+  EsSymbolInit,
+} from '../symbols/es-symbol.js';
 import { esSafeId } from '../util/es-safe-id.js';
-import { EsDeclarationInit, EsDeclaredSymbol } from './es-declared.symbol.js';
 
 /**
  * Declares constant.
@@ -18,16 +24,15 @@ import { EsDeclarationInit, EsDeclaredSymbol } from './es-declared.symbol.js';
  *
  * @returns Declared constant symbol.
  */
-export function esConst(key: string, initializer: string, init?: EsConstInit): EsDeclaredSymbol;
+export function esConst(key: string, initializer: string, init?: EsConstInit): EsSymbol;
 
-export function esConst(
-  key: string,
-  initializer: string,
-  { exported, refers, prefix = exported ? '' : 'CONST_' }: EsConstInit = {},
-): EsDeclaredSymbol {
+export function esConst(key: string, initializer: string, init: EsConstInit = {}): EsSymbol {
+  const { at = 'bundle', prefix = at === 'exports' ? '' : 'CONST_' } = init;
+  let { refers } = init;
+
   refers = asArray(refers);
 
-  const cache = exported || refers.length ? null : esConst$cache;
+  const cache = at !== 'bundle' || refers.length ? null : esConst$cache;
 
   const existingConst = cache?.get(initializer);
 
@@ -35,9 +40,12 @@ export function esConst(
     return existingConst;
   }
 
-  const newConst = new EsConstSymbol(esSafeId(`${prefix}${key}`), initializer, {
-    exported,
-    refers,
+  const newConst = new EsSymbol(esSafeId(`${prefix}${key}`), {
+    declare: {
+      at,
+      refers,
+      as: ({ naming }) => [esline`const ${naming} = ${initializer};`, naming],
+    },
   });
 
   cache?.set(initializer, newConst);
@@ -49,7 +57,16 @@ export function esConst(
  * Constant initialization options.
  */
 
-export interface EsConstInit extends Omit<EsDeclarationInit, 'declare'> {
+export interface EsConstInit
+  extends Omit<EsSymbolInit, 'declare'>,
+    Omit<EsDeclarationPolicy, 'at' | 'as'> {
+  /**
+   * Where to place the constant declaration.
+   *
+   * @defaultValue `bundle`
+   */
+  readonly at?: EsDeclarationLocation | undefined;
+
   /**
    * Constant name prefix.
    *
@@ -58,15 +75,4 @@ export interface EsConstInit extends Omit<EsDeclarationInit, 'declare'> {
   readonly prefix?: string | undefined;
 }
 
-const esConst$cache = new Map<string, EsConstSymbol>();
-
-class EsConstSymbol extends EsDeclaredSymbol {
-
-  constructor(requestedName: string, initializer: string, init: EsConstInit) {
-    super(requestedName, {
-      ...init,
-      declare: ({ naming: { name } }) => `const ${name} = ${initializer};`,
-    });
-  }
-
-}
+const esConst$cache = new Map<string, EsSymbol>();

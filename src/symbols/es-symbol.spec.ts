@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsBundle } from '../emission/es-bundle.js';
+import { asis } from '@proc7ts/primitives';
+import { EsBundle } from '../scopes/es-bundle.js';
+import { EsNamingHost } from './es-namespace.js';
 import { EsNaming, EsSymbol } from './es-symbol.js';
 
 describe('EsSymbol', () => {
@@ -21,12 +23,12 @@ describe('EsSymbol', () => {
   describe('emit', () => {
     it('emits symbol name', async () => {
       const symbol = new TestSymbol('test');
-      const { name } = bundle.ns.nameSymbol(symbol);
+      const { name } = symbol.declareIn(bundle);
 
       await expect(
         bundle
           .emit(code => {
-            code.inline(symbol, '();');
+            code.line(symbol, '();');
           })
           .asText(),
       ).resolves.toBe(`${name}();\n`);
@@ -49,8 +51,8 @@ describe('EsSymbol', () => {
 
 class TestSymbol extends EsSymbol {
 
-  override bind(naming: EsNaming): EsNaming {
-    return naming;
+  declareIn({ ns }: EsNamingHost): EsNaming {
+    return ns.addSymbol(this, asis);
   }
 
 }

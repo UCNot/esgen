@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsBundle } from './emission/es-bundle.js';
 import { EsCode } from './es-code.js';
 import { EsOutput } from './es-output.js';
+import { EsBundle } from './scopes/es-bundle.js';
 
 describe('EsCode', () => {
   let code: EsCode;
@@ -11,7 +11,7 @@ describe('EsCode', () => {
   });
 
   describe('none', () => {
-    it('produces no code', async () => {
+    it('emits no code', async () => {
       code.write(EsCode.none);
 
       await expect(new EsBundle().emit(code).asText()).resolves.toBe('');
@@ -40,17 +40,6 @@ describe('EsCode', () => {
       await expect(new EsBundle().emit(code).asText()).resolves.toBe('{\n\n}\n');
     });
     it('accepts another code fragment', async () => {
-      code.write({
-        toCode() {
-          return code => {
-            code.write('foo();');
-          };
-        },
-      });
-
-      await expect(new EsBundle().emit(code).asText()).resolves.toBe('foo();\n');
-    });
-    it('accepts another EsCode instance', async () => {
       code.write(new EsCode().write('foo();'));
 
       await expect(new EsBundle().emit(code).asText()).resolves.toBe('foo();\n');
@@ -66,15 +55,15 @@ describe('EsCode', () => {
     });
   });
 
-  describe('inline', () => {
-    it('joins lines', async () => {
+  describe('line', () => {
+    it('joins fragments', async () => {
       code
         .write('{')
         .indent(code => {
           code
             .write('{')
             .indent(code => {
-              code.inline(code => {
+              code.line(code => {
                 code.write('foo();', 'bar();');
               });
             })
@@ -88,12 +77,12 @@ describe('EsCode', () => {
     });
   });
 
-  describe('indent inside inline', () => {
+  describe('indent inside line of code', () => {
     it('respects outer indentation', async () => {
       code
         .write('const test = {')
         .indent(code => {
-          code.inline(
+          code.line(
             'a: ',
             '{',
             code => {
@@ -110,16 +99,16 @@ describe('EsCode', () => {
     });
   });
 
-  describe('block inside inline', () => {
+  describe('multi-line inside line of code', () => {
     it('respects outer indentation only', async () => {
       code
         .write('const test = {')
         .indent(code => {
-          code.inline(
+          code.line(
             'a: ',
             '{',
             code => {
-              code.block('foo: 1,', 'bar: 2');
+              code.multiLine('foo: 1,', 'bar: 2');
             },
             '},',
           );
@@ -150,8 +139,8 @@ describe('EsCode', () => {
       code.write('first();');
 
       const bundle = new EsBundle();
-      const emission = bundle.spawn();
-      const printer = code.emit(emission);
+      const scope = bundle.nest();
+      const printer = code.emit(scope);
 
       code.write('second();');
 
@@ -159,7 +148,7 @@ describe('EsCode', () => {
       await expect(new EsOutput().print(printer).asText()).resolves.toBe('first();\nsecond();\n');
 
       bundle.done();
-      await emission.whenDone();
+      await scope.whenDone();
     });
     it('prevents inserting code after print', async () => {
       code.write('first();');

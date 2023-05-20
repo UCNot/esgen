@@ -1,11 +1,10 @@
-import { lazyValue } from '@proc7ts/primitives';
-import { EsBundleFormat } from '../emission/es-bundle-format.js';
-import { EsBundle } from '../emission/es-bundle.js';
+import { asArray, lazyValue } from '@proc7ts/primitives';
 import { EsCode } from '../es-code.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
-import { EsSource } from '../es-source.js';
-import { EsAnySymbol, EsNaming, EsReference, EsSymbol } from '../symbols/es-symbol.js';
-import { EsDeclaredSymbol } from './es-declared.symbol.js';
+import { EsSnippet } from '../es-snippet.js';
+import { EsBundleFormat } from '../scopes/es-bundle-format.js';
+import { EsBundle } from '../scopes/es-bundle.js';
+import { EsDeclarationPolicy, EsNaming, EsReference, EsSymbol } from '../symbols/es-symbol.js';
 
 /**
  * Collection of bundle declarations.
@@ -13,16 +12,22 @@ import { EsDeclaredSymbol } from './es-declared.symbol.js';
 export class EsDeclarations {
 
   readonly #bundle: EsBundle;
-  readonly #snippets = new Map<EsAnySymbol, EsDeclSnippet>();
+  readonly #snippets = new Map<EsSymbol, EsDeclSnippet>();
   readonly #content = lazyValue(() => this.#build());
-  #addDecl: (symbol: EsDeclaredSymbol, snippet: EsDeclSnippet) => void;
+  #addDecl: <TNaming extends EsNaming>(
+    symbol: EsSymbol<TNaming>,
+    snippet: EsDeclSnippet<TNaming>,
+  ) => void;
 
   constructor(bundle: EsBundle) {
     this.#bundle = bundle;
     this.#addDecl = this.#doAddDecl;
   }
 
-  #doAddDecl(symbol: EsDeclaredSymbol, snippet: EsDeclSnippet): void {
+  #doAddDecl<TNaming extends EsNaming>(
+    symbol: EsSymbol<TNaming>,
+    snippet: EsDeclSnippet<TNaming>,
+  ): void {
     this.#snippets.set(symbol, snippet);
   }
 
@@ -30,30 +35,35 @@ export class EsDeclarations {
     return this.#bundle;
   }
 
-  get body(): EsSource {
+  get body(): EsSnippet {
     return this.#content().body;
   }
 
-  get exports(): EsSource {
+  get exports(): EsSnippet {
     return this.#content().exports;
   }
 
   /**
-   * Add symbol declaration.
+   * Adds symbol declaration.
    *
-   * Called when {@link EsNamespace#nameSymbol naming} the symbol.
+   * Called when the symbol declared automatically.
    *
    * @param symbol - Declared symbol.
-   * @param naming - Symbol naming.
+   * @param naming - Basic symbol naming.
+   * @param policy - Symbol declaration policy.
    *
-   * @returns
+   * @returns Symbol naming specific to symbol type.
    */
-  addDeclaration(symbol: EsDeclaredSymbol, naming: EsNaming): EsNaming {
-    const newSnippet = new EsDeclSnippet(symbol, naming);
+  declareSymbol<TNaming extends EsNaming>(
+    symbol: EsSymbol<TNaming>,
+    naming: EsNaming,
+    policy: EsDeclarationPolicy<TNaming>,
+  ): TNaming {
+    const newSnippet = new EsDeclSnippet(symbol, naming, policy);
 
     this.#addDecl(symbol, newSnippet);
 
-    return naming;
+    return newSnippet.naming;
   }
 
   #build(): EsDeclarations$Content {
@@ -206,19 +216,30 @@ export class EsDeclarations {
 }
 
 interface EsDeclarations$Content {
-  readonly body: EsSource;
-  readonly exports: EsSource;
+  readonly body: EsSnippet;
+  readonly exports: EsSnippet;
 }
 
-class EsDeclSnippet {
+class EsDeclSnippet<out TNaming extends EsNaming = EsNaming> {
 
-  readonly #symbol: EsDeclaredSymbol;
-  readonly #naming: EsNaming;
-  readonly #refs = new Set<EsAnySymbol>();
+  readonly #symbol: EsSymbol<TNaming>;
+  readonly #exported: boolean;
+  readonly naming: TNaming;
+  readonly #snippet: EsSnippet;
+  readonly #refs: Set<EsSymbol>;
 
-  constructor(symbol: EsDeclaredSymbol, naming: EsNaming) {
+  constructor(symbol: EsSymbol<TNaming>, naming: EsNaming, policy: EsDeclarationPolicy<TNaming>) {
     this.#symbol = symbol;
-    this.#naming = naming;
+
+    const { at, refers, as } = policy;
+
+    this.#exported = at === 'exports';
+    this.#refs = new Set<EsSymbol>(asArray(refers).map(({ symbol }) => symbol));
+
+    const [snippet, symbolNaming] = as({ naming, refer: this.#refer.bind(this) });
+
+    this.naming = symbolNaming;
+    this.#snippet = snippet;
   }
 
   refs(): IterableIterator<EsSymbol> {
@@ -229,8 +250,8 @@ class EsDeclSnippet {
     let exports: string[] | undefined;
     let prefix: string | undefined;
 
-    if (this.#symbol.exported) {
-      const { name } = this.#naming;
+    if (this.#exported) {
+      const { name } = this.naming;
       const { requestedName } = this.#symbol;
 
       switch (bundle.format) {
@@ -250,17 +271,12 @@ class EsDeclSnippet {
     return {
       body: new EsCode()
         .write(code => {
-          const snippet = this.#symbol.declare({
-            naming: this.#naming,
-            refer: this.#refer.bind(this),
-          });
-
           if (prefix) {
-            code.inline(prefix, code => {
-              code.block(snippet);
+            code.line(prefix, code => {
+              code.multiLine(this.#snippet);
             });
           } else {
-            code.write(snippet);
+            code.write(this.#snippet);
           }
         })
         .emit(bundle),

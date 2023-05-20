@@ -1,5 +1,6 @@
-import { EsEmission, EsEmissionResult, EsEmitter } from '../emission/es-emission.js';
-import { EsCode } from '../es-code.js';
+import { noop } from '@proc7ts/primitives';
+import { EsSnippet } from '../es-snippet.js';
+import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsNamespace } from './es-namespace.js';
 import { esSymbolString } from './es-symbol-string.js';
@@ -8,19 +9,17 @@ import { esSymbolString } from './es-symbol-string.js';
  * Program symbol.
  *
  * Requests a {@link requestedName name} within program. The actual name, however, may differ to avoid naming conflicts.
- * In order to receive an actual name, the symbol has to be {@link EsNamespace#nameSymbol named} first. Then, the symbol
+ * In order to receive an actual name, the symbol has to be {@link EsNamespace#addSymbol named} first. Then, the symbol
  * becomes {@link EsNamespace#findSymbol visible} under its actual {@link EsNamespace#refer name} in target
  * namespace and its nested namespaces.
  *
  * @typeParam TNaming - Type of symbol naming.
- * @typeParam TConstraints - Type of naming constraints.
  */
-export abstract class EsSymbol<
-  out TNaming extends EsNaming = EsNaming,
-  in TConstraints extends EsNamingConstraints = EsNamingConstraints,
-> implements EsReference<TNaming>, EsEmitter {
+export class EsSymbol<out TNaming extends EsNaming = EsNaming>
+  implements EsReference<TNaming>, EsEmitter {
 
   readonly #requestedName: string;
+  readonly #declare: EsDeclarationPolicy<TNaming> | undefined;
   readonly #comment: string | undefined;
 
   /**
@@ -29,9 +28,13 @@ export abstract class EsSymbol<
    * @param requestedName - Requested symbol name. Will be converted to {@link esSafeId ECMAScript-safe} identifier.
    * @param init - Initialization options.
    */
-  constructor(requestedName: string, init?: EsSymbolInit) {
+  constructor(requestedName: string, init: EsSymbolInit<TNaming> = {}) {
     this.#requestedName = esSafeId(requestedName);
-    this.#comment = init?.comment;
+
+    const { declare, comment } = init;
+
+    this.#declare = declare;
+    this.#comment = comment;
   }
 
   /**
@@ -71,39 +74,70 @@ export abstract class EsSymbol<
   /**
    * Adjusts this symbol resolution when it is {@link EsNamespace#refer referred}.
    *
-   * Does nothing by default.
+   * Automatically declares the symbol if automatic declaration {@link EsSymbolInit#declare requested}, or does nothing
+   * otherwise.
    *
    * @param resolution - Symbol resolution.
    * @param ns - Referring namespace.
    *
    * @returns Adjusted resolution.
    */
-  refer(resolution: EsResolution<TNaming, this>, ns: EsNamespace): EsResolution<TNaming, this>;
-  refer(resolution: EsResolution<TNaming, this>, _ns: EsNamespace): EsResolution<TNaming, this> {
+  refer(resolution: EsResolution<TNaming, this>, ns: EsNamespace): EsResolution<TNaming, this> {
+    if (this.#declare) {
+      this.#autoDeclareIn(ns, this.#declare);
+    }
+
     return resolution;
   }
 
-  /**
-   * Binds named symbol to namespace.
-   *
-   * Called to perform additional actions right after the symbol received its {@link EsNamespace#nameSymbol name}.
-   *
-   * @param naming - Symbol naming.
-   * @param constraints - Naming constraints specific to this type of symbols.
-   *
-   * @returns Naming specific to this type of symbols.
-   */
-  abstract bind(naming: EsNaming, constraints: TConstraints): TNaming;
+  #autoDeclareIn(ns: EsNamespace, policy: EsDeclarationPolicy<TNaming>): TNaming {
+    return (
+      ns.findSymbol(this)
+      ?? ns.addSymbol(this, naming => ns.scope.bundle.declarations.declareSymbol(this, naming, policy))
+    );
+  }
 
   /**
-   * Emits the name of the symbol visible to {@link EsEmission#ns emission namespace}.
+   * Requests symbol declaration.
    *
-   * @param emission - Code emission control.
+   * The symbol can be used after that.
+   *
+   * @param request - Symbol declaration request.
+   *
+   * @returns Symbol's declaration statement.
+   */
+  requestDeclaration(request: EsDeclarationRequest<TNaming>): EsSnippet {
+    return (code, scope) => {
+      code.write(this.#declareIn(scope, request));
+    };
+  }
+
+  #declareIn(scope: EsScope, { as }: EsDeclarationRequest<TNaming>): EsSnippet {
+    let snippet!: EsSnippet;
+
+    scope.ns.addSymbol(this, naming => {
+      const [declSnippet, symbolNaming] = as({
+        naming,
+        refer: noop, // Local declaration order is not maintained.
+      });
+
+      snippet = declSnippet;
+
+      return symbolNaming;
+    });
+
+    return snippet;
+  }
+
+  /**
+   * Emits the name of the symbol visible to {@link EsScope#ns emission namespace}.
+   *
+   * @param scope - Code emission scope.
    *
    * @returns Emission result.
    */
-  emit(emission: EsEmission): EsEmissionResult {
-    return new EsCode().write(emission.ns.refer<TNaming>(this)).emit(emission);
+  emit(scope: EsScope): EsEmissionResult {
+    return scope.ns.refer<TNaming>(this).emit(scope);
   }
 
   /**
@@ -132,21 +166,99 @@ export abstract class EsSymbol<
 }
 
 /**
- * Arbitrary symbol type suitable for wildcard usage.
+ * {@link EsSymbol Symbol} initialization options.
  *
  * @typeParam TNaming - Type of symbol naming.
  */
-export type EsAnySymbol<TNaming extends EsNaming = EsNaming> = EsSymbol<TNaming, any>;
+export interface EsSymbolInit<out TNaming extends EsNaming = EsNaming> {
+  /**
+   * Automatic symbol declaration policy.
+   *
+   * When specified, the symbol will be automatically declared once referenced.
+   *
+   * When omitted, the symbol declaration has to be explicitly {@link EsSymbol#requestDeclaration requested} prior to
+   * being used.
+   */
+  readonly declare?: EsDeclarationPolicy<TNaming> | undefined;
 
-/**
- * Symbol initialization options.
- */
-export interface EsSymbolInit {
   /**
    * Human-readable symbol comment used in its string representation.
    */
   readonly comment?: string | undefined;
 }
+
+/**
+ * Explicit symbol {@link EsSymbol#requestDeclaration declaration} request.
+ *
+ * @typeParam TNaming - Type of symbol naming.
+ */
+export interface EsDeclarationRequest<out TNaming extends EsNaming = EsNaming> {
+  /**
+   * Declares symbol.
+   *
+   * @param context - Symbol declaration context.
+   *
+   * @returns Tuple of code snippet containing symbol declaration, and symbol naming.
+   */
+  as(this: void, context: EsDeclarationContext): readonly [declaration: EsSnippet, naming: TNaming];
+}
+
+/**
+ * Automatic {@link EsSymbol symbol} declaration policy.
+ *
+ * @typeParam TNaming - Type of symbol naming.
+ */
+export interface EsDeclarationPolicy<out TNaming extends EsNaming = EsNaming> {
+  /**
+   * Where to place the symbol declaration.
+   */
+  readonly at: EsDeclarationLocation;
+
+  /**
+   * Other symbols the declared one refers.
+   *
+   * Referred symbols supposed to be declared _before_ the referrer.
+   */
+  readonly refers?: EsReference | readonly EsReference[] | undefined;
+
+  /**
+   * Declares symbol on demand.
+   *
+   * @param context - Symbol declaration context.
+   *
+   * @returns Tuple of code snippet containing symbol declaration, and symbol naming.
+   */
+  as(this: void, context: EsDeclarationContext): readonly [declaration: EsSnippet, naming: TNaming];
+}
+
+/**
+ * Symbol declaration context.
+ */
+export interface EsDeclarationContext {
+  /**
+   * Declared symbol naming.
+   */
+  readonly naming: EsNaming;
+
+  /**
+   * Refers the given symbol.
+   *
+   * Referred symbols supposed to be declared _before_ the referrer.
+   *
+   * @param ref - Referred symbol.
+   */
+  refer(this: void, ref: EsReference): void;
+}
+
+/**
+ * Location of symbol declaration.
+ *
+ * One of:
+ *
+ * - `bundle` - for top-level symbol internal to the bundle,
+ * - `exports` - for top-level symbol exported from the bundle.
+ */
+export type EsDeclarationLocation = 'bundle' | 'exports';
 
 /**
  * Symbol reference.
@@ -156,7 +268,7 @@ export interface EsSymbolInit {
  */
 export interface EsReference<
   out TNaming extends EsNaming = EsNaming,
-  out TSymbol extends EsAnySymbol<TNaming> = EsAnySymbol<TNaming>,
+  out TSymbol extends EsSymbol<TNaming> = EsSymbol<TNaming>,
 > {
   /**
    * Referred symbol.
@@ -172,7 +284,7 @@ export interface EsReference<
  */
 export interface EsResolution<
   out TNaming extends EsNaming = EsNaming,
-  out TSymbol extends EsAnySymbol<TNaming> = EsAnySymbol<TNaming>,
+  out TSymbol extends EsSymbol<TNaming> = EsSymbol<TNaming>,
 > extends EsReference<TNaming, TSymbol>,
     EsEmitter {
   /**
@@ -181,7 +293,7 @@ export interface EsResolution<
   readonly symbol: TSymbol;
 
   /**
-   * Obtains immediately available {@link EsNamespace#nameSymbol naming} of the {@link symbol}.
+   * Obtains immediately available naming of the {@link symbol}.
    *
    * Fails if the symbol is not named yet. Alternatively, it is possible to {@link whenNamed wait} for naming.
    *
@@ -194,11 +306,11 @@ export interface EsResolution<
   getNaming(): TNaming;
 
   /**
-   * Awaits for the {@link symbol} {@link EsNamespace#nameSymbol naming}.
+   * Awaits for the {@link symbol} to be named.
    *
    * The naming may not be {@link getNaming immediately available}. This method allows to wait for it.
    *
-   * This method won't wait infinitely and would fail if the symbol is not named for some time.
+   * This method won't wait infinitely though, and would fail if the symbol is not named for some time.
    *
    * @returns Promise resolved to symbol naming, or rejected if symbol is not named after some timeout.
    */
@@ -207,9 +319,11 @@ export interface EsResolution<
   /**
    * Emits the code containing {@link symbol} name.
    *
+   * @param scope - Code emission scope.
+   *
    * @returns Code emission result.
    */
-  emit(this: void): EsEmissionResult;
+  emit(this: void, scope: EsScope): EsEmissionResult;
 }
 
 /**
@@ -219,7 +333,7 @@ export interface EsNaming extends EsEmitter {
   /**
    * Named symbol
    */
-  readonly symbol: EsAnySymbol;
+  readonly symbol: EsSymbol;
 
   /**
    * Namespace the symbol is visible in.
@@ -234,22 +348,9 @@ export interface EsNaming extends EsEmitter {
   /**
    * Emits symbol name.
    *
+   * @param scope - Code emission scope.
+   *
    * @returns Emission result.
    */
-  emit(this: void): EsEmissionResult;
-}
-
-/**
- * Basic symbol {@link EsNamespace#nameSymbol naming} constraints.
- */
-export interface EsNamingConstraints {
-  /**
-   * Whether new name required.
-   *
-   * By default, if symbol already named within namespace, then existing naming will be reused. But when this flag set
-   * to `true`, then error will be thrown in the above situation.
-   *
-   * @defaultValue `false`
-   */
-  readonly requireNew?: boolean | undefined;
+  emit(this: void, scope: EsScope): EsEmissionResult;
 }

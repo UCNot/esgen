@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { jsStringLiteral } from 'httongue';
-import { EsBundle } from '../emission/es-bundle.js';
 import { EsCode } from '../es-code.js';
 import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
+import { EsBundle } from '../scopes/es-bundle.js';
+import { EsClass } from './es-class.js';
 import { EsConstructor } from './es-constructor.js';
 import { EsField } from './es-field.js';
-import { EsLocalClass } from './es-local.class.js';
 import { EsMemberVisibility } from './es-member.js';
 
 describe('EsConstructor', () => {
@@ -17,7 +17,7 @@ describe('EsConstructor', () => {
   });
 
   it('is available by default without arguments', async () => {
-    const hostClass = new EsLocalClass<EsSignature.NoArgs>('Test');
+    const hostClass = new EsClass<EsSignature.NoArgs>('Test');
 
     expect(hostClass.getHandle()).toBeDefined();
     await expect(
@@ -25,14 +25,14 @@ describe('EsConstructor', () => {
     ).resolves.toBe(`class Test {\n}\nnew Test();\n`);
   });
   it('requires to be declared with arguments', () => {
-    const hostClass = new EsLocalClass('Test', { classConstructor: { args: { test: {} } } });
+    const hostClass = new EsClass('Test', { classConstructor: { args: { test: {} } } });
 
     expect(() => hostClass.getHandle()).toThrow(
       new ReferenceError(`constructor(test) is not declared in Test /* [Class] */`),
     );
   });
   it('is inherited from base class', async () => {
-    const baseClass = new EsLocalClass('Base', { classConstructor: { args: { test: {} } } });
+    const baseClass = new EsClass('Base', { classConstructor: { args: { test: {} } } });
     const field = new EsField('test', { visibility: EsMemberVisibility.Private });
 
     field.declareIn(baseClass);
@@ -44,7 +44,7 @@ describe('EsConstructor', () => {
       },
     });
 
-    const hostClass = new EsLocalClass('Test', { baseClass });
+    const hostClass = new EsClass('Test', { baseClass });
 
     expect(hostClass.getHandle()).toBeDefined();
     await expect(
@@ -70,11 +70,11 @@ new Test(1);
     );
   });
   it('requires to be declared when arguments differ', () => {
-    const baseClass = new EsLocalClass('Base', { classConstructor: { args: { test: {} } } });
+    const baseClass = new EsClass('Base', { classConstructor: { args: { test: {} } } });
 
     baseClass.declareConstructor({ body: () => EsCode.none });
 
-    const hostClass = new EsLocalClass('Test', {
+    const hostClass = new EsClass('Test', {
       baseClass,
       classConstructor: { args: { 'test?': {} } },
     });
@@ -87,7 +87,7 @@ new Test(1);
     );
   });
   it('allows to change base constructor signature', async () => {
-    const baseClass = new EsLocalClass('Base', { classConstructor: { args: { test: {} } } });
+    const baseClass = new EsClass('Base', { classConstructor: { args: { test: {} } } });
     const field = new EsField('test', { visibility: EsMemberVisibility.Private });
 
     field.declareIn(baseClass);
@@ -99,7 +99,7 @@ new Test(1);
       },
     });
 
-    const hostClass = new EsLocalClass<EsSignature.NoArgs>('Test', {
+    const hostClass = new EsClass<EsSignature.NoArgs>('Test', {
       baseClass,
       classConstructor: new EsConstructor({ args: {} }),
     });

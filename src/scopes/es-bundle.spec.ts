@@ -18,22 +18,22 @@ describe('EsBundle', () => {
     it('refers itself', () => {
       expect(bundle.bundle).toBe(bundle);
     });
-    it('refers spawning bundle', () => {
-      expect(bundle.spawn().spawn().bundle).toBe(bundle);
+    it('refers bundle', () => {
+      expect(bundle.nest().nest().bundle).toBe(bundle);
     });
   });
 
   describe('format', () => {
     it('is ES2015 by default', () => {
       expect(bundle.format).toBe(EsBundleFormat.ES2015);
-      expect(bundle.spawn().format).toBe(EsBundleFormat.ES2015);
+      expect(bundle.nest().format).toBe(EsBundleFormat.ES2015);
     });
     it('is accepted as initialization option', () => {
       const format = EsBundleFormat.IIFE;
       const bundle = new EsBundle({ format });
 
       expect(bundle.format).toBe(format);
-      expect(bundle.spawn().format).toBe(format);
+      expect(bundle.nest().format).toBe(format);
     });
   });
 
@@ -46,10 +46,10 @@ describe('EsBundle', () => {
         TestImports,
       );
     });
-    it('is derived by spawned emission', () => {
-      const emission = bundle.spawn();
+    it('is derived by nested scope', () => {
+      const nested = bundle.nest();
 
-      expect(emission.imports).toBe(bundle.imports);
+      expect(nested.imports).toBe(bundle.imports);
     });
   });
 
@@ -63,10 +63,10 @@ describe('EsBundle', () => {
         new EsBundle({ declarations: bundle => new TestDeclarations(bundle) }).declarations,
       ).toBeInstanceOf(TestDeclarations);
     });
-    it('is derived by spawned emission', () => {
-      const emission = bundle.spawn();
+    it('is derived by nested scope', () => {
+      const nested = bundle.nest();
 
-      expect(emission.declarations).toBe(bundle.declarations);
+      expect(nested.declarations).toBe(bundle.declarations);
     });
   });
 
@@ -79,19 +79,19 @@ describe('EsBundle', () => {
         TestNamespace,
       );
     });
-    it('is nested within namespace of spawning bundle', () => {
-      const emission = bundle.spawn({ ns: { comment: 'Spawned' } });
+    it('is nested within bundle namespace', () => {
+      const scope = bundle.nest({ ns: { comment: 'Nested' } });
 
-      expect(emission.ns.toString()).toBe('/* Spawned */');
-      expect(bundle.ns.encloses(emission.ns)).toBe(true);
+      expect(scope.ns.toString()).toBe('/* Nested */');
+      expect(bundle.ns.encloses(scope.ns)).toBe(true);
     });
-    it('is nested within namespace of spawning emission', () => {
-      const emission1 = bundle.spawn();
-      const emission2 = emission1.spawn({ ns: { comment: 'Spawned' } });
+    it('is nested within nested namespace', () => {
+      const scope1 = bundle.nest();
+      const scope2 = scope1.nest({ ns: { comment: 'Nested' } });
 
-      expect(emission2.ns.toString()).toBe('/* Spawned */');
-      expect(bundle.ns.encloses(emission2.ns)).toBe(true);
-      expect(emission1.ns.encloses(emission2.ns)).toBe(true);
+      expect(scope2.ns.toString()).toBe('/* Nested */');
+      expect(bundle.ns.encloses(scope2.ns)).toBe(true);
+      expect(scope1.ns.encloses(scope2.ns)).toBe(true);
     });
   });
 
@@ -99,17 +99,17 @@ describe('EsBundle', () => {
     it('returns true by default', () => {
       expect(bundle.isActive()).toBe(true);
 
-      const emission = bundle.spawn();
+      const scope = bundle.nest();
 
-      expect(emission.isActive()).toBe(true);
+      expect(scope.isActive()).toBe(true);
     });
     it('returns false when done', async () => {
-      const emission = bundle.spawn();
+      const scope = bundle.nest();
 
       await bundle.done().whenDone();
 
       expect(bundle.isActive()).toBe(false);
-      expect(emission.isActive()).toBe(false);
+      expect(scope.isActive()).toBe(false);
 
       await bundle.whenDone();
     });
@@ -132,12 +132,12 @@ describe('EsBundle', () => {
 
       expect(bundle.isActive()).toBe(false);
     });
-    it('completes spawned emission', async () => {
-      const spawned = bundle.spawn();
+    it('completes emission within nested scope', async () => {
+      const nested = bundle.nest();
 
       await bundle.done().whenDone();
 
-      expect(spawned.isActive()).toBe(false);
+      expect(nested.isActive()).toBe(false);
       expect(bundle.isActive()).toBe(false);
 
       await bundle.whenDone();

@@ -1,4 +1,4 @@
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
 import { EsClass } from './es-class.js';
 import { EsMember, EsMemberRef } from './es-member.js';
@@ -45,10 +45,10 @@ export interface EsFieldDeclaration {
    * @param member - Declared field reference.
    * @param hostClass - Class to declare the field for.
    *
-   * @returns Source of code containing field declaration.
+   * @returns Code snippet containing field declaration.
    */
   readonly initializer?:
-    | ((this: void, member: EsMemberRef<EsField>, hostClass: EsClass) => EsSource)
+    | ((this: void, member: EsMemberRef<EsField>, hostClass: EsClass) => EsSnippet)
     | undefined;
 }
 
@@ -70,7 +70,7 @@ export interface EsFieldHandle {
    *
    * @returns Value read expression.
    */
-  get(this: void, target: EsSource): EsSource;
+  get(this: void, target: EsSnippet): EsSnippet;
 
   /**
    * Assigns field value.
@@ -80,5 +80,5 @@ export interface EsFieldHandle {
    *
    * @returns Value assignment expression.
    */
-  set(this: void, target: EsSource, value: EsSource): EsSource;
+  set(this: void, target: EsSnippet, value: EsSnippet): EsSnippet;
 }

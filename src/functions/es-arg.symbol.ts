@@ -1,8 +1,9 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
+import { EsScope } from '../scopes/es-scope.js';
 import { esSymbolString } from '../symbols/es-symbol-string.js';
-import { EsNaming, EsNamingConstraints, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
+import { EsNaming, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
 import { EsSignature } from './es-signature.js';
 
 /**
@@ -10,7 +11,7 @@ import { EsSignature } from './es-signature.js';
  *
  * Declared by {@link EsSignature#args function signature} typically.
  */
-export class EsArgSymbol extends EsSymbol<EsArgNaming, EsArgNamingConstraints> {
+export class EsArgSymbol extends EsSymbol<EsArgNaming> {
 
   readonly #signature: EsSignature;
   readonly #position: number;
@@ -65,21 +66,7 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming, EsArgNamingConstraints> {
     return false;
   }
 
-  override bind(naming: EsNaming, constraints: EsArgNamingConstraints): EsArgNaming {
-    return {
-      ...naming,
-      symbol: this,
-      asDeclaration: lazyValue(() => {
-        const { comment } = this;
-        const { declare = this.#declareArgName() } = constraints;
-        const commentCode = comment ? ` /* ${comment} */` : '';
-
-        return esline`${declare(naming, this)}${commentCode}`;
-      }),
-    };
-  }
-
-  #declareArgName(): Exclude<EsArgNamingConstraints['declare'], undefined> {
+  #declareArgName(): Exclude<EsArg.Declaration['declare'], undefined> {
     const { kind } = this;
 
     return kind === 'vararg' ? ({ name }) => `...${name}` : ({ name }) => name;
@@ -92,14 +79,28 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming, EsArgNamingConstraints> {
    *
    * @param declaration - Custom argument declaration, if any.
    *
-   * @returns Source of code containing argument declaration.
+   * @returns Code snippet containing argument declaration.
    */
-  declare(declaration: EsArg.Declaration = {}): EsSource {
-    return (code, emission) => {
-      code.inline(
-        emission.ns.nameSymbol(this, { ...declaration, requireNew: true }).asDeclaration(),
-      );
+  declare(declaration: EsArg.Declaration = {}): EsSnippet {
+    return (code, scope) => {
+      code.line(this.#declareIn(scope, declaration).asDeclaration());
     };
+  }
+
+  #declareIn(
+    { ns }: EsScope,
+    { declare = this.#declareArgName() }: EsArg.Declaration,
+  ): EsArgNaming {
+    return ns.addSymbol(this, naming => ({
+      ...naming,
+      symbol: this,
+      asDeclaration: lazyValue(() => {
+        const { comment } = this;
+        const commentCode = comment ? ` /* ${comment} */` : '';
+
+        return esline`${declare(naming, this)}${commentCode}`;
+      }),
+    }));
   }
 
   override toString({
@@ -169,11 +170,11 @@ export enum EsArgKind {
 /**
  * Definition of function argument.
  */
-export type EsArg = EsSymbolInit;
+export type EsArg = Omit<EsSymbolInit, 'declare'>;
 
 export namespace EsArg {
   /**
-   * Custom argument {@link EsArgSymbol#declare declaration}.
+   * Custom argument {@link EsArgSymbol#requestDeclaration declaration}.
    */
   export interface Declaration {
     /**
@@ -182,7 +183,7 @@ export namespace EsArg {
      * @param naming - Naming of argument `symbol`.
      * @param symbol - Argument symbol to declare.
      */
-    declare?: ((this: void, naming: EsNaming, symbol: EsArgSymbol) => EsSource) | undefined;
+    declare?: ((this: void, naming: EsNaming, symbol: EsArgSymbol) => EsSnippet) | undefined;
   }
 
   /**
@@ -233,21 +234,9 @@ export interface EsArgNaming extends EsNaming {
   readonly symbol: EsArgSymbol;
 
   /**
-   * Emits argument {@link EsArgSymbol#declare declaration} code.
+   * Emits argument {@link EsArgSymbol#requestDeclaration declaration} code.
    *
    * @returns Argument declaration code.
    */
-  asDeclaration(this: void): EsSource;
-}
-
-/**
- * Function {@link EsArgSymbol argument} naming constraints.
- *
- * Contains custom argument {@link EsArg.Declaration declaration}.
- */
-export interface EsArgNamingConstraints extends EsNamingConstraints, EsArg.Declaration {
-  /**
-   * Always require new argument name.
-   */
-  readonly requireNew: true;
+  asDeclaration(this: void): EsSnippet;
 }

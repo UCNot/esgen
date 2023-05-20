@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsBundle } from './emission/es-bundle.js';
 import { esline } from './esline.tag.js';
+import { EsBundle } from './scopes/es-bundle.js';
 import { esImport } from './symbols/es-import.js';
 
 describe('esline', () => {
@@ -10,7 +10,7 @@ describe('esline', () => {
     bundle = new EsBundle();
   });
 
-  it('emits inline code', async () => {
+  it('emits a line of code', async () => {
     const test = esImport('test-module', 'test');
 
     await expect(bundle.emit(esline`console.log(${test});`).asText()).resolves.toBe(

@@ -1,5 +1,5 @@
-import { EsEmissionInit } from '../emission/es-emission.js';
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
+import { EsScopeInit } from '../scopes/es-scope.js';
 import { EsSignature } from './es-signature.js';
 
 /**
@@ -42,22 +42,22 @@ export class EsCallable<out TArgs extends EsSignature.Args> {
    * @param body - Function body builder.
    * @param expression - Lambda expression details.
    *
-   * @returns Source of code containing lambda expression.
+   * @returns Lambda expression.
    */
   lambda(
-    body: (this: void, fn: this) => EsSource,
+    body: (this: void, fn: this) => EsSnippet,
     expression?: EsLambdaExpression<TArgs>,
-  ): EsSource;
+  ): EsSnippet;
 
   lambda(
-    body: (this: void, fn: this) => EsSource,
+    body: (this: void, fn: this) => EsSnippet,
     { async, args, scope }: EsLambdaExpression<TArgs> = {},
-  ): EsSource {
+  ): EsSnippet {
     return code => {
       code.scope(scope, code => {
-        code.block(code => {
+        code.multiLine(code => {
           code
-            .inline(async ? 'async ' : '', this.signature.declare(args), ' => {')
+            .line(async ? 'async ' : '', this.signature.declare(args), ' => {')
             .indent(body(this))
             .write('}');
         });
@@ -71,22 +71,22 @@ export class EsCallable<out TArgs extends EsSignature.Args> {
    * @param body - Function body builder.
    * @param expression - Function expression details.
    *
-   * @returns Source of code containing function expression.
+   * @returns Function expression.
    */
   function(
-    body: (this: void, fn: this) => EsSource,
+    body: (this: void, fn: this) => EsSnippet,
     expression?: EsFunctionExpression<TArgs>,
-  ): EsSource;
+  ): EsSnippet;
 
   function(
-    body: (this: void, fn: this) => EsSource,
+    body: (this: void, fn: this) => EsSnippet,
     { async, generator, name, args, scope }: EsFunctionExpression<TArgs> = {},
-  ): EsSource {
+  ): EsSnippet {
     return code => {
       code.scope(scope, code => {
-        code.block(code => {
+        code.multiLine(code => {
           code
-            .inline(
+            .line(
               async ? 'async ' : '',
               'function ',
               generator ? '*' : '',
@@ -120,9 +120,9 @@ export interface EsLambdaExpression<out TArgs extends EsSignature.Args> {
   readonly args?: EsSignature.Declarations<TArgs> | undefined;
 
   /**
-   * Emission initialization options for body scope.
+   * Scope initialization options for lambda body.
    */
-  readonly scope?: EsEmissionInit | undefined;
+  readonly scope?: EsScopeInit | undefined;
 }
 
 /**
@@ -131,39 +131,16 @@ export interface EsLambdaExpression<out TArgs extends EsSignature.Args> {
  * @typeParam TArgs - Type of function arguments definition.
  */
 export interface EsFunctionExpression<out TArgs extends EsSignature.Args>
-  extends EsFunctionDeclaration<TArgs> {
+  extends EsLambdaExpression<TArgs> {
+  /**
+   * Whether generator function declared.
+   */
+  readonly generator?: boolean | undefined;
+
   /**
    * Function name.
    *
    * Defaults to none.
    */
   readonly name?: string | undefined;
-}
-
-/**
- * Details of variable declaration initialized with {@link EsCallable#lambda lambda expression}.
- *
- * @typeParam TArgs - Type of lambda arguments definition.
- */
-export interface EsLambdaDeclaration<out TArgs extends EsSignature.Args>
-  extends EsLambdaExpression<TArgs> {
-  /**
-   * Variable declaration specifier (`const`, `let`, or `var`).
-   *
-   * @defaultValue `const`.
-   */
-  readonly spec?: 'const' | 'let' | 'var';
-}
-
-/**
- * Details of function declaration.
- *
- * @typeParam TArgs - Type of lambda arguments definition.
- */
-export interface EsFunctionDeclaration<out TArgs extends EsSignature.Args>
-  extends EsLambdaExpression<TArgs> {
-  /**
-   * Whether generator function declared.
-   */
-  readonly generator?: boolean | undefined;
 }

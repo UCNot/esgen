@@ -1,5 +1,5 @@
-import { EsBundle } from '../emission/es-bundle.js';
-import { EsEmission, EsEmissionResult, EsEmitter } from '../emission/es-emission.js';
+import { EsBundle } from '../scopes/es-bundle.js';
+import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { EsImportNaming, EsImportedSymbol } from './es-imported.symbol.js';
 import { EsModuleImports } from './es-module.js';
 import { EsNaming } from './es-symbol.js';
@@ -7,7 +7,7 @@ import { EsNaming } from './es-symbol.js';
 /**
  * Collection of {@link EsImportedSymbol import} declarations of the bundle.
  *
- * Declared at bundle emission control.
+ * Declared at bundle level.
  */
 export class EsImports implements EsEmitter {
 
@@ -59,7 +59,7 @@ export class EsImports implements EsEmitter {
     return naming as EsImportNaming;
   }
 
-  emit(_emission: EsEmission): EsEmissionResult {
+  emit(_scope: EsScope): EsEmissionResult {
     return {
       printTo: out => {
         for (const moduleImports of this.#imports.values()) {

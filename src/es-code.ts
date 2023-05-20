@@ -1,26 +1,26 @@
 import { noop } from '@proc7ts/primitives';
-import { EsEmission, EsEmissionInit, EsEmissionSpan, EsEmitter } from './emission/es-emission.js';
 import { EsOutput, EsPrinter } from './es-output.js';
-import { EsBuilder, EsProducer, EsSource } from './es-source.js';
+import { EsBuilder, EsSnippet } from './es-snippet.js';
+import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit } from './scopes/es-scope.js';
 
 /**
  * Writable fragment of code.
  *
- * By default, represents a {@link block} of code, where each written code source is placed on a new line.
- * When {@link inline}, the written code sources placed without new lines between them.
+ * By default, represents a {@link multiLine multi-line} code, where each written code snippet is placed on a new line.
+ * When {@link line inline}, the written code snippets placed without new lines between them.
  */
 export class EsCode implements EsEmitter {
 
   /**
-   * Source of no code.
+   * Empty code snippet.
    */
-  static get none(): EsSource {
+  static get none(): EsSnippet {
     return EsCode$none;
   }
 
   readonly #enclosing: EsCode | undefined;
   readonly #emitters: EsEmitter[] = [];
-  readonly #emissions = new Map<EsEmission, EsEmissionSpan>();
+  readonly #spans = new Map<EsScope, EsEmissionSpan>();
 
   /**
    * Constructs code fragment.
@@ -34,54 +34,52 @@ export class EsCode implements EsEmitter {
   /**
    * Writes code to this fragment.
    *
-   * Writes a new line without `sources` specified, unless this is an {@link inline} code fragment.
+   * Writes a new line without `snippets` specified, unless this is an {@link line inline} code fragment.
    *
-   * Places each source on a new line, unless this is an {@link inline} code fragment.
+   * Places each code snippet on a new line, unless this is an {@link line inline} code fragment.
    *
-   * @param sources - Written code sources.
+   * @param snippets - Written code snippets.
    *
    * @returns `this` instance.
    */
-  write(...sources: EsSource[]): this {
-    if (sources.length) {
-      for (const source of sources) {
-        this.#addSource(source);
+  write(...snippets: EsSnippet[]): this {
+    if (snippets.length) {
+      for (const snippet of snippets) {
+        this.#addSnippet(snippet);
       }
     } else {
-      sources.push(EsCode$NewLine);
+      snippets.push(EsCode$NewLine);
     }
 
     return this;
   }
 
-  #addSource(source: EsSource): void {
-    if (typeof source === 'function') {
+  #addSnippet(snippet: EsSnippet): void {
+    if (typeof snippet === 'function') {
       const code = new EsCode(this);
 
       this.#addEmitter({
-        async emit(emission: EsEmission): Promise<EsPrinter> {
-          await source(code, emission);
+        async emit(scope: EsScope): Promise<EsPrinter> {
+          await snippet(code, scope);
 
-          return code.emit(emission);
+          return code.emit(scope);
         },
       });
-    } else if (isEsPrinter(source)) {
-      if (source instanceof EsCode && source.#contains(this)) {
+    } else if (isEsPrinter(snippet)) {
+      if (snippet instanceof EsCode && snippet.#contains(this)) {
         throw new TypeError('Can not insert code fragment into itself');
       }
-      this.#addEmitter(source);
-    } else if (isEsProducer(source)) {
-      this.#addSource(source.toCode());
-    } else if (source === '') {
+      this.#addEmitter(snippet);
+    } else if (snippet === '') {
       this.#addEmitter(EsCode$NewLine);
     } else {
-      this.#addEmitter(new EsCode$Record(source));
+      this.#addEmitter(new EsCode$Record(snippet));
     }
   }
 
   #addEmitter(emitter: EsEmitter): void {
     this.#emitters.push(emitter);
-    for (const { emit } of this.#emissions.values()) {
+    for (const { emit } of this.#spans.values()) {
       emit(emitter);
     }
   }
@@ -100,16 +98,16 @@ export class EsCode implements EsEmitter {
   }
 
   /**
-   * Writes inline code to this fragment.
+   * Writes a line of code to this fragment.
    *
-   * Unlike {@link write}, the sources are placed on the same line.
+   * Unlike {@link multiLine}, the snippets are placed on the same line.
    *
-   * @param sources - Inline code sources.
+   * @param snippets - Inline code snippets.
    *
    * @returns `this` instance.
    */
-  inline(...sources: EsSource[]): this {
-    this.#addEmitter(new EsCode$Inline(new EsCode(this).write(...sources)));
+  line(...snippets: EsSnippet[]): this {
+    this.#addEmitter(new EsCode$Line(new EsCode(this).write(...snippets)));
 
     return this;
   }
@@ -117,39 +115,39 @@ export class EsCode implements EsEmitter {
   /**
    * Writes indented code to this fragment.
    *
-   * Always places each source on a new line, and prepends it with indentation symbols. Even for {@link inline}
-   * code fragment.
+   * Always places each code snippet on a new line and prepends it with indentation symbols. Even when inside an
+   * {@link line inline} code fragment.
    *
    * Indentations may be nested. Nested indentations adjust enclosing ones.
    *
-   * @param sources - Indented code sources.
+   * @param snippets - Indented code snippets.
    *
    * @returns `this` instance.
    */
-  indent(...sources: EsSource[]): this {
-    this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...sources)));
+  indent(...snippets: EsSnippet[]): this {
+    this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...snippets)));
 
     return this;
   }
 
   /**
-   * Writes block of code to this fragment.
+   * Writes multiple lines of code to this fragment.
    *
-   * Always places each source on a new line. Even for {@link inline} code fragment. Unlike {@link indent}, does not
-   * adjust indentation.
+   * Always places each code snippet on a new line. Even when inside an {@link line inline} code fragment.
+   * Unlike {@link indent}, does not adjust indentation.
    *
-   * @param sources - Block code sources.
+   * @param snippets - Multi-line code snippets.
    *
    * @returns `this` instance.
    */
-  block(...sources: EsSource[]): this {
-    this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...sources), ''));
+  multiLine(...snippets: EsSnippet[]): this {
+    this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...snippets), ''));
 
     return this;
   }
 
   /**
-   * Emits code under {@link EsEmission#spawn spawned} emission control and appends emission result to this fragment.
+   * Emits code in {@link EsScope#nest nested} scope and appends emission result to `this` fragment.
    *
    * @param builder - Code builder.
    *
@@ -158,27 +156,26 @@ export class EsCode implements EsEmitter {
   scope(builder: EsBuilder): this;
 
   /**
-   * Emits code under emission control {@link EsEmission#spawn spawned} with custom options and appends emission result
-   * to this fragment.
+   * Emits code in customized {@link EsScope#nest nested} scope and appends emission result to `this` fragment.
    *
-   * @param init - Custom scope emission options.
+   * @param init - Custom scope initialization options.
    * @param builder - Code builder.
    *
    * @returns `this` instance.
    */
-  scope(init: EsEmissionInit | undefined, builder: EsBuilder): this;
+  scope(init: EsScopeInit | undefined, builder: EsBuilder): this;
 
-  scope(initOrBuilder: EsEmissionInit | EsBuilder | undefined, builder?: EsBuilder): this {
-    let init: EsEmissionInit | undefined;
+  scope(initOrBuilder: EsScopeInit | EsBuilder | undefined, builder?: EsBuilder): this {
+    let init: EsScopeInit | undefined;
 
     if (builder) {
-      init = initOrBuilder as EsEmissionInit;
+      init = initOrBuilder as EsScopeInit;
     } else {
       builder = initOrBuilder as EsBuilder;
     }
 
-    return this.write((code, emission) => {
-      code.write(new EsCode().write(builder!).emit(emission.spawn(init)));
+    return this.write((code, scope) => {
+      code.write(new EsCode().write(builder!).emit(scope.nest(init)));
     });
   }
 
@@ -190,26 +187,26 @@ export class EsCode implements EsEmitter {
    *
    * It is possible to issue multiple code emissions at the same time.
    *
-   * @param emission - Code emission control.
+   * @param scope - Code emission scope.
    *
    * @returns Emitted code printer.
    */
-  emit(emission: EsEmission): EsPrinter {
-    const existingSpan = this.#emissions.get(emission);
+  emit(scope: EsScope): EsPrinter {
+    const existingSpan = this.#spans.get(scope);
 
     if (existingSpan) {
       return existingSpan.printer;
     }
 
-    const span = emission.span(...this.#emitters);
+    const span = scope.span(...this.#emitters);
 
-    this.#emissions.set(emission, span);
+    this.#spans.set(scope, span);
 
-    emission
+    scope
       .whenDone()
       .catch(noop)
       .finally(() => {
-        this.#emissions.delete(emission);
+        this.#spans.delete(scope);
       });
 
     return span.printer;
@@ -217,12 +214,8 @@ export class EsCode implements EsEmitter {
 
 }
 
-function isEsPrinter(source: EsSource): source is EsEmitter {
-  return typeof source === 'object' && 'emit' in source && typeof source.emit === 'function';
-}
-
-function isEsProducer(source: EsSource): source is EsProducer {
-  return typeof source === 'object' && 'toCode' in source && typeof source.toCode === 'function';
+function isEsPrinter(snippet: EsSnippet): snippet is EsEmitter {
+  return typeof snippet === 'object' && 'emit' in snippet && typeof snippet.emit === 'function';
 }
 
 function EsCode$none(_code: EsCode): void {
@@ -257,7 +250,7 @@ class EsCode$NewLine$ implements EsEmitter {
 
 const EsCode$NewLine = /*#__PURE__*/ new EsCode$NewLine$();
 
-class EsCode$Inline implements EsEmitter {
+class EsCode$Line implements EsEmitter {
 
   readonly #code: EsCode;
 
@@ -265,12 +258,12 @@ class EsCode$Inline implements EsEmitter {
     this.#code = code;
   }
 
-  emit(emission: EsEmission): EsPrinter {
-    const record = this.#code.emit(emission);
+  emit(scope: EsScope): EsPrinter {
+    const record = this.#code.emit(scope);
 
     return {
       printTo: out => {
-        out.inline(span => span.print(record));
+        out.line(span => span.print(record));
       },
     };
   }
@@ -287,8 +280,8 @@ class EsCode$Indented implements EsEmitter {
     this.#indent = indent;
   }
 
-  emit(emission: EsEmission): EsPrinter {
-    const printer = this.#code.emit(emission);
+  emit(scope: EsScope): EsPrinter {
+    const printer = this.#code.emit(scope);
 
     return {
       printTo: span => {

@@ -1,6 +1,6 @@
 import { isArray } from '@proc7ts/primitives';
 import { jsStringLiteral } from 'httongue';
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { EsArg, EsArgKind, EsArgSymbol } from './es-arg.symbol.js';
 
 /**
@@ -126,10 +126,10 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
    *
    * @param declarations - Custom per-argument declarations, e.g. containing default values or destructuring.
    *
-   * @returns Source of code containing comma-separated argument {@link EsArgSymbol#declare declarations} enclosed into
+   * @returns Code snippet containing comma-separated argument {@link EsArgSymbol#declare declarations} enclosed into
    * parentheses.
    */
-  declare(declarations: EsSignature.Declarations<TArgs> = {}): EsSource {
+  declare(declarations: EsSignature.Declarations<TArgs> = {}): EsSnippet {
     return code => {
       let hasCustomDeclaration = false;
 
@@ -143,15 +143,15 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
 
       if (decls.length > 3 || (hasCustomDeclaration && decls.length > 1)) {
         // Each declaration on a new line.
-        code.block(code => {
+        code.multiLine(code => {
           code
             .write('(')
             .indent(code => {
               decls.forEach((decl, index, { length }) => {
                 if (index + 1 < length || !this.vararg) {
-                  code.inline(decl, ',');
+                  code.line(decl, ',');
                 } else {
-                  code.inline(decl);
+                  code.line(decl);
                 }
               });
             })
@@ -159,7 +159,7 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
         });
       } else {
         // Few declarations on the same line.
-        code.inline(
+        code.line(
           '(',
           code => {
             decls.forEach((decl, index, { length }) => {
@@ -213,26 +213,26 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
    *
    * @param args - Named argument values.
    *
-   * @returns Source of code containing comma-separated argument values enclosed into parentheses.
+   * @returns Code snippet containing comma-separated argument values enclosed into parentheses.
    */
   call(
     ...args: EsSignature.RequiredKeyOf<TArgs> extends never
       ? [EsSignature.ValuesOf<TArgs>?]
       : [EsSignature.ValuesOf<TArgs>]
-  ): EsSource;
+  ): EsSnippet;
 
-  call(args: EsSignature.ValuesOf<TArgs> = {} as EsSignature.ValuesOf<TArgs>): EsSource {
+  call(args: EsSignature.ValuesOf<TArgs> = {} as EsSignature.ValuesOf<TArgs>): EsSnippet {
     const argValues = this.#buildArgValues(args);
 
     if (argValues.length > 3) {
       // Each value on new line.
       return code => {
-        code.block(code => {
+        code.multiLine(code => {
           code
             .write('(')
             .indent(code => {
               for (const argValue of argValues) {
-                code.inline(argValue, ',');
+                code.line(argValue, ',');
               }
             })
             .write(')');
@@ -240,13 +240,13 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
       };
     }
 
-    // Inline arguments.
+    // Values on one line.
     return code => {
-      code.inline(code => {
+      code.line(code => {
         code.write('(');
         argValues.forEach((argValue, index, { length }) => {
           if (index + 1 < length) {
-            code.inline(argValue, ', ');
+            code.line(argValue, ', ');
           } else {
             code.write(argValue);
           }
@@ -256,11 +256,11 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
     };
   }
 
-  #buildArgValues(values: EsSignature.ValuesOf<TArgs>): EsSource[] {
-    const argValues: EsSource[] = [];
+  #buildArgValues(values: EsSignature.ValuesOf<TArgs>): EsSnippet[] {
+    const argValues: EsSnippet[] = [];
 
     for (const name of Object.keys(this.args)) {
-      const argValue: EsSource | readonly EsSource[] | undefined =
+      const argValue: EsSnippet | readonly EsSnippet[] | undefined =
         values[name as keyof typeof values];
 
       if (argValue == null) {
@@ -400,10 +400,13 @@ export namespace EsSignature {
    * @typeParam TArgs - Type of arguments definition.
    */
   export type ValuesOf<TArgs extends Args> = {
-    readonly [key in EsArg.NameOf<RequiredKeyOf<TArgs>>]: EsSource;
+    readonly [key in EsArg.NameOf<RequiredKeyOf<TArgs>>]: EsSnippet;
   } & {
-    readonly [key in EsArg.NameOf<OptionalKeyOf<TArgs>>]?: EsSource | undefined;
+    readonly [key in EsArg.NameOf<OptionalKeyOf<TArgs>>]?: EsSnippet | undefined;
   } & {
-    readonly [key in EsArg.NameOf<VarArgKeyOf<TArgs>>]?: EsSource | readonly EsSource[] | undefined;
+    readonly [key in EsArg.NameOf<VarArgKeyOf<TArgs>>]?:
+      | EsSnippet
+      | readonly EsSnippet[]
+      | undefined;
   };
 }

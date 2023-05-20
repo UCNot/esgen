@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { EsCode } from '../es-code.js';
-import { EsLocalSymbol } from '../symbols/es-local.symbol.js';
+import { esline } from '../esline.tag.js';
+import { EsSignature } from '../functions/es-signature.js';
+import { EsBundle } from '../scopes/es-bundle.js';
+import { EsSymbol } from '../symbols/es-symbol.js';
 import { EsClass } from './es-class.js';
-import { EsLocalClass } from './es-local.class.js';
 import { EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
 
 describe('EsClass', () => {
@@ -10,8 +12,8 @@ describe('EsClass', () => {
   let hostClass: EsClass;
 
   beforeEach(() => {
-    baseClass = new EsLocalClass('Base');
-    hostClass = new EsLocalClass('Test', { baseClass });
+    baseClass = new EsClass('Base');
+    hostClass = new EsClass('Test', { baseClass });
   });
 
   describe('declareMember', () => {
@@ -147,7 +149,7 @@ describe('EsClass', () => {
       const member1 = new TestMember('test');
       const member2 = new TestMember('test');
       const member3 = new TestMember('test');
-      const class2 = new EsClass(new EsLocalSymbol('Test2'), { baseClass });
+      const class2 = new EsClass('Test2', { baseClass });
 
       expect(member1.declareIn(hostClass).name).toBe('test');
       expect(member2.declareIn(baseClass).name).toBe('test$0');
@@ -242,6 +244,48 @@ describe('EsClass', () => {
         },
       ]);
       expect([...hostClass.members({ visibility: 'private' })]).toEqual([]);
+    });
+  });
+
+  describe('auto-declare', () => {
+    let bundle: EsBundle;
+
+    beforeEach(() => {
+      bundle = new EsBundle();
+    });
+
+    it('declares base class before the class itself', async () => {
+      const baseClass = new EsClass('Base', { declare: { at: 'bundle' } });
+      const cls = new EsClass('Test', { baseClass, declare: { at: 'bundle' } });
+
+      bundle.ns.refer(cls);
+
+      await expect(bundle.emit().asText()).resolves.toBe(
+        'class Base {\n}\nclass Test extends Base {\n}\n',
+      );
+    });
+  });
+
+  describe('declare', () => {
+    let bundle: EsBundle;
+
+    beforeEach(() => {
+      bundle = new EsBundle();
+    });
+
+    it('declares local class', async () => {
+      const cls = new EsClass<EsSignature.NoArgs>('Test');
+
+      await expect(
+        bundle
+          .emit(
+            cls.declare(),
+            new EsSymbol('instance').requestDeclaration({
+              as: ({ naming }) => [esline`const ${naming} = new ${cls}();`, naming],
+            }),
+          )
+          .asText(),
+      ).resolves.toBe(`class Test {\n}\nconst instance = new Test();\n`);
     });
   });
 

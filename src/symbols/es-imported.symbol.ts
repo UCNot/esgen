@@ -1,5 +1,5 @@
 import { jsStringLiteral } from 'httongue';
-import { EsEmission, EsEmissionResult } from '../emission/es-emission.js';
+import { EsCode } from '../es-code.js';
 import { EsModule } from './es-module.js';
 import { EsNaming, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
@@ -21,7 +21,13 @@ export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
    * @param init - Import initialization options.
    */
   constructor(from: EsModule, importName: string, init?: EsImportInit) {
-    super(init?.as ?? importName, init);
+    super(init?.as ?? importName, {
+      ...init,
+      declare: {
+        at: 'bundle',
+        as: ({ naming }) => [EsCode.none, naming.ns.scope.imports.addImport(this, naming)],
+      },
+    });
     this.#importName = importName;
     this.#from = from;
   }
@@ -38,14 +44,6 @@ export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
    */
   get importName(): string {
     return this.#importName;
-  }
-
-  override bind(naming: EsNaming): EsImportNaming {
-    return naming.ns.emission.imports.addImport(this, naming);
-  }
-
-  override emit(emission: EsEmission): EsEmissionResult {
-    return emission.bundle.ns.nameSymbol(this).name;
   }
 
   override toString({
@@ -69,7 +67,7 @@ export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
 /**
  * Import initialization options.
  */
-export interface EsImportInit extends EsSymbolInit {
+export interface EsImportInit extends Omit<EsSymbolInit, 'declare'> {
   /**
    * Requested symbol name.
    *
