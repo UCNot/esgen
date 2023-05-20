@@ -14,8 +14,8 @@ describe('EsDeclarations', () => {
     const symbol1 = esConst('first', `1`, { exported: true });
     const symbol2 = esConst('second', `2`, { exported: true });
 
-    bundle.ns.nameSymbol(symbol1);
-    bundle.ns.nameSymbol(symbol2);
+    bundle.ns.refer(symbol1);
+    bundle.ns.refer(symbol2);
 
     await expect(bundle.emit().asText()).resolves.toBe(
       `export const first = 1;\nexport const second = 2;\n`,
@@ -25,8 +25,8 @@ describe('EsDeclarations', () => {
     const symbol1 = esConst('test', `1`, { prefix: '' });
     const symbol2 = esConst('test', `2`, { exported: true });
 
-    expect(bundle.ns.nameSymbol(symbol1).name).toBe('test');
-    expect(bundle.ns.nameSymbol(symbol2).name).toBe('test$0');
+    expect(bundle.ns.refer(symbol1).getNaming().name).toBe('test');
+    expect(bundle.ns.refer(symbol2).getNaming().name).toBe('test$0');
 
     await expect(bundle.emit().asText()).resolves.toBe(
       `const test = 1;\nconst test$0 = 2;\nexport {\n  test$0 as test,\n};\n`,
@@ -36,13 +36,11 @@ describe('EsDeclarations', () => {
     const symbol1 = esConst('first', `1`, { exported: true });
     const symbol2 = esConst('second', `2`, { exported: true });
 
-    bundle.ns.nameSymbol(symbol1);
+    bundle.ns.refer(symbol1);
 
     await expect(bundle.emit().asText()).resolves.toBe(`export const first = 1;\n`);
 
-    expect(() => bundle.ns.nameSymbol(symbol2)).toThrow(
-      new TypeError(`Declarations already printed`),
-    );
+    expect(() => bundle.ns.refer(symbol2)).toThrow(new TypeError(`Declarations already printed`));
   });
 
   describe('IIFE', () => {
@@ -51,8 +49,8 @@ describe('EsDeclarations', () => {
       const symbol1 = esConst('test', `1`, { prefix: '' });
       const symbol2 = esConst('test', `2`, { exported: true });
 
-      expect(bundle.ns.nameSymbol(symbol1).name).toBe('test');
-      expect(bundle.ns.nameSymbol(symbol2).name).toBe('test$0');
+      expect(bundle.ns.refer(symbol1).getNaming().name).toBe('test');
+      expect(bundle.ns.refer(symbol2).getNaming().name).toBe('test$0');
 
       await expect(bundle.emit().asExports()).resolves.toEqual({ test: 2 });
     });

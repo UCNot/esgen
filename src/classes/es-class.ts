@@ -5,7 +5,7 @@ import { EsSignature } from '../functions/es-signature.js';
 import { esMemberAccessor } from '../impl/es-member-accessor.js';
 import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { EsNameRegistry } from '../symbols/es-name-registry.js';
-import { EsAnySymbol, EsNaming, EsReference } from '../symbols/es-symbol.js';
+import { EsNaming, EsReference, EsSymbol } from '../symbols/es-symbol.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsConstructor, EsConstructorDeclaration, EsConstructorInit } from './es-constructor.js';
 import { EsAnyMember, EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
@@ -22,7 +22,7 @@ import { EsAnyMember, EsMember, EsMemberRef, EsMemberVisibility } from './es-mem
 export class EsClass<
   out TArgs extends EsSignature.Args = EsSignature.Args,
   out TNaming extends EsNaming = EsNaming,
-  out TSymbol extends EsAnySymbol<TNaming> = EsAnySymbol<TNaming>,
+  out TSymbol extends EsSymbol<TNaming> = EsSymbol<TNaming>,
 > implements EsReference<TNaming, TSymbol>, EsEmitter {
 
   readonly #symbol: TSymbol;

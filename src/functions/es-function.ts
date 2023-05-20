@@ -1,6 +1,6 @@
 import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
-import { EsAnySymbol, EsNaming } from '../symbols/es-symbol.js';
+import { EsNaming, EsSymbol } from '../symbols/es-symbol.js';
 import { EsCallable } from './es-callable.js';
 import { EsSignature } from './es-signature.js';
 
@@ -16,7 +16,7 @@ import { EsSignature } from './es-signature.js';
 export class EsFunction<
   out TArgs extends EsSignature.Args,
   out TNaming extends EsNaming = EsNaming,
-  out TSymbol extends EsAnySymbol<TNaming> = EsAnySymbol<TNaming>,
+  out TSymbol extends EsSymbol<TNaming> = EsSymbol<TNaming>,
 > extends EsCallable<TArgs> {
 
   readonly #symbol: TSymbol;

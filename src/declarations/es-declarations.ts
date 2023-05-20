@@ -4,7 +4,7 @@ import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsSnippet } from '../es-snippet.js';
 import { EsBundleFormat } from '../scopes/es-bundle-format.js';
 import { EsBundle } from '../scopes/es-bundle.js';
-import { EsAnySymbol, EsNaming, EsReference, EsSymbol } from '../symbols/es-symbol.js';
+import { EsNaming, EsReference, EsSymbol } from '../symbols/es-symbol.js';
 import { EsDeclaredSymbol } from './es-declared.symbol.js';
 
 /**
@@ -13,7 +13,7 @@ import { EsDeclaredSymbol } from './es-declared.symbol.js';
 export class EsDeclarations {
 
   readonly #bundle: EsBundle;
-  readonly #snippets = new Map<EsAnySymbol, EsDeclSnippet>();
+  readonly #snippets = new Map<EsSymbol, EsDeclSnippet>();
   readonly #content = lazyValue(() => this.#build());
   #addDecl: (symbol: EsDeclaredSymbol, snippet: EsDeclSnippet) => void;
 
@@ -41,12 +41,12 @@ export class EsDeclarations {
   /**
    * Add symbol declaration.
    *
-   * Called when {@link EsNamespace#nameSymbol naming} the symbol.
+   * Called when declaring the symbol.
    *
    * @param symbol - Declared symbol.
    * @param naming - Symbol naming.
    *
-   * @returns
+   * @returns - Symbol naming.
    */
   addDeclaration(symbol: EsDeclaredSymbol, naming: EsNaming): EsNaming {
     const newSnippet = new EsDeclSnippet(symbol, naming);
@@ -214,7 +214,7 @@ class EsDeclSnippet {
 
   readonly #symbol: EsDeclaredSymbol;
   readonly #naming: EsNaming;
-  readonly #refs = new Set<EsAnySymbol>();
+  readonly #refs = new Set<EsSymbol>();
 
   constructor(symbol: EsDeclaredSymbol, naming: EsNaming) {
     this.#symbol = symbol;

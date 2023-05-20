@@ -1,8 +1,9 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
+import { EsScope } from '../scopes/es-scope.js';
 import { esSymbolString } from '../symbols/es-symbol-string.js';
-import { EsNaming, EsNamingConstraints, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
+import { EsNaming, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
 import { EsSignature } from './es-signature.js';
 
 /**
@@ -10,7 +11,7 @@ import { EsSignature } from './es-signature.js';
  *
  * Declared by {@link EsSignature#args function signature} typically.
  */
-export class EsArgSymbol extends EsSymbol<EsArgNaming, EsArgNamingConstraints> {
+export class EsArgSymbol extends EsSymbol<EsArgNaming> {
 
   readonly #signature: EsSignature;
   readonly #position: number;
@@ -65,21 +66,7 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming, EsArgNamingConstraints> {
     return false;
   }
 
-  override bind(naming: EsNaming, constraints: EsArgNamingConstraints): EsArgNaming {
-    return {
-      ...naming,
-      symbol: this,
-      asDeclaration: lazyValue(() => {
-        const { comment } = this;
-        const { declare = this.#declareArgName() } = constraints;
-        const commentCode = comment ? ` /* ${comment} */` : '';
-
-        return esline`${declare(naming, this)}${commentCode}`;
-      }),
-    };
-  }
-
-  #declareArgName(): Exclude<EsArgNamingConstraints['declare'], undefined> {
+  #declareArgName(): Exclude<EsArg.Declaration['declare'], undefined> {
     const { kind } = this;
 
     return kind === 'vararg' ? ({ name }) => `...${name}` : ({ name }) => name;
@@ -96,8 +83,24 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming, EsArgNamingConstraints> {
    */
   declare(declaration: EsArg.Declaration = {}): EsSnippet {
     return (code, scope) => {
-      code.line(scope.ns.nameSymbol(this, { ...declaration, requireNew: true }).asDeclaration());
+      code.line(this.#declareIn(scope, declaration).asDeclaration());
     };
+  }
+
+  #declareIn(
+    { ns }: EsScope,
+    { declare = this.#declareArgName() }: EsArg.Declaration,
+  ): EsArgNaming {
+    return ns.addSymbol(this, naming => ({
+      ...naming,
+      symbol: this,
+      asDeclaration: lazyValue(() => {
+        const { comment } = this;
+        const commentCode = comment ? ` /* ${comment} */` : '';
+
+        return esline`${declare(naming, this)}${commentCode}`;
+      }),
+    }));
   }
 
   override toString({
@@ -236,16 +239,4 @@ export interface EsArgNaming extends EsNaming {
    * @returns Argument declaration code.
    */
   asDeclaration(this: void): EsSnippet;
-}
-
-/**
- * Function {@link EsArgSymbol argument} naming constraints.
- *
- * Contains custom argument {@link EsArg.Declaration declaration}.
- */
-export interface EsArgNamingConstraints extends EsNamingConstraints, EsArg.Declaration {
-  /**
-   * Always require new argument name.
-   */
-  readonly requireNew: true;
 }

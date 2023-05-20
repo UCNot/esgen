@@ -1,4 +1,3 @@
-import { EsCode } from '../es-code.js';
 import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsNamespace } from './es-namespace.js';
@@ -8,17 +7,14 @@ import { esSymbolString } from './es-symbol-string.js';
  * Program symbol.
  *
  * Requests a {@link requestedName name} within program. The actual name, however, may differ to avoid naming conflicts.
- * In order to receive an actual name, the symbol has to be {@link EsNamespace#nameSymbol named} first. Then, the symbol
+ * In order to receive an actual name, the symbol has to be {@link EsNamespace#addSymbol named} first. Then, the symbol
  * becomes {@link EsNamespace#findSymbol visible} under its actual {@link EsNamespace#refer name} in target
  * namespace and its nested namespaces.
  *
  * @typeParam TNaming - Type of symbol naming.
- * @typeParam TConstraints - Type of naming constraints.
  */
-export abstract class EsSymbol<
-  out TNaming extends EsNaming = EsNaming,
-  in TConstraints extends EsNamingConstraints = EsNamingConstraints,
-> implements EsReference<TNaming>, EsEmitter {
+export abstract class EsSymbol<out TNaming extends EsNaming = EsNaming>
+  implements EsReference<TNaming>, EsEmitter {
 
   readonly #requestedName: string;
   readonly #comment: string | undefined;
@@ -84,18 +80,6 @@ export abstract class EsSymbol<
   }
 
   /**
-   * Binds named symbol to namespace.
-   *
-   * Called to perform additional actions right after the symbol received its {@link EsNamespace#nameSymbol name}.
-   *
-   * @param naming - Symbol naming.
-   * @param constraints - Naming constraints specific to this type of symbols.
-   *
-   * @returns Naming specific to this type of symbols.
-   */
-  abstract bind(naming: EsNaming, constraints: TConstraints): TNaming;
-
-  /**
    * Emits the name of the symbol visible to {@link EsScope#ns emission namespace}.
    *
    * @param scope - Code emission scope.
@@ -103,7 +87,7 @@ export abstract class EsSymbol<
    * @returns Emission result.
    */
   emit(scope: EsScope): EsEmissionResult {
-    return new EsCode().write(scope.ns.refer<TNaming>(this)).emit(scope);
+    return scope.ns.refer<TNaming>(this).emit(scope);
   }
 
   /**
@@ -132,13 +116,6 @@ export abstract class EsSymbol<
 }
 
 /**
- * Arbitrary symbol type suitable for wildcard usage.
- *
- * @typeParam TNaming - Type of symbol naming.
- */
-export type EsAnySymbol<TNaming extends EsNaming = EsNaming> = EsSymbol<TNaming, any>;
-
-/**
  * Symbol initialization options.
  */
 export interface EsSymbolInit {
@@ -156,7 +133,7 @@ export interface EsSymbolInit {
  */
 export interface EsReference<
   out TNaming extends EsNaming = EsNaming,
-  out TSymbol extends EsAnySymbol<TNaming> = EsAnySymbol<TNaming>,
+  out TSymbol extends EsSymbol<TNaming> = EsSymbol<TNaming>,
 > {
   /**
    * Referred symbol.
@@ -172,7 +149,7 @@ export interface EsReference<
  */
 export interface EsResolution<
   out TNaming extends EsNaming = EsNaming,
-  out TSymbol extends EsAnySymbol<TNaming> = EsAnySymbol<TNaming>,
+  out TSymbol extends EsSymbol<TNaming> = EsSymbol<TNaming>,
 > extends EsReference<TNaming, TSymbol>,
     EsEmitter {
   /**
@@ -181,7 +158,7 @@ export interface EsResolution<
   readonly symbol: TSymbol;
 
   /**
-   * Obtains immediately available {@link EsNamespace#nameSymbol naming} of the {@link symbol}.
+   * Obtains immediately available naming of the {@link symbol}.
    *
    * Fails if the symbol is not named yet. Alternatively, it is possible to {@link whenNamed wait} for naming.
    *
@@ -194,11 +171,11 @@ export interface EsResolution<
   getNaming(): TNaming;
 
   /**
-   * Awaits for the {@link symbol} {@link EsNamespace#nameSymbol naming}.
+   * Awaits for the {@link symbol} to be named.
    *
    * The naming may not be {@link getNaming immediately available}. This method allows to wait for it.
    *
-   * This method won't wait infinitely and would fail if the symbol is not named for some time.
+   * This method won't wait infinitely though, and would fail if the symbol is not named for some time.
    *
    * @returns Promise resolved to symbol naming, or rejected if symbol is not named after some timeout.
    */
@@ -207,9 +184,11 @@ export interface EsResolution<
   /**
    * Emits the code containing {@link symbol} name.
    *
+   * @param scope - Code emission scope.
+   *
    * @returns Code emission result.
    */
-  emit(this: void): EsEmissionResult;
+  emit(this: void, scope: EsScope): EsEmissionResult;
 }
 
 /**
@@ -219,7 +198,7 @@ export interface EsNaming extends EsEmitter {
   /**
    * Named symbol
    */
-  readonly symbol: EsAnySymbol;
+  readonly symbol: EsSymbol;
 
   /**
    * Namespace the symbol is visible in.
@@ -234,22 +213,9 @@ export interface EsNaming extends EsEmitter {
   /**
    * Emits symbol name.
    *
+   * @param scope - Code emission scope.
+   *
    * @returns Emission result.
    */
-  emit(this: void): EsEmissionResult;
-}
-
-/**
- * Basic symbol {@link EsNamespace#nameSymbol naming} constraints.
- */
-export interface EsNamingConstraints {
-  /**
-   * Whether new name required.
-   *
-   * By default, if symbol already named within namespace, then existing naming will be reused. But when this flag set
-   * to `true`, then error will be thrown in the above situation.
-   *
-   * @defaultValue `false`
-   */
-  readonly requireNew?: boolean | undefined;
+  emit(this: void, scope: EsScope): EsEmissionResult;
 }

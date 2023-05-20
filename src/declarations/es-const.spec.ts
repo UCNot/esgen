@@ -77,7 +77,7 @@ describe('esConst', () => {
     it('exports constant', async () => {
       const symbol = esConst('TEST', `13`, { exported: true });
 
-      bundle.ns.nameSymbol(symbol);
+      bundle.ns.refer(symbol);
       await expect(bundle.emit().asText()).resolves.toBe(`export const TEST = 13;\n`);
     });
   });
@@ -87,7 +87,7 @@ describe('esConst', () => {
       const bundle = new EsBundle({ format: EsBundleFormat.IIFE });
       const symbol = esConst('TEST', `13`, { exported: true });
 
-      bundle.ns.nameSymbol(symbol);
+      bundle.ns.refer(symbol);
       await expect(bundle.emit().asExports()).resolves.toEqual({ TEST: 13 });
     });
   });

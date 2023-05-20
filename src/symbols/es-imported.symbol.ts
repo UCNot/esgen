@@ -1,7 +1,7 @@
 import { jsStringLiteral } from 'httongue';
-import { EsEmissionResult, EsScope } from '../scopes/es-scope.js';
 import { EsModule } from './es-module.js';
-import { EsNaming, EsSymbol, EsSymbolInit } from './es-symbol.js';
+import { EsNamespace } from './es-namespace.js';
+import { EsNaming, EsResolution, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
 /**
  * Symbol imported from some {@link EsModule module}.
@@ -40,12 +40,21 @@ export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
     return this.#importName;
   }
 
-  override bind(naming: EsNaming): EsImportNaming {
-    return naming.ns.scope.imports.addImport(this, naming);
+  override refer(
+    resolution: EsResolution<EsImportNaming, this>,
+    ns: EsNamespace,
+  ): EsResolution<EsImportNaming, this> {
+    this.#declareIn(ns);
+
+    return resolution;
   }
 
-  override emit(scope: EsScope): EsEmissionResult {
-    return scope.bundle.ns.nameSymbol(this).name;
+  #declareIn({
+    scope: {
+      bundle: { ns, imports },
+    },
+  }: EsNamespace): EsImportNaming {
+    return ns.findSymbol(this) ?? ns.addSymbol(this, naming => imports.addImport(this, naming));
   }
 
   override toString({

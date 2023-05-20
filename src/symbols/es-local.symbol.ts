@@ -1,28 +1,12 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsSnippet } from '../es-snippet.js';
-import { EsNaming, EsNamingConstraints, EsSymbol, EsSymbolInit } from './es-symbol.js';
+import { EsScope } from '../scopes/es-scope.js';
+import { EsNaming, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
 /**
  * Local symbol supposed to be {@link declare declared} prior to being used.
  */
-export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstraints> {
-
-  override bind(naming: EsNaming, constraints: EsLocalNamingConstraints): EsLocalNaming;
-  override bind(naming: EsLocalNaming, { declare }: EsLocalNamingConstraints): EsLocalNaming {
-    return {
-      ...naming,
-      asDeclaration: lazyValue(() => {
-        const context: EsLocalContext = {
-          symbol: this,
-          naming: naming,
-        };
-
-        return 'declareLocal' in declare && typeof declare.declareLocal === 'function'
-          ? declare.declareLocal(context)
-          : (declare as EsLocalDeclarer.Function)(context);
-      }),
-    };
-  }
+export class EsLocalSymbol extends EsSymbol<EsLocalNaming> {
 
   /**
    * @returns `false`, as the same local may be declared in multiple unrelated namespaces.
@@ -42,8 +26,25 @@ export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstrai
    */
   declare(declare: EsLocalDeclarer): EsSnippet {
     return (code, scope) => {
-      code.write(scope.ns.nameSymbol(this, { declare, requireNew: true }).asDeclaration());
+      code.write(this.#declareIn(scope, declare).asDeclaration());
     };
+  }
+
+  #declareIn(scope: EsScope, declare: EsLocalDeclarer): EsLocalNaming {
+    return scope.ns.addSymbol(this, naming => ({
+      ...naming,
+      symbol: this,
+      asDeclaration: lazyValue(() => {
+        const context: EsLocalContext = {
+          symbol: this,
+          naming: naming,
+        };
+
+        return 'declareLocal' in declare && typeof declare.declareLocal === 'function'
+          ? declare.declareLocal(context)
+          : (declare as EsLocalDeclarer.Function)(context);
+      }),
+    }));
   }
 
   override toString({
@@ -137,19 +138,4 @@ export interface EsLocalNaming extends EsNaming {
    * Emits local's {@link EsLocalSymbol#declare declaration} statement.
    */
   asDeclaration(this: void): EsSnippet;
-}
-
-/**
- * Naming constraints of {@link EsLocalSymbol local symbol}.
- */
-export interface EsLocalNamingConstraints extends EsNamingConstraints {
-  /**
-   * Always require new name.
-   */
-  readonly requireNew: true;
-
-  /**
-   * Local symbol declarer.
-   */
-  readonly declare: EsLocalDeclarer;
 }

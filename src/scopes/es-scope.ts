@@ -1,7 +1,7 @@
 import { EsDeclarations } from '../declarations/es-declarations.js';
 import { EsPrinter } from '../es-output.js';
 import { EsImports } from '../symbols/es-imports.js';
-import { EsNamespace, EsNamespaceInit } from '../symbols/es-namespace.js';
+import { EsNamespace, EsNamespaceInit, EsNamingHost } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsBundle } from './es-bundle.js';
 
@@ -14,7 +14,7 @@ import { EsBundle } from './es-bundle.js';
  *
  * Scopes may be {@link nest nested}.
  */
-export interface EsScope {
+export interface EsScope extends EsNamingHost {
   /**
    * Enclosing code bundle.
    */
@@ -36,7 +36,7 @@ export interface EsScope {
   get declarations(): EsDeclarations;
 
   /**
-   * Namespace to {@link EsNamespace#nameSymbol bind local symbols} to.
+   * Namespace used to name the symbols.
    */
   get ns(): EsNamespace;
 
