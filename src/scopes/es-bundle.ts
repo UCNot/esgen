@@ -3,7 +3,7 @@ import { lazyValue } from '@proc7ts/primitives';
 import { EsDeclarations } from '../declarations/es-declarations.js';
 import { EsCode } from '../es-code.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
@@ -99,16 +99,16 @@ export class EsBundle implements EsScope {
    *
    * Signals code bundling to {@link done stop}.
    *
-   * @param sources - Code sources to emit code from.
+   * @param snippets - Emitted code snippets.
    *
    * @returns Bundling result in appropriate {@link format}.
    */
-  emit(...sources: EsSource[]): EsBundleResult {
+  emit(...snippets: EsSnippet[]): EsBundleResult {
     const { printer } = this.span(
       new EsCode().write(
         this.imports,
         this.declarations.body,
-        ...sources,
+        ...snippets,
         this.declarations.exports,
       ),
     );

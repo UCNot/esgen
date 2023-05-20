@@ -1,21 +1,21 @@
-import { EsSource } from './es-source.js';
+import { EsSnippet } from './es-snippet.js';
 
 /**
  * Tagged template emitting a {@link EsCode#line line of code}.
  *
  * @param strings - Template strings.
- * @param sources - Substituted code sources.
+ * @param snippets - Substituted code snippets.
  *
- * @returns Source of inline code.
+ * @returns Line of code.
  */
-export function esline(strings: TemplateStringsArray, ...sources: EsSource[]): EsSource {
-  const src = new Array<EsSource>(strings.length + sources.length);
+export function esline(strings: TemplateStringsArray, ...snippets: EsSnippet[]): EsSnippet {
+  const src = new Array<EsSnippet>(strings.length + snippets.length);
 
-  for (let i = 0; i < sources.length; ++i) {
+  for (let i = 0; i < snippets.length; ++i) {
     const srcIdx = i << 1;
 
     src[srcIdx] = strings[i];
-    src[srcIdx + 1] = sources[i];
+    src[srcIdx + 1] = snippets[i];
   }
 
   src[src.length - 1] = strings[strings.length - 1];

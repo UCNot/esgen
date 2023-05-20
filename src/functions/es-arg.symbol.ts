@@ -1,5 +1,5 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
 import { esSymbolString } from '../symbols/es-symbol-string.js';
 import { EsNaming, EsNamingConstraints, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
@@ -92,9 +92,9 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming, EsArgNamingConstraints> {
    *
    * @param declaration - Custom argument declaration, if any.
    *
-   * @returns Source of code containing argument declaration.
+   * @returns Code snippet containing argument declaration.
    */
-  declare(declaration: EsArg.Declaration = {}): EsSource {
+  declare(declaration: EsArg.Declaration = {}): EsSnippet {
     return (code, scope) => {
       code.line(scope.ns.nameSymbol(this, { ...declaration, requireNew: true }).asDeclaration());
     };
@@ -180,7 +180,7 @@ export namespace EsArg {
      * @param naming - Naming of argument `symbol`.
      * @param symbol - Argument symbol to declare.
      */
-    declare?: ((this: void, naming: EsNaming, symbol: EsArgSymbol) => EsSource) | undefined;
+    declare?: ((this: void, naming: EsNaming, symbol: EsArgSymbol) => EsSnippet) | undefined;
   }
 
   /**
@@ -235,7 +235,7 @@ export interface EsArgNaming extends EsNaming {
    *
    * @returns Argument declaration code.
    */
-  asDeclaration(this: void): EsSource;
+  asDeclaration(this: void): EsSnippet;
 }
 
 /**

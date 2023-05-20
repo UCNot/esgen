@@ -4,7 +4,7 @@ import {
   EsDeclarationNaming,
   EsDeclaredSymbol,
 } from '../declarations/es-declared.symbol.js';
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { EsFunctionDeclaration } from './es-callable.js';
 import { EsFunction } from './es-function.js';
 import { EsSignature } from './es-signature.js';
@@ -66,7 +66,7 @@ export interface EsFunctionDeclarationInit<out TArgs extends EsSignature.Args>
    * @param fn - Declared function.
    * @param context - Function declaration context.
    *
-   * @returns Source of code containing function body.
+   * @returns Code snippet containing function body.
    */
-  body(this: void, fn: EsDeclaredFunction<TArgs>, context: EsDeclarationContext): EsSource;
+  body(this: void, fn: EsDeclaredFunction<TArgs>, context: EsDeclarationContext): EsSnippet;
 }

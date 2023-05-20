@@ -1,4 +1,4 @@
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsLocalNaming, EsLocalSymbol } from '../symbols/es-local.symbol.js';
 import { EsSymbolInit } from '../symbols/es-symbol.js';
@@ -32,7 +32,7 @@ export class EsLocalClass<out TArgs extends EsSignature.Args> extends EsClass<
     super(new EsLocalSymbol(requestedName, init), init as EsClassInit<TArgs>);
   }
 
-  declare(): EsSource {
+  declare(): EsSnippet {
     return this.symbol.declare(_context => super.declare());
   }
 

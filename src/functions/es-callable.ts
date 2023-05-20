@@ -1,4 +1,4 @@
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { EsScopeInit } from '../scopes/es-scope.js';
 import { EsSignature } from './es-signature.js';
 
@@ -42,17 +42,17 @@ export class EsCallable<out TArgs extends EsSignature.Args> {
    * @param body - Function body builder.
    * @param expression - Lambda expression details.
    *
-   * @returns Source of code containing lambda expression.
+   * @returns Lambda expression.
    */
   lambda(
-    body: (this: void, fn: this) => EsSource,
+    body: (this: void, fn: this) => EsSnippet,
     expression?: EsLambdaExpression<TArgs>,
-  ): EsSource;
+  ): EsSnippet;
 
   lambda(
-    body: (this: void, fn: this) => EsSource,
+    body: (this: void, fn: this) => EsSnippet,
     { async, args, scope }: EsLambdaExpression<TArgs> = {},
-  ): EsSource {
+  ): EsSnippet {
     return code => {
       code.scope(scope, code => {
         code.multiLine(code => {
@@ -71,17 +71,17 @@ export class EsCallable<out TArgs extends EsSignature.Args> {
    * @param body - Function body builder.
    * @param expression - Function expression details.
    *
-   * @returns Source of code containing function expression.
+   * @returns Function expression.
    */
   function(
-    body: (this: void, fn: this) => EsSource,
+    body: (this: void, fn: this) => EsSnippet,
     expression?: EsFunctionExpression<TArgs>,
-  ): EsSource;
+  ): EsSnippet;
 
   function(
-    body: (this: void, fn: this) => EsSource,
+    body: (this: void, fn: this) => EsSnippet,
     { async, generator, name, args, scope }: EsFunctionExpression<TArgs> = {},
-  ): EsSource {
+  ): EsSnippet {
     return code => {
       code.scope(scope, code => {
         code.multiLine(code => {

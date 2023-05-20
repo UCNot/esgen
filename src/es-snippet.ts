@@ -3,7 +3,7 @@ import { EsPrinter } from './es-output.js';
 import { EsEmitter, EsScope } from './scopes/es-scope.js';
 
 /**
- * Arbitrary code source that can be {@link EsCode#write written} to code fragment.
+ * Code snippet that can be {@link EsCode#write written} to code fragment.
  *
  * One of:
  *
@@ -13,12 +13,12 @@ import { EsEmitter, EsScope } from './scopes/es-scope.js';
  * - code {@link EsEmitter emitter}, or
  * - code {@link EsBuilder builder} function.
  */
-export type EsSource = string | EsPrinter | EsEmitter | EsBuilder;
+export type EsSnippet = string | EsPrinter | EsEmitter | EsBuilder;
 
 /**
  * Code builder signature.
  *
- * Can be used as code {@link EsSource source}.
+ * Can be used as code {@link EsSnippet snippet}.
  *
  * Invoked at {@link EsEmitter#emit code emission} to build the code and write it to the given `code` fragment.
  *

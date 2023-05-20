@@ -1,7 +1,7 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsCode } from '../es-code.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { EsBundleFormat } from '../scopes/es-bundle-format.js';
 import { EsBundle } from '../scopes/es-bundle.js';
 import { EsAnySymbol, EsNaming, EsReference, EsSymbol } from '../symbols/es-symbol.js';
@@ -30,11 +30,11 @@ export class EsDeclarations {
     return this.#bundle;
   }
 
-  get body(): EsSource {
+  get body(): EsSnippet {
     return this.#content().body;
   }
 
-  get exports(): EsSource {
+  get exports(): EsSnippet {
     return this.#content().exports;
   }
 
@@ -206,8 +206,8 @@ export class EsDeclarations {
 }
 
 interface EsDeclarations$Content {
-  readonly body: EsSource;
-  readonly exports: EsSource;
+  readonly body: EsSnippet;
+  readonly exports: EsSnippet;
 }
 
 class EsDeclSnippet {

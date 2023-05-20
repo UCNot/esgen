@@ -1,4 +1,4 @@
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
 import { EsAnySymbol, EsNaming } from '../symbols/es-symbol.js';
 import { EsCallable } from './es-callable.js';
@@ -44,15 +44,15 @@ export class EsFunction<
    *
    * @param args - Named argument values.
    *
-   * @returns Source of code containing function call.
+   * @returns Function call expression.
    */
   call(
     ...args: EsSignature.RequiredKeyOf<TArgs> extends never
       ? [EsSignature.ValuesOf<TArgs>?]
       : [EsSignature.ValuesOf<TArgs>]
-  ): EsSource;
+  ): EsSnippet;
 
-  call(args: EsSignature.ValuesOf<TArgs>): EsSource {
+  call(args: EsSignature.ValuesOf<TArgs>): EsSnippet {
     return esline`${this.symbol}${this.signature.call(args)}`;
   }
 

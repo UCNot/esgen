@@ -1,20 +1,20 @@
 import { noop } from '@proc7ts/primitives';
 import { EsOutput, EsPrinter } from './es-output.js';
-import { EsBuilder, EsSource } from './es-source.js';
+import { EsBuilder, EsSnippet } from './es-snippet.js';
 import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit } from './scopes/es-scope.js';
 
 /**
  * Writable fragment of code.
  *
- * By default, represents a {@link multiLine multi-line} code, where each written code source is placed on a new line.
- * When {@link line inline}, the written code sources placed without new lines between them.
+ * By default, represents a {@link multiLine multi-line} code, where each written code snippet is placed on a new line.
+ * When {@link line inline}, the written code snippets placed without new lines between them.
  */
 export class EsCode implements EsEmitter {
 
   /**
-   * Source of no code.
+   * Empty code snippet.
    */
-  static get none(): EsSource {
+  static get none(): EsSnippet {
     return EsCode$none;
   }
 
@@ -34,46 +34,46 @@ export class EsCode implements EsEmitter {
   /**
    * Writes code to this fragment.
    *
-   * Writes a new line without `sources` specified, unless this is an {@link line inline} code fragment.
+   * Writes a new line without `snippets` specified, unless this is an {@link line inline} code fragment.
    *
-   * Places each source on a new line, unless this is an {@link line inline} code fragment.
+   * Places each code snippet on a new line, unless this is an {@link line inline} code fragment.
    *
-   * @param sources - Written code sources.
+   * @param snippets - Written code snippets.
    *
    * @returns `this` instance.
    */
-  write(...sources: EsSource[]): this {
-    if (sources.length) {
-      for (const source of sources) {
-        this.#addSource(source);
+  write(...snippets: EsSnippet[]): this {
+    if (snippets.length) {
+      for (const snippet of snippets) {
+        this.#addSnippet(snippet);
       }
     } else {
-      sources.push(EsCode$NewLine);
+      snippets.push(EsCode$NewLine);
     }
 
     return this;
   }
 
-  #addSource(source: EsSource): void {
-    if (typeof source === 'function') {
+  #addSnippet(snippet: EsSnippet): void {
+    if (typeof snippet === 'function') {
       const code = new EsCode(this);
 
       this.#addEmitter({
         async emit(scope: EsScope): Promise<EsPrinter> {
-          await source(code, scope);
+          await snippet(code, scope);
 
           return code.emit(scope);
         },
       });
-    } else if (isEsPrinter(source)) {
-      if (source instanceof EsCode && source.#contains(this)) {
+    } else if (isEsPrinter(snippet)) {
+      if (snippet instanceof EsCode && snippet.#contains(this)) {
         throw new TypeError('Can not insert code fragment into itself');
       }
-      this.#addEmitter(source);
-    } else if (source === '') {
+      this.#addEmitter(snippet);
+    } else if (snippet === '') {
       this.#addEmitter(EsCode$NewLine);
     } else {
-      this.#addEmitter(new EsCode$Record(source));
+      this.#addEmitter(new EsCode$Record(snippet));
     }
   }
 
@@ -100,14 +100,14 @@ export class EsCode implements EsEmitter {
   /**
    * Writes a line of code to this fragment.
    *
-   * Unlike {@link multiLine}, the sources are placed on the same line.
+   * Unlike {@link multiLine}, the snippets are placed on the same line.
    *
-   * @param sources - Inline code sources.
+   * @param snippets - Inline code snippets.
    *
    * @returns `this` instance.
    */
-  line(...sources: EsSource[]): this {
-    this.#addEmitter(new EsCode$Line(new EsCode(this).write(...sources)));
+  line(...snippets: EsSnippet[]): this {
+    this.#addEmitter(new EsCode$Line(new EsCode(this).write(...snippets)));
 
     return this;
   }
@@ -115,17 +115,17 @@ export class EsCode implements EsEmitter {
   /**
    * Writes indented code to this fragment.
    *
-   * Always places each source on a new line and prepends it with indentation symbols. Even when inside an
+   * Always places each code snippet on a new line and prepends it with indentation symbols. Even when inside an
    * {@link line inline} code fragment.
    *
    * Indentations may be nested. Nested indentations adjust enclosing ones.
    *
-   * @param sources - Indented code sources.
+   * @param snippets - Indented code snippets.
    *
    * @returns `this` instance.
    */
-  indent(...sources: EsSource[]): this {
-    this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...sources)));
+  indent(...snippets: EsSnippet[]): this {
+    this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...snippets)));
 
     return this;
   }
@@ -133,15 +133,15 @@ export class EsCode implements EsEmitter {
   /**
    * Writes multiple lines of code to this fragment.
    *
-   * Always places each source on a new line. Even when inside an {@link line inline} code fragment.
+   * Always places each code snippet on a new line. Even when inside an {@link line inline} code fragment.
    * Unlike {@link indent}, does not adjust indentation.
    *
-   * @param sources - Multi-line code sources.
+   * @param snippets - Multi-line code snippets.
    *
    * @returns `this` instance.
    */
-  multiLine(...sources: EsSource[]): this {
-    this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...sources), ''));
+  multiLine(...snippets: EsSnippet[]): this {
+    this.#addEmitter(new EsCode$Indented(new EsCode(this).write(...snippets), ''));
 
     return this;
   }
@@ -214,8 +214,8 @@ export class EsCode implements EsEmitter {
 
 }
 
-function isEsPrinter(source: EsSource): source is EsEmitter {
-  return typeof source === 'object' && 'emit' in source && typeof source.emit === 'function';
+function isEsPrinter(snippet: EsSnippet): snippet is EsEmitter {
+  return typeof snippet === 'object' && 'emit' in snippet && typeof snippet.emit === 'function';
 }
 
 function EsCode$none(_code: EsCode): void {

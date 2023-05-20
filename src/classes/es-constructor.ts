@@ -1,4 +1,4 @@
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsClass, EsClassHandle } from './es-class.js';
@@ -182,7 +182,7 @@ export class EsConstructor<out TArgs extends EsSignature.Args = EsSignature.Args
     return handle;
   }
 
-  #instantiate(hostClass: EsClass<TArgs>, args: EsSignature.ValuesOf<TArgs>): EsSource {
+  #instantiate(hostClass: EsClass<TArgs>, args: EsSignature.ValuesOf<TArgs>): EsSnippet {
     return esline`new ${hostClass}${this.signature.call(args)}`;
   }
 
@@ -222,11 +222,11 @@ export interface EsConstructorDeclaration<out TArgs extends EsSignature.Args> {
    * @param member - Declared constructor reference.
    * @param hostClass - Class to declare constructor for.
    *
-   * @returns Source of code containing constructor body declaration.
+   * @returns Code snippet containing constructor body.
    */
   body(
     this: void,
     member: EsMemberRef<EsConstructor<TArgs>, EsClassHandle<TArgs>>,
     hostClass: EsClass,
-  ): EsSource;
+  ): EsSnippet;
 }

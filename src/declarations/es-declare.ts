@@ -1,4 +1,4 @@
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { EsDeclarationContext, EsDeclarationInit, EsDeclaredSymbol } from './es-declared.symbol.js';
 
 /**
@@ -40,7 +40,7 @@ export interface EsDeclaration extends Omit<EsDeclarationInit, 'declare'> {
    *
    * @param context - Declaration context.
    *
-   * @returns Source of code containing the value.
+   * @returns Expression containing the value initializer.
    */
-  value(this: void, context: EsDeclarationContext): EsSource;
+  value(this: void, context: EsDeclarationContext): EsSnippet;
 }

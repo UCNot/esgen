@@ -5,7 +5,7 @@ import {
   EsDeclarationNaming,
   EsDeclaredSymbol,
 } from '../declarations/es-declared.symbol.js';
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
 import { EsLambdaDeclaration } from './es-callable.js';
 import { EsFunction } from './es-function.js';
@@ -65,7 +65,7 @@ export interface EsLambdaDeclarationInit<out TArgs extends EsSignature.Args>
    * @param fn - Declared function.
    * @param context - Function declaration context.
    *
-   * @returns Source of code containing function body.
+   * @returns Code snippet containing function body.
    */
-  body(this: void, fn: EsDeclaredLambda<TArgs>, context: EsDeclarationContext): EsSource;
+  body(this: void, fn: EsDeclaredLambda<TArgs>, context: EsDeclarationContext): EsSnippet;
 }

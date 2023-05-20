@@ -1,5 +1,5 @@
 import { asArray } from '@proc7ts/primitives';
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { EsBundle } from '../scopes/es-bundle.js';
 import { EsEmissionResult, EsScope } from '../scopes/es-scope.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
@@ -20,7 +20,7 @@ export class EsDeclaredSymbol extends EsSymbol<EsDeclarationNaming> {
 
   readonly #exported: boolean;
   readonly #refers: readonly EsReference[];
-  readonly #declare: (context: EsDeclarationContext) => EsSource;
+  readonly #declare: (context: EsDeclarationContext) => EsSnippet;
 
   /**
    * Constructs declared symbol.
@@ -69,9 +69,9 @@ export class EsDeclaredSymbol extends EsSymbol<EsDeclarationNaming> {
    *
    * @param context - Declaration context.
    *
-   * @returns Source of code that contains declaration.
+   * @returns Code snippet containing declaration.
    */
-  declare(context: EsDeclarationContext): EsSource {
+  declare(context: EsDeclarationContext): EsSnippet {
     return code => {
       for (const ref of this.#refers) {
         context.refer(ref);
@@ -123,9 +123,9 @@ export interface EsDeclarationInit extends EsSymbolInit {
    *
    * @param context - Declaration context.
    *
-   * @returns Source of code that contains declaration.
+   * @returns Code snippet containing declaration.
    */
-  declare(this: void, context: EsDeclarationContext): EsSource;
+  declare(this: void, context: EsDeclarationContext): EsSnippet;
 }
 
 /**

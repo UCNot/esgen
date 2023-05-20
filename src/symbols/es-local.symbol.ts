@@ -1,5 +1,5 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { EsNaming, EsNamingConstraints, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
 /**
@@ -38,9 +38,9 @@ export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstrai
    *
    * @param declare - Local symbol declarer.
    *
-   * @returns Source of local's declaration code.
+   * @returns Local's declaration statement.
    */
-  declare(declare: EsLocalDeclarer): EsSource {
+  declare(declare: EsLocalDeclarer): EsSnippet {
     return (code, scope) => {
       code.write(scope.ns.nameSymbol(this, { declare, requireNew: true }).asDeclaration());
     };
@@ -91,9 +91,9 @@ export namespace EsLocalDeclarer {
    *
    * @param context - Declaration context of local symbol.
    *
-   * @returns Source of local's declaration code.
+   * @returns Local's declaration statement.
    */
-  export type Function = (this: void, context: EsLocalContext) => EsSource;
+  export type Function = (this: void, context: EsLocalContext) => EsSnippet;
 
   /**
    * Local symbol {@link EsLocalDeclarer declarer} interface.
@@ -104,9 +104,9 @@ export namespace EsLocalDeclarer {
      *
      * @param context - Declaration context of local symbol.
      *
-     * @returns Source of local's declaration code.
+     * @returns Local's declaration statement.
      */
-    declareLocal(context: EsLocalContext): EsSource;
+    declareLocal(context: EsLocalContext): EsSnippet;
   }
 }
 
@@ -129,16 +129,14 @@ export interface EsLocalContext {
 
 /**
  * Naming of {@link EsLocalSymbol local symbol} within namespace.
- *
- * Can be used as a source of local declaration code.
  */
 export interface EsLocalNaming extends EsNaming {
   readonly symbol: EsLocalSymbol;
 
   /**
-   * Emits local {@link EsLocalSymbol#declare declaration} code.
+   * Emits local's {@link EsLocalSymbol#declare declaration} statement.
    */
-  asDeclaration(this: void): EsSource;
+  asDeclaration(this: void): EsSnippet;
 }
 
 /**

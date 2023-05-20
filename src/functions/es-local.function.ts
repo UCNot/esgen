@@ -1,4 +1,4 @@
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
 import { EsLocalNaming, EsLocalSymbol, esLocal } from '../symbols/es-local.symbol.js';
 import { EsSymbolInit } from '../symbols/es-symbol.js';
@@ -23,12 +23,12 @@ export class EsLocalFunction<out TArgs extends EsSignature.Args> extends EsFunct
    * @param body - Function body builder.
    * @param declaration - Function declaration details.
    *
-   * @returns Source of code containing function declaration.
+   * @returns Function statement.
    */
   declare(
-    body: (this: void, fn: this) => EsSource,
+    body: (this: void, fn: this) => EsSnippet,
     declaration?: EsFunctionDeclaration<TArgs>,
-  ): EsSource {
+  ): EsSnippet {
     return this.symbol.declare(({ naming: { name } }) => this.function(body, { ...declaration, name }));
   }
 
@@ -38,10 +38,10 @@ export class EsLocalFunction<out TArgs extends EsSignature.Args> extends EsFunct
    * @param body - Lambda body builder.
    * @param declaration - Lambda declaration details.
    *
-   * @returns Source of code containing function declaration.
+   * @returns Lambda declaration statement.
    */
   declareLambda(
-    body: (this: void, fn: this) => EsSource,
+    body: (this: void, fn: this) => EsSnippet,
     declaration?: EsLambdaExpression<TArgs> & {
       /**
        * Variable specifier.
@@ -50,7 +50,7 @@ export class EsLocalFunction<out TArgs extends EsSignature.Args> extends EsFunct
        */
       readonly spec?: 'const' | 'let' | 'var' | undefined;
     },
-  ): EsSource {
+  ): EsSnippet {
     const spec = declaration?.spec ?? 'const';
 
     return this.symbol.declare(

@@ -1,4 +1,4 @@
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsClass } from './es-class.js';
@@ -99,13 +99,13 @@ export interface EsMethodDeclaration<out TArgs extends EsSignature.Args> {
    * @param member - Declared member reference.
    * @param hostClass - Class to declare the method for.
    *
-   * @returns Source of code containing method body declaration.
+   * @returns Code snippet containing method body.
    */
   body(
     this: void,
     member: EsMemberRef<EsMethod<TArgs>, EsMethodHandle<TArgs>>,
     hostClass: EsClass,
-  ): EsSource;
+  ): EsSnippet;
 }
 
 /**
@@ -125,12 +125,12 @@ export interface EsMethodHandle<out TArgs extends EsSignature.Args> {
    * @param target - Host class instance expression.
    * @param args - Named argument values.
    *
-   * @returns Source of code containing method call.
+   * @returns Expression containing method call.
    */
   call(
-    target: EsSource,
+    target: EsSnippet,
     ...args: EsSignature.RequiredKeyOf<TArgs> extends never
       ? [EsSignature.ValuesOf<TArgs>?]
       : [EsSignature.ValuesOf<TArgs>]
-  ): EsSource;
+  ): EsSnippet;
 }

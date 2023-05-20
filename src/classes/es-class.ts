@@ -1,6 +1,6 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsCode } from '../es-code.js';
-import { EsSource } from '../es-source.js';
+import { EsSnippet } from '../es-snippet.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { esMemberAccessor } from '../impl/es-member-accessor.js';
 import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
@@ -113,15 +113,15 @@ export class EsClass<
    *
    * @param args - Named argument values.
    *
-   * @returns Source of code containing class instantiation.
+   * @returns Class instantiation expression.
    */
   instantiate(
     ...args: EsSignature.RequiredKeyOf<TArgs> extends never
       ? [EsSignature.ValuesOf<TArgs>?]
       : [EsSignature.ValuesOf<TArgs>]
-  ): EsSource;
+  ): EsSnippet;
 
-  instantiate(args: EsSignature.ValuesOf<TArgs>): EsSource {
+  instantiate(args: EsSignature.ValuesOf<TArgs>): EsSnippet {
     return this.getHandle().instantiate(args);
   }
 
@@ -227,7 +227,7 @@ export class EsClass<
   addMember<TMember extends EsMember<THandle>, THandle = EsMember.HandleOf<TMember>>(
     member: TMember,
     handle: THandle,
-    declaration: EsSource,
+    declaration: EsSnippet,
   ): EsMemberRef<TMember, THandle> {
     return (
       member.visibility === EsMemberVisibility.Public
@@ -239,7 +239,7 @@ export class EsClass<
   #declarePublicMember<TMember extends EsMember<THandle>, THandle>(
     member: TMember,
     handle: THandle,
-    declaration: EsSource,
+    declaration: EsSnippet,
   ): EsMemberEntry<TMember, THandle> {
     const entry: EsMemberEntry<TMember, THandle> =
       this.#findPublicMember(member) ?? this.#addPublicMember(member);
@@ -271,7 +271,7 @@ export class EsClass<
   #declarePrivateMember<TMember extends EsMember<THandle>, THandle>(
     member: TMember,
     handle: THandle,
-    declaration: EsSource,
+    declaration: EsSnippet,
   ): EsMemberEntry<TMember, THandle> {
     const entry: EsMemberEntry<TMember, THandle> =
       this.#findPrivateMember(member) ?? this.#addPrivateMember(member);
@@ -403,9 +403,9 @@ export class EsClass<
   /**
    * Emits class declaration.
    *
-   * @returns Source of code containing class declaration.
+   * @returns Class declaration statement.
    */
-  declare(): EsSource {
+  declare(): EsSnippet {
     return {
       emit: scope => this.#getCode().emit(scope),
     };
@@ -527,13 +527,13 @@ export interface EsClassHandle<out TArgs extends EsSignature.Args = EsSignature.
    *
    * @param args - Named argument values.
    *
-   * @returns Source of code containing class instantiation.
+   * @returns Class instantiation expression.
    */
   instantiate(
     ...args: EsSignature.RequiredKeyOf<TArgs> extends never
       ? [EsSignature.ValuesOf<TArgs>?]
       : [EsSignature.ValuesOf<TArgs>]
-  ): EsSource;
+  ): EsSnippet;
 }
 
 class EsMemberEntry<
