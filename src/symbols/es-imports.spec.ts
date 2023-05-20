@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsBundleFormat } from '../emission/es-bundle-format.js';
-import { EsBundle } from '../emission/es-bundle.js';
+import { EsBundleFormat } from '../scopes/es-bundle-format.js';
+import { EsBundle } from '../scopes/es-bundle.js';
 import { esImport } from './es-import.js';
 
 describe('EsImports', () => {

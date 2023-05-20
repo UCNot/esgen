@@ -1,5 +1,5 @@
-import { EsEmissionInit } from '../emission/es-emission.js';
 import { EsSource } from '../es-source.js';
+import { EsScopeInit } from '../scopes/es-scope.js';
 import { EsSignature } from './es-signature.js';
 
 /**
@@ -120,9 +120,9 @@ export interface EsLambdaExpression<out TArgs extends EsSignature.Args> {
   readonly args?: EsSignature.Declarations<TArgs> | undefined;
 
   /**
-   * Emission initialization options for body scope.
+   * Scope initialization options for lambda body.
    */
-  readonly scope?: EsEmissionInit | undefined;
+  readonly scope?: EsScopeInit | undefined;
 }
 
 /**

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { EsDeclarationNaming, EsDeclaredSymbol } from '../declarations/es-declared.symbol.js';
-import { EsBundleFormat } from '../emission/es-bundle-format.js';
-import { EsBundle } from '../emission/es-bundle.js';
 import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
+import { EsBundleFormat } from '../scopes/es-bundle-format.js';
+import { EsBundle } from '../scopes/es-bundle.js';
 import { esLocal } from '../symbols/es-local.symbol.js';
 import { EsClass } from './es-class.js';
 import { EsDeclaredClass } from './es-declared.class.js';

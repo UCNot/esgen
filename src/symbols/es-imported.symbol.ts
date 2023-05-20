@@ -1,5 +1,5 @@
 import { jsStringLiteral } from 'httongue';
-import { EsEmission, EsEmissionResult } from '../emission/es-emission.js';
+import { EsEmissionResult, EsScope } from '../scopes/es-scope.js';
 import { EsModule } from './es-module.js';
 import { EsNaming, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
@@ -41,11 +41,11 @@ export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
   }
 
   override bind(naming: EsNaming): EsImportNaming {
-    return naming.ns.emission.imports.addImport(this, naming);
+    return naming.ns.scope.imports.addImport(this, naming);
   }
 
-  override emit(emission: EsEmission): EsEmissionResult {
-    return emission.bundle.ns.nameSymbol(this).name;
+  override emit(scope: EsScope): EsEmissionResult {
+    return scope.bundle.ns.nameSymbol(this).name;
   }
 
   override toString({

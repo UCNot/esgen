@@ -1,5 +1,5 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { EsEmission } from '../emission/es-emission.js';
+import { EsScope } from '../scopes/es-scope.js';
 import { EsNameRegistry } from './es-name-registry.js';
 import {
   EsAnySymbol,
@@ -15,7 +15,7 @@ import {
  */
 export class EsNamespace {
 
-  readonly #emission: EsEmission;
+  readonly #scope: EsScope;
   readonly #enclosing: EsNamespace | undefined;
   readonly #shared: EsNamespace$SharedState;
   readonly #names: EsNameRegistry;
@@ -26,13 +26,13 @@ export class EsNamespace {
   /**
    * Constructs namespace.
    *
-   * @param emission - Code emission control the namespace created for.
+   * @param scope - Code emission scope the namespace created for.
    * @param init - Initialization options.
    */
-  constructor(emission: EsEmission, init?: EsNamespaceInit);
+  constructor(scope: EsScope, init?: EsNamespaceInit);
 
   constructor(
-    emission: EsEmission,
+    scope: EsScope,
     {
       enclosing,
       comment = enclosing
@@ -40,7 +40,7 @@ export class EsNamespace {
         : `Namespace #${++EsNamespace$seq}`,
     }: EsNamespaceInit = {},
   ) {
-    this.#emission = emission;
+    this.#scope = scope;
     this.#enclosing = enclosing;
     if (enclosing) {
       this.#shared = enclosing.#shared;
@@ -53,10 +53,10 @@ export class EsNamespace {
   }
 
   /**
-   * Code emission control this namespace created for.
+   * Code emission scope this namespace created for.
    */
-  get emission(): EsEmission {
-    return this.#emission;
+  get scope(): EsScope {
+    return this.#scope;
   }
 
   /**
@@ -372,13 +372,13 @@ export class EsNamespace {
   /**
    * Creates nested namespace.
    *
-   * @param emission - Code emission control the nested namespace created for.
+   * @param scope - Code emission scope the nested namespace created for.
    * @param init - Nested namespace initialization options.
    *
    * @returns New namespace nested within current one.
    */
-  nest(emission: EsEmission, init?: Omit<EsNamespaceInit, 'enclosing'>): EsNamespace {
-    return new EsNamespace(emission, { ...init, enclosing: this });
+  nest(scope: EsScope, init?: Omit<EsNamespaceInit, 'enclosing'>): EsNamespace {
+    return new EsNamespace(scope, { ...init, enclosing: this });
   }
 
   toString(): string {

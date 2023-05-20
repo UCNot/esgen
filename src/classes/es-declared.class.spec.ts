@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsBundle } from '../emission/es-bundle.js';
+import { EsBundle } from '../scopes/es-bundle.js';
 import { EsDeclaredClass } from './es-declared.class.js';
 
 describe('EsDeclaredClass', () => {

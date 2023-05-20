@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsBundle } from '../emission/es-bundle.js';
 import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
+import { EsBundle } from '../scopes/es-bundle.js';
 import { esLocal } from '../symbols/es-local.symbol.js';
 import { EsLocalClass } from './es-local.class.js';
 

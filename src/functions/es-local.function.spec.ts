@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsBundle } from '../emission/es-bundle.js';
 import { esline } from '../esline.tag.js';
+import { EsBundle } from '../scopes/es-bundle.js';
 import { esLocalFunction } from './es-local.function.js';
 
 describe('EsLocalFunction', () => {

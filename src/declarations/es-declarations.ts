@@ -1,9 +1,9 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { EsBundleFormat } from '../emission/es-bundle-format.js';
-import { EsBundle } from '../emission/es-bundle.js';
 import { EsCode } from '../es-code.js';
 import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsSource } from '../es-source.js';
+import { EsBundleFormat } from '../scopes/es-bundle-format.js';
+import { EsBundle } from '../scopes/es-bundle.js';
 import { EsAnySymbol, EsNaming, EsReference, EsSymbol } from '../symbols/es-symbol.js';
 import { EsDeclaredSymbol } from './es-declared.symbol.js';
 

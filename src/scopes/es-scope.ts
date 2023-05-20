@@ -6,17 +6,17 @@ import { EsBundleFormat } from './es-bundle-format.js';
 import { EsBundle } from './es-bundle.js';
 
 /**
- * Code emission control.
+ * Code emission scope.
  *
  * Ensures that all code {@link EsEmitter#emit emitted} _before_ the code printed.
  *
  * Code may be emitted in multiple {@link EsEmissionSpan spans} in arbitrary order.
  *
- * Emissions may {@link spawn} more emissions, e.g. for nested namespaces.
+ * Scopes may be {@link nest nested}.
  */
-export interface EsEmission {
+export interface EsScope {
   /**
-   * Code bundle control that {@link spawn spawned} this emission.
+   * Enclosing code bundle.
    */
   get bundle(): EsBundle;
 
@@ -48,13 +48,13 @@ export interface EsEmission {
   isActive(): boolean;
 
   /**
-   * Spawns another emission.
+   * Creates nested emission scope.
    *
-   * @param init - Nested emission options.
+   * @param init - Nested emission scope options.
    *
-   * @returns New emission instance.
+   * @returns New code emission scope.
    */
-  spawn(init?: EsEmissionInit): EsEmission;
+  nest(init?: EsScopeInit): EsScope;
 
   /**
    * Starts new emission span.
@@ -74,9 +74,9 @@ export interface EsEmission {
 }
 
 /**
- * Initialization options for {@link EsEmission#spawn spawned} code emission.
+ * Initialization options for {@link EsScope#nest nested} emission scope.
  */
-export interface EsEmissionInit {
+export interface EsScopeInit {
   /**
    * Initialization options for {@link EsNamespace#nest nested namespace}.
    */
@@ -105,18 +105,18 @@ export interface EsEmissionSpan {
 /**
  * Code emitter invoked prior to code {@link EsPrinter print}.
  *
- * Multiple code emissions may be active at the same time. More code emissions may be {@link EsEmission#spawn spawned}
- * while emitting the code. However, all code emissions have to complete _before_ the emitted code printed.
+ * Multiple code emissions may be active at the same time. More code emissions may be started while emitting the code.
+ * However, all code emissions have to complete _before_ the emitted code printed.
  */
 export interface EsEmitter {
   /**
-   * Emits the code during code `emission`.
+   * Emits the code in the given `scope`.
    *
-   * @param emission - Code emission control.
+   * @param scope - Code emission scope.
    *
    * @returns Emission result.
    */
-  emit(emission: EsEmission): EsEmissionResult;
+  emit(scope: EsScope): EsEmissionResult;
 }
 
 /**

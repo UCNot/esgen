@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsBundle } from './emission/es-bundle.js';
 import { EsCode } from './es-code.js';
 import { EsOutput } from './es-output.js';
+import { EsBundle } from './scopes/es-bundle.js';
 
 describe('EsCode', () => {
   let code: EsCode;
@@ -150,8 +150,8 @@ describe('EsCode', () => {
       code.write('first();');
 
       const bundle = new EsBundle();
-      const emission = bundle.spawn();
-      const printer = code.emit(emission);
+      const scope = bundle.nest();
+      const printer = code.emit(scope);
 
       code.write('second();');
 
@@ -159,7 +159,7 @@ describe('EsCode', () => {
       await expect(new EsOutput().print(printer).asText()).resolves.toBe('first();\nsecond();\n');
 
       bundle.done();
-      await emission.whenDone();
+      await scope.whenDone();
     });
     it('prevents inserting code after print', async () => {
       code.write('first();');

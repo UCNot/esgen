@@ -1,9 +1,9 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { EsEmission, EsEmissionResult, EsEmitter } from '../emission/es-emission.js';
 import { EsCode } from '../es-code.js';
 import { EsSource } from '../es-source.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { esMemberAccessor } from '../impl/es-member-accessor.js';
+import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { EsNameRegistry } from '../symbols/es-name-registry.js';
 import { EsAnySymbol, EsNaming, EsReference } from '../symbols/es-symbol.js';
 import { esSafeId } from '../util/es-safe-id.js';
@@ -392,22 +392,22 @@ export class EsClass<
   /**
    * Emits class reference.
    *
-   * @param emission - Code emission control.
+   * @param scope - Code emission scope.
    *
    * @returns Code emission result that prints class name.
    */
-  emit(emission: EsEmission): EsEmissionResult {
-    return this.symbol.emit(emission);
+  emit(scope: EsScope): EsEmissionResult {
+    return this.symbol.emit(scope);
   }
 
   /**
    * Emits class declaration.
    *
-   * @returns Class declaration code emission.
+   * @returns Source of code containing class declaration.
    */
   declare(): EsSource {
     return {
-      emit: emission => this.#getCode().emit(emission),
+      emit: scope => this.#getCode().emit(scope),
     };
   }
 

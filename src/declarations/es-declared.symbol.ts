@@ -1,7 +1,7 @@
 import { asArray } from '@proc7ts/primitives';
-import { EsBundle } from '../emission/es-bundle.js';
-import { EsEmission, EsEmissionResult } from '../emission/es-emission.js';
 import { EsSource } from '../es-source.js';
+import { EsBundle } from '../scopes/es-bundle.js';
+import { EsEmissionResult, EsScope } from '../scopes/es-scope.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import {
   EsNaming,
@@ -49,17 +49,17 @@ export class EsDeclaredSymbol extends EsSymbol<EsDeclarationNaming> {
     resolution: EsResolution<EsDeclarationNaming, this>,
     ns: EsNamespace,
   ): EsResolution<EsDeclarationNaming, this> {
-    ns.emission.bundle.ns.nameSymbol(this);
+    ns.scope.bundle.ns.nameSymbol(this);
 
     return resolution;
   }
 
   override bind(naming: EsNaming): EsDeclarationNaming {
-    return naming.ns.emission.declarations.addDeclaration(this, naming) as EsDeclarationNaming;
+    return naming.ns.scope.declarations.addDeclaration(this, naming) as EsDeclarationNaming;
   }
 
-  override emit(emission: EsEmission): EsEmissionResult {
-    return emission.bundle.ns.nameSymbol(this).name;
+  override emit(scope: EsScope): EsEmissionResult {
+    return scope.bundle.ns.nameSymbol(this).name;
   }
 
   /**

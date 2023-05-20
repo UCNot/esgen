@@ -1,7 +1,7 @@
 import { noop } from '@proc7ts/primitives';
-import { EsEmission, EsEmissionInit, EsEmissionSpan, EsEmitter } from './emission/es-emission.js';
 import { EsOutput, EsPrinter } from './es-output.js';
 import { EsBuilder, EsProducer, EsSource } from './es-source.js';
+import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit } from './scopes/es-scope.js';
 
 /**
  * Writable fragment of code.
@@ -20,7 +20,7 @@ export class EsCode implements EsEmitter {
 
   readonly #enclosing: EsCode | undefined;
   readonly #emitters: EsEmitter[] = [];
-  readonly #emissions = new Map<EsEmission, EsEmissionSpan>();
+  readonly #spans = new Map<EsScope, EsEmissionSpan>();
 
   /**
    * Constructs code fragment.
@@ -59,10 +59,10 @@ export class EsCode implements EsEmitter {
       const code = new EsCode(this);
 
       this.#addEmitter({
-        async emit(emission: EsEmission): Promise<EsPrinter> {
-          await source(code, emission);
+        async emit(scope: EsScope): Promise<EsPrinter> {
+          await source(code, scope);
 
-          return code.emit(emission);
+          return code.emit(scope);
         },
       });
     } else if (isEsPrinter(source)) {
@@ -81,7 +81,7 @@ export class EsCode implements EsEmitter {
 
   #addEmitter(emitter: EsEmitter): void {
     this.#emitters.push(emitter);
-    for (const { emit } of this.#emissions.values()) {
+    for (const { emit } of this.#spans.values()) {
       emit(emitter);
     }
   }
@@ -149,7 +149,7 @@ export class EsCode implements EsEmitter {
   }
 
   /**
-   * Emits code under {@link EsEmission#spawn spawned} emission control and appends emission result to this fragment.
+   * Emits code in {@link EsScope#nest nested} scope and appends emission result to `this` fragment.
    *
    * @param builder - Code builder.
    *
@@ -158,27 +158,26 @@ export class EsCode implements EsEmitter {
   scope(builder: EsBuilder): this;
 
   /**
-   * Emits code under emission control {@link EsEmission#spawn spawned} with custom options and appends emission result
-   * to this fragment.
+   * Emits code in customized {@link EsScope#nest nested} scope and appends emission result to `this` fragment.
    *
-   * @param init - Custom scope emission options.
+   * @param init - Custom scope initialization options.
    * @param builder - Code builder.
    *
    * @returns `this` instance.
    */
-  scope(init: EsEmissionInit | undefined, builder: EsBuilder): this;
+  scope(init: EsScopeInit | undefined, builder: EsBuilder): this;
 
-  scope(initOrBuilder: EsEmissionInit | EsBuilder | undefined, builder?: EsBuilder): this {
-    let init: EsEmissionInit | undefined;
+  scope(initOrBuilder: EsScopeInit | EsBuilder | undefined, builder?: EsBuilder): this {
+    let init: EsScopeInit | undefined;
 
     if (builder) {
-      init = initOrBuilder as EsEmissionInit;
+      init = initOrBuilder as EsScopeInit;
     } else {
       builder = initOrBuilder as EsBuilder;
     }
 
-    return this.write((code, emission) => {
-      code.write(new EsCode().write(builder!).emit(emission.spawn(init)));
+    return this.write((code, scope) => {
+      code.write(new EsCode().write(builder!).emit(scope.nest(init)));
     });
   }
 
@@ -190,26 +189,26 @@ export class EsCode implements EsEmitter {
    *
    * It is possible to issue multiple code emissions at the same time.
    *
-   * @param emission - Code emission control.
+   * @param scope - Code emission scope.
    *
    * @returns Emitted code printer.
    */
-  emit(emission: EsEmission): EsPrinter {
-    const existingSpan = this.#emissions.get(emission);
+  emit(scope: EsScope): EsPrinter {
+    const existingSpan = this.#spans.get(scope);
 
     if (existingSpan) {
       return existingSpan.printer;
     }
 
-    const span = emission.span(...this.#emitters);
+    const span = scope.span(...this.#emitters);
 
-    this.#emissions.set(emission, span);
+    this.#spans.set(scope, span);
 
-    emission
+    scope
       .whenDone()
       .catch(noop)
       .finally(() => {
-        this.#emissions.delete(emission);
+        this.#spans.delete(scope);
       });
 
     return span.printer;
@@ -265,8 +264,8 @@ class EsCode$Inline implements EsEmitter {
     this.#code = code;
   }
 
-  emit(emission: EsEmission): EsPrinter {
-    const record = this.#code.emit(emission);
+  emit(scope: EsScope): EsPrinter {
+    const record = this.#code.emit(scope);
 
     return {
       printTo: out => {
@@ -287,8 +286,8 @@ class EsCode$Indented implements EsEmitter {
     this.#indent = indent;
   }
 
-  emit(emission: EsEmission): EsPrinter {
-    const printer = this.#code.emit(emission);
+  emit(scope: EsScope): EsPrinter {
+    const printer = this.#code.emit(scope);
 
     return {
       printTo: span => {

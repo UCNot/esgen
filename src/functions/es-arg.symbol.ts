@@ -95,10 +95,8 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming, EsArgNamingConstraints> {
    * @returns Source of code containing argument declaration.
    */
   declare(declaration: EsArg.Declaration = {}): EsSource {
-    return (code, emission) => {
-      code.inline(
-        emission.ns.nameSymbol(this, { ...declaration, requireNew: true }).asDeclaration(),
-      );
+    return (code, scope) => {
+      code.inline(scope.ns.nameSymbol(this, { ...declaration, requireNew: true }).asDeclaration());
     };
   }
 

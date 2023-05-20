@@ -7,25 +7,26 @@ import { EsSource } from '../es-source.js';
 import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
-import { EsEmission, EsEmissionInit, EsEmissionSpan, EsEmitter } from './es-emission.js';
+import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit } from './es-scope.js';
 
 /**
- * Code bundle control.
+ * Emitted code bundle.
  *
- * Controls the emission of the code supposed to be placed to the same bundle (i.e. module, file, etc.).
+ * A top-level emission {@link EsScope scope}. A code amitted in this scope supposed to be placed to the same bundle
+ * (i.e. module, file, etc.).
  */
-export class EsBundle implements EsEmission {
+export class EsBundle implements EsScope {
 
-  readonly #state: [EsEmission$State];
+  readonly #state: [EsScope$State];
   readonly #format: EsBundleFormat;
   readonly #imports: () => EsImports;
   readonly #declarations: () => EsDeclarations;
   readonly #ns: () => EsNamespace;
 
   /**
-   * Constructs bundle emission control.
+   * Constructs bundle.
    *
-   * @param init - Bundle emission initialization options.
+   * @param init - Bundle initialization options.
    */
   constructor(init?: EsBundleInit);
   constructor({
@@ -38,7 +39,7 @@ export class EsBundle implements EsEmission {
     this.#ns = lazyValue(() => ns(this));
     this.#imports = lazyValue(() => imports(this));
     this.#declarations = lazyValue(() => declarations(this));
-    this.#state = [new EsEmission$ActiveState(newState => (this.#state[0] = newState))];
+    this.#state = [new EsScope$ActiveState(newState => (this.#state[0] = newState))];
   }
 
   /**
@@ -68,8 +69,8 @@ export class EsBundle implements EsEmission {
     return this.#state[0].isActive();
   }
 
-  spawn(init?: EsEmissionInit): EsEmission {
-    return new SpawnedEsEmission(this, this.#state, emission => this.ns.nest(emission, { ...init?.ns }));
+  nest(init?: EsScopeInit): EsScope {
+    return new NestedEsScope(this, this.#state, scope => this.ns.nest(scope, { ...init?.ns }));
   }
 
   span(...emitters: EsEmitter[]): EsEmissionSpan {
@@ -184,7 +185,7 @@ export class EsBundle implements EsEmission {
 }
 
 /**
- * Initialization options for bundle emission.
+ * Initialization options for {@link EsBundle code bundle}.
  */
 export interface EsBundleInit {
   /**
@@ -237,17 +238,13 @@ export interface EsBundleResult extends EsPrinter {
   asExports(): Promise<unknown>;
 }
 
-class SpawnedEsEmission implements EsEmission {
+class NestedEsScope implements EsScope {
 
   readonly #bundle: EsBundle;
-  readonly #state: [EsEmission$State];
+  readonly #state: [EsScope$State];
   readonly #ns: () => EsNamespace;
 
-  constructor(
-    bundle: EsBundle,
-    state: [EsEmission$State],
-    ns: (emission: EsEmission) => EsNamespace,
-  ) {
+  constructor(bundle: EsBundle, state: [EsScope$State], ns: (scope: EsScope) => EsNamespace) {
     this.#bundle = bundle;
     this.#state = state;
     this.#ns = lazyValue(() => ns(this));
@@ -277,8 +274,8 @@ class SpawnedEsEmission implements EsEmission {
     return this.bundle.isActive();
   }
 
-  spawn(init?: EsEmissionInit): EsEmission {
-    return new SpawnedEsEmission(this.bundle, this.#state, emission => this.ns.nest(emission, init?.ns));
+  nest(init?: EsScopeInit): EsScope {
+    return new NestedEsScope(this.bundle, this.#state, scope => this.ns.nest(scope, init?.ns));
   }
 
   span(...emitters: EsEmitter[]): EsEmissionSpan {
@@ -291,25 +288,25 @@ class SpawnedEsEmission implements EsEmission {
 
 }
 
-interface EsEmission$State {
+interface EsScope$State {
   isActive(): boolean;
-  span(emission: EsEmission, ...emitters: EsEmitter[]): EsEmissionSpan;
+  span(scope: EsScope, ...emitters: EsEmitter[]): EsEmissionSpan;
   done(): void;
   whenDone(): Promise<void>;
 }
 
-class EsEmission$ActiveState implements EsEmission$State {
+class EsScope$ActiveState implements EsScope$State {
 
   readonly #done = new PromiseResolver();
   readonly #resolver = new EveryPromiseResolver<unknown>(this.#done.whenDone());
   readonly whenDone: () => Promise<void>;
 
-  constructor(change: (newState: EsEmission$State) => void) {
+  constructor(change: (newState: EsScope$State) => void) {
     this.whenDone = lazyValue(async () => {
       try {
         await this.#resolver.whenDone();
       } finally {
-        change(new EsEmission$EmittedState(this.whenDone));
+        change(new EsScope$EmittedState(this.whenDone));
       }
     });
   }
@@ -318,11 +315,11 @@ class EsEmission$ActiveState implements EsEmission$State {
     return true;
   }
 
-  span(emission: EsEmission, ...emitters: EsEmitter[]): EsEmissionSpan {
+  span(scope: EsScope, ...emitters: EsEmitter[]): EsEmissionSpan {
     const { add, whenDone } = new EveryPromiseResolver<string | EsPrinter>();
 
     let emit = (...emitters: EsEmitter[]): void => {
-      const emissions = emitters.map(async emitter => await emitter.emit(emission));
+      const emissions = emitters.map(async emitter => await emitter.emit(scope));
 
       add(...emissions);
       this.#resolver.add(...emissions);
@@ -356,7 +353,7 @@ class EsEmission$ActiveState implements EsEmission$State {
 
 }
 
-class EsEmission$EmittedState implements EsEmission$State {
+class EsScope$EmittedState implements EsScope$State {
 
   constructor(readonly whenDone: () => Promise<void>) {}
 
@@ -364,7 +361,7 @@ class EsEmission$EmittedState implements EsEmission$State {
     return false;
   }
 
-  span(_emission: EsEmission): never {
+  span(_scope: EsScope): never {
     throw new TypeError(`All code emitted already`);
   }
 

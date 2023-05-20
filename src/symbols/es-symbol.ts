@@ -1,5 +1,5 @@
-import { EsEmission, EsEmissionResult, EsEmitter } from '../emission/es-emission.js';
 import { EsCode } from '../es-code.js';
+import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsNamespace } from './es-namespace.js';
 import { esSymbolString } from './es-symbol-string.js';
@@ -96,14 +96,14 @@ export abstract class EsSymbol<
   abstract bind(naming: EsNaming, constraints: TConstraints): TNaming;
 
   /**
-   * Emits the name of the symbol visible to {@link EsEmission#ns emission namespace}.
+   * Emits the name of the symbol visible to {@link EsScope#ns emission namespace}.
    *
-   * @param emission - Code emission control.
+   * @param scope - Code emission scope.
    *
    * @returns Emission result.
    */
-  emit(emission: EsEmission): EsEmissionResult {
-    return new EsCode().write(emission.ns.refer<TNaming>(this)).emit(emission);
+  emit(scope: EsScope): EsEmissionResult {
+    return new EsCode().write(scope.ns.refer<TNaming>(this)).emit(scope);
   }
 
   /**

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { jsStringLiteral } from 'httongue';
-import { EsBundle } from '../emission/es-bundle.js';
 import { EsCode } from '../es-code.js';
 import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
+import { EsBundle } from '../scopes/es-bundle.js';
 import { EsConstructor } from './es-constructor.js';
 import { EsField } from './es-field.js';
 import { EsLocalClass } from './es-local.class.js';

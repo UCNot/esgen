@@ -41,8 +41,8 @@ export class EsLocalSymbol extends EsSymbol<EsLocalNaming, EsLocalNamingConstrai
    * @returns Source of local's declaration code.
    */
   declare(declare: EsLocalDeclarer): EsSource {
-    return (code, emission) => {
-      code.write(emission.ns.nameSymbol(this, { declare, requireNew: true }).asDeclaration());
+    return (code, scope) => {
+      code.write(scope.ns.nameSymbol(this, { declare, requireNew: true }).asDeclaration());
     };
   }
 
