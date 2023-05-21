@@ -20,7 +20,7 @@ export class EsVarSymbol extends EsSymbol {
       ...init,
       declare: declare && {
         ...declare,
-        as: context => this.#declare(context, declare, 'var'),
+        as: context => this.#declare(context, declare, EsVarKind.Var),
       },
     });
   }
@@ -35,21 +35,21 @@ export class EsVarSymbol extends EsSymbol {
   declare(request: EsVarDeclarationRequest = {}): EsSnippet {
     return this.declareSymbol({
       ...request,
-      as: context => this.#declare(context, request, 'let'),
+      as: context => this.#declare(context, request, EsVarKind.Let),
     });
   }
 
   #declare(
     context: EsDeclarationContext,
     { as, value }: EsVarDeclarationPolicy | EsVarDeclarationRequest,
-    withoutVariable: 'let' | 'var',
+    withoutValue: EsVarKind,
   ): readonly [EsSnippet, EsNaming] {
     return [
       code => {
         code.line(code => {
           const init = value?.(context, this);
 
-          code.write(as ?? init == null ? withoutVariable : 'const', ' ', context.naming);
+          code.write(as ?? init == null ? withoutValue : EsVarKind.Const, ' ', context.naming);
 
           if (init) {
             code.write(' = ', init);
@@ -62,6 +62,26 @@ export class EsVarSymbol extends EsSymbol {
     ];
   }
 
+}
+
+/**
+ * Kind of variable declaration.
+ */
+export enum EsVarKind {
+  /**
+   * Constant.
+   */
+  Const = 'const',
+
+  /**
+   * Variable declared with `let` keyword.
+   */
+  Let = 'let',
+
+  /**
+   * Variable declared with `var` keyword.
+   */
+  Var = 'var',
 }
 
 /**
@@ -87,9 +107,10 @@ export interface EsVarDeclarationPolicy extends Omit<EsDeclarationPolicy, 'as'> 
   /**
    * How to declare variable.
    *
-   * @defaultValue `const` when initial {@link value} specified, or `var` otherwise.
+   * @defaultValue {@link EsVarKind.Const const} when {@link value} initializer provided, or {@link EsVarKind.Var var}
+   * otherwise.
    */
-  readonly as?: 'const' | 'let' | 'var' | undefined;
+  readonly as?: EsVarKind | undefined;
 
   /**
    * Emits initial value of the variable.
@@ -113,9 +134,10 @@ export interface EsVarDeclarationRequest extends Omit<EsDeclarationRequest, 'as'
   /**
    * How to declare variable.
    *
-   * @defaultValue `const` when initial {@link value} specified, or `let` otherwise.
+   * @defaultValue {@link EsVarKind.Const const} when {@link value} initializer provided, or {@link EsVarKind.Let let}
+   * otherwise.
    */
-  readonly as?: 'const' | 'let' | 'var';
+  readonly as?: EsVarKind | undefined;
 
   /**
    * Emits initial value of the variable.
