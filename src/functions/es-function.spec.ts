@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 import { esline } from '../esline.tag.js';
 import { EsBundleFormat } from '../scopes/es-bundle-format.js';
 import { EsBundle } from '../scopes/es-bundle.js';
-import { EsFunction } from './es-function.js';
+import { EsFunction, EsFunctionKind } from './es-function.js';
 
 describe('EsFunction', () => {
   describe('auto-declare', () => {
@@ -41,7 +41,7 @@ describe('EsFunction', () => {
         {
           declare: {
             at: 'exports',
-            as: 'var',
+            as: EsFunctionKind.Var,
             body: ({ args: { value } }) => esline`return ${value} + 1;`,
           },
         },
@@ -115,7 +115,7 @@ describe('EsFunction', () => {
               code
                 .write(
                   fn.declare({
-                    as: 'const',
+                    as: EsFunctionKind.Const,
                     body: fn => esline`return [${fn.args.arg}, ...${fn.args.rest}];`,
                   }),
                 )
@@ -138,7 +138,7 @@ describe('EsFunction', () => {
               code
                 .write(
                   fn.declare({
-                    as: 'let',
+                    as: EsFunctionKind.Let,
                     body: fn => esline`return [${fn.args.arg}, ...${fn.args.rest}];`,
                   }),
                 )

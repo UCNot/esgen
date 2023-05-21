@@ -56,7 +56,7 @@ export class EsFunction<out TArgs extends EsSignature.Args>
   ): readonly [EsSnippet, EsFunctionNaming<TArgs>] {
     const { as } = policy;
 
-    if (as === 'const' || as === 'let' || as === 'var') {
+    if (isLambda(as)) {
       return this.#declareLambda(context, policy);
     }
 
@@ -80,7 +80,7 @@ export class EsFunction<out TArgs extends EsSignature.Args>
   declare(request: EsFunctionDeclarationRequest<TArgs>): EsSnippet {
     const { as } = request;
 
-    if (as === 'const' || as === 'let' || as === 'var') {
+    if (isLambda(as)) {
       return this.symbol.declareSymbol({
         ...request,
         as: context => this.#declareLambda(context, request),
@@ -126,7 +126,7 @@ export class EsFunction<out TArgs extends EsSignature.Args>
       this.function(fn => body(fn, context), {
         ...request,
         name: naming.name,
-        generator: as === 'generator',
+        generator: as === EsFunctionKind.Generator,
       }),
       this.#createNaming(naming),
     ];
@@ -162,6 +162,44 @@ export class EsFunction<out TArgs extends EsSignature.Args>
     };
   }
 
+}
+
+/**
+ * Kind of function declaration.
+ */
+export enum EsFunctionKind {
+  /**
+   * Declared with `function` statement.
+   */
+  Function = 'function',
+
+  /**
+   * Declared with `function *` statement.
+   */
+  Generator = 'function*',
+
+  /**
+   * Declared as constant with lambda initializer.
+   */
+  Const = 'const',
+
+  /**
+   * Declared as variable with `let` keyword and lambda initializer.
+   */
+  Let = 'let',
+
+  /**
+   * Declared as variable with `var` keyword and lambda initializer.
+   */
+  Var = 'var',
+}
+
+function isLambda(
+  kind: EsFunctionKind | undefined,
+): kind is EsFunctionKind.Const | EsFunctionKind.Let | EsFunctionKind.Const {
+  return (
+    kind === EsFunctionKind.Const || kind === EsFunctionKind.Let || kind === EsFunctionKind.Var
+  );
 }
 
 /**
@@ -234,9 +272,9 @@ export interface EsFunctionDeclarationPolicy<out TArgs extends EsSignature.Args>
   /**
    * Host to declare function.
    *
-   * @defaultValue - `function`
+   * @defaultValue - {@link EsFunctionKind.Function function}
    */
-  readonly as?: 'function' | 'generator' | 'const' | 'let' | 'var' | undefined;
+  readonly as?: EsFunctionKind | undefined;
 
   /**
    * Emits function body.
@@ -260,9 +298,9 @@ export interface EsFunctionDeclarationRequest<out TArgs extends EsSignature.Args
   /**
    * Host to declare function.
    *
-   * @defaultValue - `function`
+   * @defaultValue {@link EsFunctionKind.Function function}
    */
-  readonly as?: 'function' | 'generator' | 'const' | 'let' | 'var' | undefined;
+  readonly as?: EsFunctionKind | undefined;
 
   /**
    * Emits function body.
