@@ -21,9 +21,9 @@ import { EsSignature } from './es-signature.js';
  */
 export class EsFunction<out TArgs extends EsSignature.Args>
   extends EsCallable<TArgs>
-  implements EsReference {
+  implements EsReference<EsFunctionNaming<TArgs>> {
 
-  readonly #symbol: EsSymbol;
+  readonly #symbol: EsSymbol<EsFunctionNaming<TArgs>>;
 
   /**
    * Constructs function.
@@ -40,7 +40,7 @@ export class EsFunction<out TArgs extends EsSignature.Args>
 
     const { declare } = init;
 
-    this.#symbol = new EsSymbol(requestedName, {
+    this.#symbol = new EsSymbol<EsFunctionNaming<TArgs>>(requestedName, {
       ...init,
       declare: declare && {
         ...declare,
@@ -52,7 +52,7 @@ export class EsFunction<out TArgs extends EsSignature.Args>
   #autoDeclare(
     context: EsDeclarationContext,
     policy: EsFunctionDeclarationPolicy<TArgs>,
-  ): readonly [EsSnippet, EsNaming] {
+  ): readonly [EsSnippet, EsFunctionNaming<TArgs>] {
     const { as } = policy;
 
     if (as === 'const' || as === 'let' || as === 'var') {
@@ -65,7 +65,7 @@ export class EsFunction<out TArgs extends EsSignature.Args>
   /**
    * Function symbol.
    */
-  get symbol(): EsSymbol {
+  get symbol(): EsSymbol<EsFunctionNaming<TArgs>> {
     return this.#symbol;
   }
 
@@ -95,7 +95,8 @@ export class EsFunction<out TArgs extends EsSignature.Args>
   #declareLambda(
     context: EsDeclarationContext,
     request: EsFunctionDeclarationRequest<TArgs> | EsFunctionDeclarationPolicy<TArgs>,
-  ): readonly [EsSnippet, EsNaming] {
+  ): readonly [EsSnippet, EsFunctionNaming<TArgs>] {
+    const { naming } = context;
     const { as, body } = request;
 
     return [
@@ -103,30 +104,40 @@ export class EsFunction<out TArgs extends EsSignature.Args>
         code.line(
           as!,
           ' ',
-          context.naming,
+          naming,
           ' = ',
           this.lambda(fn => body(fn, context), request),
           ';',
         );
       },
-      context.naming,
+      this.#createNaming(naming),
     ];
   }
 
   #declareFunction(
     context: EsDeclarationContext,
     request: EsFunctionDeclarationRequest<TArgs> | EsFunctionDeclarationPolicy<TArgs>,
-  ): readonly [EsSnippet, EsNaming] {
+  ): readonly [EsSnippet, EsFunctionNaming<TArgs>] {
+    const { naming } = context;
     const { as, body } = request;
 
     return [
       this.function(fn => body(fn, context), {
         ...request,
-        name: context.naming.name,
+        name: naming.name,
         generator: as === 'generator',
       }),
-      context.naming,
+      this.#createNaming(naming),
     ];
+  }
+
+  #createNaming(naming: EsNaming): EsFunctionNaming<TArgs> {
+    return {
+      ...naming,
+      symbol: this.symbol,
+      fn: this,
+      call: (args: EsSignature.ValuesOf<TArgs>) => esline`${naming}${this.signature.call(args)}`,
+    };
   }
 
   /**
@@ -143,7 +154,11 @@ export class EsFunction<out TArgs extends EsSignature.Args>
   ): EsSnippet;
 
   call(args: EsSignature.ValuesOf<TArgs>): EsSnippet {
-    return esline`${this.symbol}${this.signature.call(args)}`;
+    return async (code, { ns }) => {
+      const naming = await ns.refer(this).whenNamed();
+
+      code.line(naming.call(args));
+    };
   }
 
 }
@@ -173,6 +188,36 @@ export interface EsFunctionInit<out TArgs extends EsSignature.Args>
    * When omitted, the function has to be explicitly {@link EsFunction#declare declared} prior to being used.
    */
   readonly declare?: EsFunctionDeclarationPolicy<TArgs> | undefined;
+}
+
+/**
+ * {@link EsFunction Function} naming within namespace.
+ */
+export interface EsFunctionNaming<out TArgs extends EsSignature.Args = EsSignature.Args>
+  extends EsNaming {
+  /**
+   * Named function symbol.
+   */
+  readonly symbol: EsSymbol<EsFunctionNaming>;
+
+  /**
+   * Named function.
+   */
+  readonly fn: EsFunction<TArgs>;
+
+  /**
+   * Calls the function.
+   *
+   * @param args - Named argument values.
+   *
+   * @returns Function call expression.
+   */
+  call(
+    this: void,
+    ...args: EsSignature.RequiredKeyOf<TArgs> extends never
+      ? [EsSignature.ValuesOf<TArgs>?]
+      : [EsSignature.ValuesOf<TArgs>]
+  ): EsSnippet;
 }
 
 /**
