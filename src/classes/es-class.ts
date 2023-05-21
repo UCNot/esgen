@@ -415,7 +415,7 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
    * @returns Class declaration statement.
    */
   declare(): EsSnippet {
-    return this.symbol.requestDeclaration({
+    return this.symbol.declareSymbol({
       as: context => [this.asDeclaration(), context.naming],
     });
   }

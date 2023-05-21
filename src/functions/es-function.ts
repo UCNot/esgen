@@ -80,13 +80,13 @@ export class EsFunction<out TArgs extends EsSignature.Args>
     const { as } = request;
 
     if (as === 'const' || as === 'let' || as === 'var') {
-      return this.symbol.requestDeclaration({
+      return this.symbol.declareSymbol({
         ...request,
         as: context => this.#declareLambda(context, request),
       });
     }
 
-    return this.symbol.requestDeclaration({
+    return this.symbol.declareSymbol({
       ...request,
       as: context => this.#declareFunction(context, request),
     });

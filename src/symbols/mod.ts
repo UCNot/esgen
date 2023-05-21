@@ -7,3 +7,4 @@ export * from './es-name-registry.js';
 export * from './es-namespace.js';
 export * from './es-symbol-string.js';
 export * from './es-symbol.js';
+export * from './es-var.symbol.js';

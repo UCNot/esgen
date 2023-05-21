@@ -174,7 +174,7 @@ export type EsArg = Omit<EsSymbolInit, 'declare'>;
 
 export namespace EsArg {
   /**
-   * Custom argument {@link EsArgSymbol#requestDeclaration declaration}.
+   * Custom argument {@link EsArgSymbol#declareSymbol declaration}.
    */
   export interface Declaration {
     /**
@@ -234,7 +234,7 @@ export interface EsArgNaming extends EsNaming {
   readonly symbol: EsArgSymbol;
 
   /**
-   * Emits argument {@link EsArgSymbol#requestDeclaration declaration} code.
+   * Emits argument {@link EsArgSymbol#declareSymbol declaration} code.
    *
    * @returns Argument declaration code.
    */

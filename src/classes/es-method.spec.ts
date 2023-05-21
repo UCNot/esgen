@@ -3,7 +3,7 @@ import { jsStringLiteral } from 'httongue';
 import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsBundle } from '../scopes/es-bundle.js';
-import { EsSymbol } from '../symbols/es-symbol.js';
+import { EsVarSymbol } from '../symbols/es-var.symbol.js';
 import { EsClass } from './es-class.js';
 import { EsMethod } from './es-method.js';
 
@@ -28,12 +28,12 @@ describe('EsMethod', () => {
     await expect(
       bundle
         .emit(code => {
-          const instance = new EsSymbol('instance');
+          const instance = new EsVarSymbol('instance');
 
           code
             .write(
-              instance.requestDeclaration({
-                as: ({ naming }) => [esline`const ${naming} = ${hostClass.instantiate()};`, naming],
+              instance.declare({
+                value: () => hostClass.instantiate(),
               }),
             )
             .write(esline`${hostClass.member(method).call(instance, { arg1: '13' })};`);
