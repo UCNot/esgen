@@ -1,5 +1,4 @@
 import { EsSnippet } from '../es-snippet.js';
-import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsClass, EsClassHandle } from './es-class.js';
 import { EsMember, EsMemberInit, EsMemberRef, EsMemberVisibility } from './es-member.js';
@@ -62,7 +61,7 @@ export class EsConstructor<out TArgs extends EsSignature.Args = EsSignature.Args
   /**
    * Constructor signature.
    */
-  get signature(): EsSignature {
+  get signature(): EsSignature<TArgs> {
     return this.#signature;
   }
 
@@ -182,8 +181,12 @@ export class EsConstructor<out TArgs extends EsSignature.Args = EsSignature.Args
     return handle;
   }
 
-  #instantiate(hostClass: EsClass<TArgs>, args: EsSignature.ValuesOf<TArgs>): EsSnippet {
-    return esline`new ${hostClass}${this.signature.call(args)}`;
+  #instantiate({ symbol }: EsClass<TArgs>, args: EsSignature.ValuesOf<TArgs>): EsSnippet {
+    return async (code, { ns }) => {
+      const { instantiate } = await ns.refer(symbol).whenNamed();
+
+      code.line(instantiate(args));
+    };
   }
 
   toString(): string {
