@@ -207,6 +207,7 @@ export class EsNamespace implements EsNamingHost {
   /**
    * Searches for the symbol {@link addSymbol named} in this namespace or one of enclosing namespaces.
    *
+   * @typeParam TNaming - Type of symbol naming.
    * @param ref - Reference to target symbol.
    *
    * @returns Either found symbol naming, or `undefined` when `symbol` is not visible.
@@ -257,6 +258,7 @@ export class EsNamespace implements EsNamingHost {
   /**
    * Refers the symbol visible in this namespace.
    *
+   * @typeParam TNaming - Type of symbol naming.
    * @param ref - Reference to symbol previously named in this namespace or one of enclosing ones.
    *
    * @returns Referred symbol naming.

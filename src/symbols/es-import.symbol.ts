@@ -1,3 +1,4 @@
+import { asis } from '@proc7ts/primitives';
 import { jsStringLiteral } from 'httongue';
 import { EsModule } from './es-module.js';
 import { EsNamespace } from './es-namespace.js';
@@ -8,10 +9,13 @@ import { EsNaming, EsResolution, EsSymbol, EsSymbolInit } from './es-symbol.js';
  *
  * The symbol is automatically imported and named in {@link EsBundle#ns bundle namespace} whenever referred.
  */
-export class EsImportSymbol extends EsSymbol<EsImportNaming> {
+export class EsImportSymbol<
+  out TNaming extends EsNaming = EsImportNaming,
+> extends EsSymbol<TNaming> {
 
   readonly #from: EsModule;
   readonly #importName: string;
+  readonly #createNaming: EsImportInit.Namer<TNaming>;
 
   /**
    * Constructs new imported symbol.
@@ -20,10 +24,24 @@ export class EsImportSymbol extends EsSymbol<EsImportNaming> {
    * @param importName - The name of imported symbol. I.e. the name of the module export.
    * @param init - Import initialization options.
    */
-  constructor(from: EsModule, importName: string, init?: EsImportInit) {
-    super(init?.as ?? importName, init);
+  constructor(
+    from: EsModule,
+    importName: string,
+    ...init: EsImportNaming extends TNaming ? [EsImportInit<TNaming>?] : [EsImportInit<TNaming>]
+  );
+
+  constructor(
+    from: EsModule,
+    importName: string,
+    init: Partial<EsImportInit.Custom<TNaming>> = {},
+  ) {
+    const { as = importName, createNaming = asis as EsImportInit.Namer<TNaming> } = init;
+
+    super(as, init);
+
     this.#importName = importName;
     this.#from = from;
+    this.#createNaming = createNaming;
   }
 
   /**
@@ -49,10 +67,10 @@ export class EsImportSymbol extends EsSymbol<EsImportNaming> {
    * @returns Imported symbol resolution resolution.
    */
   override refer(
-    resolution: EsResolution<EsImportNaming, this>,
+    resolution: EsResolution<TNaming, this>,
     ns: EsNamespace,
-  ): EsResolution<EsImportNaming, this> {
-    ns.scope.bundle.ns.addSymbol(this, naming => ns.scope.imports.addImport(this, naming));
+  ): EsResolution<TNaming, this> {
+    ns.scope.bundle.ns.addSymbol(this, naming => ns.scope.imports.addImport(this, naming, this.#createNaming));
 
     return resolution;
   }
@@ -76,15 +94,60 @@ export class EsImportSymbol extends EsSymbol<EsImportNaming> {
 }
 
 /**
- * Import initialization options.
+ * {@link EsImportSymbol Import} initialization options.
+ *
+ * @typeParam TNaming - Import naming type.
  */
-export interface EsImportInit extends Omit<EsSymbolInit, 'declare'> {
+export type EsImportInit<TNaming extends EsNaming = EsImportNaming> = EsImportNaming extends TNaming
+  ? EsImportInit.Default
+  : EsImportInit.Custom<TNaming>;
+
+export namespace EsImportInit {
   /**
-   * Requested symbol name.
+   * Default {@link EsImportSymbol import} initialization options.
    *
-   * @defaultValue The same as import name.
+   * @typeParam TNaming - Import naming type.
    */
-  readonly as?: string | undefined;
+  export interface Default<out TNaming extends EsNaming = EsNaming>
+    extends Omit<EsSymbolInit, 'declare'> {
+    /**
+     * Requested symbol name.
+     *
+     * @defaultValue The same as import name.
+     */
+    readonly as?: string | undefined;
+
+    /**
+     * Creates import naming specific to particular symbol type.
+     */
+    readonly createNaming?: Namer<TNaming> | undefined;
+  }
+
+  /**
+   * Custom {@link EsImportSymbol import} initialization options.
+   *
+   * @typeParam TNaming - Import naming type.
+   */
+  export interface Custom<out TNaming extends EsNaming> extends Default<TNaming> {
+    readonly createNaming: Namer<TNaming>;
+  }
+
+  /**
+   * {@link EsImport Import} namer signature.
+   *
+   * @typeParam TNaming - Import naming type.
+   */
+  export type Namer<out TNaming extends EsNaming> = {
+    /**
+     * Creates import naming specific to particular symbol type.
+     *
+     * @param naming - Default import naming.
+     * @param symbol - Named symbol.
+     *
+     * @returns Import naming specific to symbol type.
+     */
+    createNaming(this: void, naming: EsNaming, symbol: EsImportSymbol<TNaming>): TNaming;
+  }['createNaming'];
 }
 
 /**

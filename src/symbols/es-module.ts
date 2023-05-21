@@ -1,8 +1,9 @@
 import { jsStringLiteral } from 'httongue';
 import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsBundleFormat } from '../scopes/es-bundle-format.js';
-import { EsImportInit, EsImportNaming, EsImportSymbol } from './es-import.symbol.js';
+import { EsImportInit, EsImportSymbol } from './es-import.symbol.js';
 import { EsImports } from './es-imports.js';
+import { EsNaming } from './es-symbol.js';
 
 /**
  * Module is a source of {@link EsImportSymbol imported symbols}.
@@ -26,6 +27,20 @@ export abstract class EsModule {
   abstract get moduleName(): string;
 
   /**
+   * Creates symbol imported from this module with custom naming.
+   *
+   * @typeParam TNaming - Import naming type.
+   * @param name - Name of symbol to import.
+   * @param init - Import initialization options.
+   *
+   * @returns Imported symbol instance.
+   */
+  import<TNaming extends EsNaming>(
+    name: string,
+    init: EsImportInit.Custom<TNaming>,
+  ): EsImportSymbol<TNaming>;
+
+  /**
    * Creates symbol imported from this module.
    *
    * @param name - Name of symbol to import.
@@ -33,7 +48,12 @@ export abstract class EsModule {
    *
    * @returns Imported symbol instance.
    */
-  import(name: string, init?: EsImportInit): EsImportSymbol {
+  import(name: string, init?: EsImportInit.Default): EsImportSymbol;
+
+  import<TNaming extends EsNaming>(
+    name: string,
+    init: EsImportInit<TNaming>,
+  ): EsImportSymbol<TNaming> {
     return new EsImportSymbol(this, name, init);
   }
 
@@ -48,7 +68,7 @@ export abstract class EsModule {
    */
   startImports(imports: EsImports): EsModuleImports;
   startImports({ bundle: { format } }: EsImports): EsModuleImports {
-    const namings = new Map<string, EsImportNaming>();
+    const namings = new Map<string, EsNaming>();
 
     return {
       printTo: out => {
@@ -57,13 +77,15 @@ export abstract class EsModule {
       addImport({ importName }, name) {
         namings.set(importName, name);
       },
-      findImport({ requestedName }) {
-        return namings.get(requestedName);
+      findImport<TNaming extends EsNaming>({
+        requestedName,
+      }: EsImportSymbol<TNaming>): TNaming | undefined | null {
+        return namings.get(requestedName) as TNaming;
       },
     };
   }
 
-  #printImports(format: EsBundleFormat, imports: ReadonlyMap<string, EsImportNaming>): EsPrinter {
+  #printImports(format: EsBundleFormat, imports: ReadonlyMap<string, EsNaming>): EsPrinter {
     switch (format) {
       case EsBundleFormat.ES2015:
         return this.#printStaticImports(imports);
@@ -72,7 +94,7 @@ export abstract class EsModule {
     }
   }
 
-  #printStaticImports(names: ReadonlyMap<string, EsImportNaming>): EsPrinter {
+  #printStaticImports(names: ReadonlyMap<string, EsNaming>): EsPrinter {
     return {
       printTo: out => {
         const from = jsStringLiteral(this.moduleName);
@@ -99,7 +121,7 @@ export abstract class EsModule {
     return importName === name ? importName : `${importName} as ${name}`;
   }
 
-  #printDynamicImports(imports: ReadonlyMap<string, EsImportNaming>): EsPrinter {
+  #printDynamicImports(imports: ReadonlyMap<string, EsNaming>): EsPrinter {
     return {
       printTo: out => {
         const from = jsStringLiteral(this.moduleName);
@@ -148,17 +170,19 @@ export interface EsModuleImports extends EsPrinter {
   /**
    * Adds new import from this module.
    *
+   * @typeParam TNaming - Import naming type.
    * @param symbol - Imported symbol.
    * @param naming - Naming of imported `symbol` within namespace.
    */
-  addImport(symbol: EsImportSymbol, naming: EsImportNaming): void;
+  addImport<TNaming extends EsNaming>(symbol: EsImportSymbol<TNaming>, naming: TNaming): void;
 
   /**
    * Searches for the import of the `symbol`.
    *
+   * @typeParam TNaming - Import naming type.
    * @param symbol - Imported symbol.
    *
    * @returns Either previously {@link addImport added} symbol naming, or falsy value if the import not added yet.
    */
-  findImport(symbol: EsImportSymbol): EsImportNaming | undefined | null;
+  findImport<TNaming extends EsNaming>(symbol: EsImportSymbol<TNaming>): TNaming | undefined | null;
 }
