@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { EsBundleFormat } from '../scopes/es-bundle-format.js';
 import { EsBundle } from '../scopes/es-bundle.js';
+import { EsExternalModule } from './es-external-module.js';
 import { esImport } from './es-import.js';
 
 describe('EsImports', () => {
@@ -16,6 +17,19 @@ describe('EsImports', () => {
         bundle
           .emit(code => {
             const test = esImport('test-module', 'test');
+
+            code.line(test, `();`);
+          })
+          .asText(),
+      ).resolves.toBe(`import { test } from 'test-module';\ntest();\n`);
+    });
+    it('declares import from custom module', async () => {
+      const from = new EsExternalModule('test-module');
+
+      await expect(
+        bundle
+          .emit(code => {
+            const test = esImport(from, 'test');
 
             code.line(test, `();`);
           })

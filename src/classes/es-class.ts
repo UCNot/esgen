@@ -1,11 +1,18 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsCode } from '../es-code.js';
 import { EsSnippet } from '../es-snippet.js';
+import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { esMemberAccessor } from '../impl/es-member-accessor.js';
 import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { EsNameRegistry } from '../symbols/es-name-registry.js';
-import { EsDeclarationPolicy, EsReference, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
+import {
+  EsDeclarationPolicy,
+  EsNaming,
+  EsReference,
+  EsSymbol,
+  EsSymbolInit,
+} from '../symbols/es-symbol.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsConstructor, EsConstructorDeclaration, EsConstructorInit } from './es-constructor.js';
 import { EsAnyMember, EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
@@ -20,9 +27,9 @@ import { EsAnyMember, EsMember, EsMemberRef, EsMemberVisibility } from './es-mem
  * @typeParam TSymbol - Type of class symbol.
  */
 export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
-  implements EsReference, EsEmitter {
+  implements EsReference<EsClassNaming<TArgs>>, EsEmitter {
 
-  readonly #symbol: EsSymbol;
+  readonly #symbol: EsSymbol<EsClassNaming<TArgs>>;
   readonly #baseClass: EsClass | undefined;
   readonly #classConstructor: EsConstructor<TArgs>;
 
@@ -62,7 +69,7 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
             context.refer(baseClass);
           }
 
-          return [this.asDeclaration(), context.naming];
+          return [this.asDeclaration(), this.#createNaming(context.naming)];
         },
       },
     });
@@ -85,10 +92,26 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
     this.#addPublicMember(this.classConstructor);
   }
 
+  #createNaming(naming: EsNaming): EsClassNaming<TArgs> {
+    const {
+      symbol,
+      classConstructor: { signature },
+    } = this;
+
+    return {
+      ...naming,
+      symbol,
+      signature,
+      instantiate(args: EsSignature.ValuesOf<TArgs>) {
+        return esline`new ${naming}${signature.call(args)}`;
+      },
+    };
+  }
+
   /**
    * Unique class symbol.
    */
-  get symbol(): EsSymbol {
+  get symbol(): EsSymbol<EsClassNaming<TArgs>> {
     return this.#symbol;
   }
 
@@ -416,7 +439,7 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
    */
   declare(): EsSnippet {
     return this.symbol.declareSymbol({
-      as: context => [this.asDeclaration(), context.naming],
+      as: context => [this.asDeclaration(), this.#createNaming(context.naming)],
     });
   }
 
@@ -549,6 +572,37 @@ export namespace EsClassInit {
  * Automatic {@link EsClass class} declaration policy.
  */
 export type EsClassDeclarationPolicy = Omit<EsDeclarationPolicy, 'as'>;
+
+/**
+ * {@link EsClass Class} naming within namespace.
+ *
+ * @typeParam TArgs - Type of class constructor arguments definition.
+ */
+export interface EsClassNaming<out TArgs extends EsSignature.Args = EsSignature.Args>
+  extends EsNaming {
+  /**
+   * Named class symbol.
+   */
+  readonly symbol: EsSymbol<EsClassNaming<TArgs>>;
+
+  /**
+   * Constructor signature.
+   */
+  readonly signature: EsSignature<TArgs>;
+
+  /**
+   * Instantiates class.
+   *
+   * @param args - Named argument values.
+   *
+   * @returns Class instantiation expression.
+   */
+  instantiate(
+    ...args: EsSignature.RequiredKeyOf<TArgs> extends never
+      ? [EsSignature.ValuesOf<TArgs>?]
+      : [EsSignature.ValuesOf<TArgs>]
+  ): EsSnippet;
+}
 
 /**
  * {@link EsClass Class} handle used to instantiate new class instances.

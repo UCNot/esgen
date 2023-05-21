@@ -30,6 +30,7 @@ export class EsFunction<out TArgs extends EsSignature.Args>
    *
    * @param requestedName - Requested symbol name.
    * @param args - Either function signature or arguments definition.
+   * @param init - Function initialization options.
    */
   constructor(
     requestedName: string,
@@ -135,7 +136,7 @@ export class EsFunction<out TArgs extends EsSignature.Args>
     return {
       ...naming,
       symbol: this.symbol,
-      fn: this,
+      signature: this.signature,
       call: (args: EsSignature.ValuesOf<TArgs>) => esline`${naming}${this.signature.call(args)}`,
     };
   }
@@ -155,7 +156,7 @@ export class EsFunction<out TArgs extends EsSignature.Args>
 
   call(args: EsSignature.ValuesOf<TArgs>): EsSnippet {
     return async (code, { ns }) => {
-      const naming = await ns.refer(this).whenNamed();
+      const naming = await ns.refer<EsFunctionNaming<TArgs>>(this).whenNamed();
 
       code.line(naming.call(args));
     };
@@ -192,18 +193,20 @@ export interface EsFunctionInit<out TArgs extends EsSignature.Args>
 
 /**
  * {@link EsFunction Function} naming within namespace.
+ *
+ * @typeParam TArgs - Type of function arguments definition.
  */
 export interface EsFunctionNaming<out TArgs extends EsSignature.Args = EsSignature.Args>
   extends EsNaming {
   /**
    * Named function symbol.
    */
-  readonly symbol: EsSymbol<EsFunctionNaming>;
+  readonly symbol: EsSymbol<EsFunctionNaming<TArgs>>;
 
   /**
-   * Named function.
+   * Named function signature.
    */
-  readonly fn: EsFunction<TArgs>;
+  readonly signature: EsSignature<TArgs>;
 
   /**
    * Calls the function.
