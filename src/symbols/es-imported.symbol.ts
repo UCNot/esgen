@@ -1,7 +1,7 @@
 import { jsStringLiteral } from 'httongue';
-import { EsCode } from '../es-code.js';
 import { EsModule } from './es-module.js';
-import { EsNaming, EsSymbol, EsSymbolInit } from './es-symbol.js';
+import { EsNamespace } from './es-namespace.js';
+import { EsNaming, EsResolution, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
 /**
  * Symbol imported from some {@link EsModule module}.
@@ -21,13 +21,7 @@ export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
    * @param init - Import initialization options.
    */
   constructor(from: EsModule, importName: string, init?: EsImportInit) {
-    super(init?.as ?? importName, {
-      ...init,
-      declare: {
-        at: 'bundle',
-        as: ({ naming }) => [EsCode.none, naming.ns.scope.imports.addImport(this, naming)],
-      },
-    });
+    super(init?.as ?? importName, init);
     this.#importName = importName;
     this.#from = from;
   }
@@ -44,6 +38,23 @@ export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
    */
   get importName(): string {
     return this.#importName;
+  }
+
+  /**
+   * Automatically imports this symbol when it is {@link EsNamespace#refer referred}.
+   *
+   * @param resolution - Symbol resolution.
+   * @param ns - Referring namespace.
+   *
+   * @returns Imported symbol resolution resolution.
+   */
+  override refer(
+    resolution: EsResolution<EsImportNaming, this>,
+    ns: EsNamespace,
+  ): EsResolution<EsImportNaming, this> {
+    ns.scope.bundle.ns.addSymbol(this, naming => ns.scope.imports.addImport(this, naming));
+
+    return resolution;
   }
 
   override toString({
