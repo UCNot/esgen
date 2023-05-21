@@ -133,7 +133,7 @@ export namespace EsImportInit {
   }
 
   /**
-   * {@link EsImport Import} namer signature.
+   * {@link EsImportSymbol Import} namer signature.
    *
    * @typeParam TNaming - Import naming type.
    */
