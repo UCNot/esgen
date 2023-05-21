@@ -3,7 +3,7 @@ import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsBundleFormat } from '../scopes/es-bundle-format.js';
 import { EsBundle } from '../scopes/es-bundle.js';
-import { EsSymbol } from '../symbols/es-symbol.js';
+import { EsVarSymbol } from '../symbols/es-var.symbol.js';
 import { EsClass } from './es-class.js';
 import { EsField } from './es-field.js';
 
@@ -56,12 +56,12 @@ describe('EsField', () => {
         bundle
           .emit(code => {
             const handle = hostClass.member(field);
-            const instance = new EsSymbol('instance');
+            const instance = new EsVarSymbol('instance');
 
             code
               .write(
-                instance.requestDeclaration({
-                  as: ({ naming }) => [esline`const ${naming} = new ${hostClass}();`, naming],
+                instance.declare({
+                  value: () => hostClass.instantiate(),
                 }),
               )
               .line(handle.set(instance, esline`${handle.get(instance)} + 1`), `;`);

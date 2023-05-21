@@ -98,7 +98,7 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
   }
 
   /**
-   * Requests symbol declaration.
+   * Declares symbol in the most generic way.
    *
    * The symbol can be used after that.
    *
@@ -106,7 +106,7 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
    *
    * @returns Symbol's declaration statement.
    */
-  requestDeclaration(request: EsDeclarationRequest<TNaming>): EsSnippet {
+  declareSymbol(request: EsDeclarationRequest<TNaming>): EsSnippet {
     return (code, scope) => {
       code.write(this.#declareIn(scope, request));
     };
@@ -176,8 +176,7 @@ export interface EsSymbolInit<out TNaming extends EsNaming = EsNaming> {
    *
    * When specified, the symbol will be automatically declared once referenced.
    *
-   * When omitted, the symbol declaration has to be explicitly {@link EsSymbol#requestDeclaration requested} prior to
-   * being used.
+   * When omitted, the symbol has to be explicitly {@link EsSymbol#declareSymbol declared} prior to being used.
    */
   readonly declare?: EsDeclarationPolicy<TNaming> | undefined;
 
@@ -188,7 +187,7 @@ export interface EsSymbolInit<out TNaming extends EsNaming = EsNaming> {
 }
 
 /**
- * Explicit symbol {@link EsSymbol#requestDeclaration declaration} request.
+ * Explicit symbol {@link EsSymbol#declareSymbol declaration} request.
  *
  * @typeParam TNaming - Type of symbol naming.
  */

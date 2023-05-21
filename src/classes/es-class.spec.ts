@@ -3,7 +3,7 @@ import { EsCode } from '../es-code.js';
 import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsBundle } from '../scopes/es-bundle.js';
-import { EsSymbol } from '../symbols/es-symbol.js';
+import { EsVarSymbol } from '../symbols/es-var.symbol.js';
 import { EsClass } from './es-class.js';
 import { EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
 
@@ -280,8 +280,8 @@ describe('EsClass', () => {
         bundle
           .emit(
             cls.declare(),
-            new EsSymbol('instance').requestDeclaration({
-              as: ({ naming }) => [esline`const ${naming} = new ${cls}();`, naming],
+            new EsVarSymbol('instance').declare({
+              value: () => esline`new ${cls}()`,
             }),
           )
           .asText(),
