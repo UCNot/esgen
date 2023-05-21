@@ -4,11 +4,11 @@ import { EsNamespace } from './es-namespace.js';
 import { EsNaming, EsResolution, EsSymbol, EsSymbolInit } from './es-symbol.js';
 
 /**
- * Symbol imported from some {@link EsModule module}.
+ * Symbol of the import from some {@link EsModule module}.
  *
- * The symbol is automatically imported and named in {@link EsBundle#ns bundle namespace} whenever used.
+ * The symbol is automatically imported and named in {@link EsBundle#ns bundle namespace} whenever referred.
  */
-export class EsImportedSymbol extends EsSymbol<EsImportNaming> {
+export class EsImportSymbol extends EsSymbol<EsImportNaming> {
 
   readonly #from: EsModule;
   readonly #importName: string;
@@ -91,5 +91,5 @@ export interface EsImportInit extends Omit<EsSymbolInit, 'declare'> {
  * Imported symbol naming within (bundle) namespace.
  */
 export interface EsImportNaming extends EsNaming {
-  readonly symbol: EsImportedSymbol;
+  readonly symbol: EsImportSymbol;
 }

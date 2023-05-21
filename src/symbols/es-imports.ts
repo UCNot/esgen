@@ -1,11 +1,11 @@
 import { EsBundle } from '../scopes/es-bundle.js';
 import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
-import { EsImportNaming, EsImportedSymbol } from './es-imported.symbol.js';
+import { EsImportNaming, EsImportSymbol } from './es-import.symbol.js';
 import { EsModuleImports } from './es-module.js';
 import { EsNaming } from './es-symbol.js';
 
 /**
- * Collection of {@link EsImportedSymbol import} declarations of the bundle.
+ * Collection of {@link EsImportSymbol import} declarations of the bundle.
  *
  * Declared at bundle level.
  */
@@ -38,7 +38,7 @@ export class EsImports implements EsEmitter {
    *
    * @returns Imported symbol naming.
    */
-  addImport(symbol: EsImportedSymbol, naming: EsNaming): EsImportNaming {
+  addImport(symbol: EsImportSymbol, naming: EsNaming): EsImportNaming {
     const { from } = symbol;
     const { moduleId } = from;
     let moduleImports = this.#imports.get(moduleId);

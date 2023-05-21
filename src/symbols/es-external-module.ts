@@ -1,8 +1,8 @@
-import { EsImportedSymbol } from './es-imported.symbol.js';
+import { EsImportSymbol } from './es-import.symbol.js';
 import { EsModule } from './es-module.js';
 
 /**
- * External module to {@link EsImportedSymbol import symbols} from.
+ * External module to {@link EsImportSymbol import symbols} from.
  *
  * Module instances are identified by their name and cached.
  */

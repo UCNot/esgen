@@ -1,11 +1,11 @@
 import { jsStringLiteral } from 'httongue';
 import { EsOutput, EsPrinter } from '../es-output.js';
 import { EsBundleFormat } from '../scopes/es-bundle-format.js';
-import { EsImportInit, EsImportNaming, EsImportedSymbol } from './es-imported.symbol.js';
+import { EsImportInit, EsImportNaming, EsImportSymbol } from './es-import.symbol.js';
 import { EsImports } from './es-imports.js';
 
 /**
- * Module is a source of {@link EsImportedSymbol imported symbols}.
+ * Module is a source of {@link EsImportSymbol imported symbols}.
  */
 export abstract class EsModule {
 
@@ -33,8 +33,8 @@ export abstract class EsModule {
    *
    * @returns Imported symbol instance.
    */
-  import(name: string, init?: EsImportInit): EsImportedSymbol {
-    return new EsImportedSymbol(this, name, init);
+  import(name: string, init?: EsImportInit): EsImportSymbol {
+    return new EsImportSymbol(this, name, init);
   }
 
   /**
@@ -151,7 +151,7 @@ export interface EsModuleImports extends EsPrinter {
    * @param symbol - Imported symbol.
    * @param naming - Naming of imported `symbol` within namespace.
    */
-  addImport(symbol: EsImportedSymbol, naming: EsImportNaming): void;
+  addImport(symbol: EsImportSymbol, naming: EsImportNaming): void;
 
   /**
    * Searches for the import of the `symbol`.
@@ -160,5 +160,5 @@ export interface EsModuleImports extends EsPrinter {
    *
    * @returns Either previously {@link addImport added} symbol naming, or falsy value if the import not added yet.
    */
-  findImport(symbol: EsImportedSymbol): EsImportNaming | undefined | null;
+  findImport(symbol: EsImportSymbol): EsImportNaming | undefined | null;
 }
