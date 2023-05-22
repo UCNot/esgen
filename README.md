@@ -16,7 +16,7 @@ Supported features:
 
 Choose what you need. If strings concatenation is just enough - that's definitely the way to go.
 
-See [API Documentation] for detailed usage examples.
+See [API Documentation] for the details.
 
 [npm-image]: https://img.shields.io/npm/v/esgen.svg?logo=npm
 [npm-url]: https://www.npmjs.com/package/esgen
