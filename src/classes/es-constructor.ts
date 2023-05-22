@@ -1,5 +1,6 @@
 import { EsSnippet } from '../es-snippet.js';
 import { EsSignature } from '../functions/es-signature.js';
+import { EsScopeKind } from '../scopes/es-scope.js';
 import { EsClass, EsClassHandle } from './es-class.js';
 import { EsMember, EsMemberInit, EsMemberRef, EsMemberVisibility } from './es-member.js';
 
@@ -170,12 +171,18 @@ export class EsConstructor<out TArgs extends EsSignature.Args = EsSignature.Args
       instantiate: (args: EsSignature.ValuesOf<TArgs>) => this.#instantiate(hostClass, args),
     };
     const ref = hostClass.addMember(this, handle, code => {
-      code.scope(code => {
-        code
-          .line('constructor', signature.declare(args), ' {')
-          .indent(body(ref, hostClass))
-          .write('}');
-      });
+      code.scope(
+        {
+          kind: EsScopeKind.Function,
+          ns: { comment: `[${this}]` },
+        },
+        code => {
+          code
+            .line('constructor', signature.declare(args), ' {')
+            .indent(body(ref, hostClass))
+            .write('}');
+        },
+      );
     });
 
     return handle;
@@ -189,7 +196,7 @@ export class EsConstructor<out TArgs extends EsSignature.Args = EsSignature.Args
     };
   }
 
-  toString(): string {
+  override toString(): string {
     return `constructor${this.signature}`;
   }
 

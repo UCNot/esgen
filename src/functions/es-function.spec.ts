@@ -138,7 +138,7 @@ describe('EsFunction', () => {
               code
                 .write(
                   fn.declare({
-                    as: EsFunctionKind.Let,
+                    as: EsFunctionKind.Var,
                     body: fn => esline`return [${fn.args.arg}, ...${fn.args.rest}];`,
                   }),
                 )
@@ -146,7 +146,7 @@ describe('EsFunction', () => {
             })
             .asText(),
         ).resolves.toBe(
-          `let test = (arg, ...rest) => {\n`
+          `var test = (arg, ...rest) => {\n`
             + `  return [arg, ...rest];\n`
             + `};\n`
             + `test(1, 2, 3);\n`,

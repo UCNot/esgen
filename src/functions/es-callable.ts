@@ -1,5 +1,5 @@
 import { EsSnippet } from '../es-snippet.js';
-import { EsScopeInit } from '../scopes/es-scope.js';
+import { EsScopeInit, EsScopeKind } from '../scopes/es-scope.js';
 import { EsSignature } from './es-signature.js';
 
 /**
@@ -54,14 +54,26 @@ export class EsCallable<out TArgs extends EsSignature.Args> {
     { async, args, scope }: EsLambdaExpression<TArgs> = {},
   ): EsSnippet {
     return code => {
-      code.scope(scope, code => {
-        code.multiLine(code => {
-          code
-            .line(async ? 'async ' : '', this.signature.declare(args), ' => {')
-            .indent(body(this))
-            .write('}');
-        });
-      });
+      code.scope(
+        {
+          ...scope,
+          kind: EsScopeKind.Function,
+          async,
+          generator: false,
+          ns: {
+            ...scope?.ns,
+            comment: scope?.ns?.comment ?? `[${this.signature} => {}]`,
+          },
+        },
+        code => {
+          code.multiLine(code => {
+            code
+              .line(async ? 'async ' : '', this.signature.declare(args), ' => {')
+              .indent(body(this))
+              .write('}');
+          });
+        },
+      );
     };
   }
 
@@ -80,24 +92,36 @@ export class EsCallable<out TArgs extends EsSignature.Args> {
 
   function(
     body: (this: void, fn: this) => EsSnippet,
-    { async, generator, name, args, scope }: EsFunctionExpression<TArgs> = {},
+    { async, generator, name = '', args, scope }: EsFunctionExpression<TArgs> = {},
   ): EsSnippet {
     return code => {
-      code.scope(scope, code => {
-        code.multiLine(code => {
-          code
-            .line(
-              async ? 'async ' : '',
-              'function ',
-              generator ? '*' : '',
-              name ?? '',
-              this.signature.declare(args),
-              ' {',
-            )
-            .indent(body(this))
-            .write('}');
-        });
-      });
+      code.scope(
+        {
+          ...scope,
+          kind: EsScopeKind.Function,
+          async,
+          generator,
+          ns: {
+            ...scope?.ns,
+            comment: scope?.ns?.comment ?? `[function ${name}${this.signature}]`,
+          },
+        },
+        code => {
+          code.multiLine(code => {
+            code
+              .line(
+                async ? 'async ' : '',
+                'function ',
+                generator ? '*' : '',
+                name,
+                this.signature.declare(args),
+                ' {',
+              )
+              .indent(body(this))
+              .write('}');
+          });
+        },
+      );
     };
   }
 
@@ -122,7 +146,7 @@ export interface EsLambdaExpression<out TArgs extends EsSignature.Args> {
   /**
    * Scope initialization options for lambda body.
    */
-  readonly scope?: EsScopeInit | undefined;
+  readonly scope?: Omit<EsScopeInit, 'kind' | 'async' | 'generator'> | undefined;
 }
 
 /**

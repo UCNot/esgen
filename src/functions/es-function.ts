@@ -1,9 +1,9 @@
 import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
+import { esFunctionOrBundle } from '../impl/es-function-or-bundle.js';
 import {
   EsDeclarationContext,
   EsDeclarationPolicy,
-  EsDeclarationRequest,
   EsNaming,
   EsReference,
   EsSymbol,
@@ -82,14 +82,14 @@ export class EsFunction<out TArgs extends EsSignature.Args>
 
     if (isLambda(as)) {
       return this.symbol.declareSymbol({
-        ...request,
         as: context => this.#declareLambda(context, request),
+        at: as === EsFunctionKind.Var ? esFunctionOrBundle : undefined,
       });
     }
 
     return this.symbol.declareSymbol({
-      ...request,
       as: context => this.#declareFunction(context, request),
+      at: esFunctionOrBundle,
     });
   }
 
@@ -196,7 +196,7 @@ export enum EsFunctionKind {
 
 function isLambda(
   kind: EsFunctionKind | undefined,
-): kind is EsFunctionKind.Const | EsFunctionKind.Let | EsFunctionKind.Const {
+): kind is EsFunctionKind.Const | EsFunctionKind.Let | EsFunctionKind.Var {
   return (
     kind === EsFunctionKind.Const || kind === EsFunctionKind.Let || kind === EsFunctionKind.Var
   );
@@ -293,8 +293,7 @@ export interface EsFunctionDeclarationPolicy<out TArgs extends EsSignature.Args>
  * @typeParam TArgs - Type of function arguments definition.
  */
 export interface EsFunctionDeclarationRequest<out TArgs extends EsSignature.Args>
-  extends Omit<EsDeclarationRequest, 'as'>,
-    EsLambdaExpression<TArgs> {
+  extends EsLambdaExpression<TArgs> {
   /**
    * Host to declare function.
    *

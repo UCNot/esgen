@@ -6,6 +6,7 @@ import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsBundle } from './es-bundle.js';
+import { EsScopeKind } from './es-scope.js';
 
 describe('EsBundle', () => {
   let bundle: EsBundle;
@@ -14,12 +15,27 @@ describe('EsBundle', () => {
     bundle = new EsBundle();
   });
 
+  describe('kind', () => {
+    it('is always Bundle', () => {
+      expect(bundle.kind).toBe(EsScopeKind.Bundle);
+    });
+  });
+
   describe('bundle', () => {
     it('refers itself', () => {
       expect(bundle.bundle).toBe(bundle);
     });
-    it('refers bundle', () => {
-      expect(bundle.nest().nest().bundle).toBe(bundle);
+  });
+
+  describe('enclosing', () => {
+    it('refers itself', () => {
+      expect(bundle.enclosing).toBe(bundle);
+    });
+  });
+
+  describe('functionOrBundle', () => {
+    it('refers itself', () => {
+      expect(bundle.functionOrBundle).toBe(bundle);
     });
   });
 
@@ -79,19 +95,17 @@ describe('EsBundle', () => {
         TestNamespace,
       );
     });
-    it('is nested within bundle namespace', () => {
-      const scope = bundle.nest({ ns: { comment: 'Nested' } });
+  });
 
-      expect(scope.ns.toString()).toBe('/* Nested */');
-      expect(bundle.ns.encloses(scope.ns)).toBe(true);
+  describe('isAsync', () => {
+    it('is always true', () => {
+      expect(bundle.isAsync()).toBe(true);
     });
-    it('is nested within nested namespace', () => {
-      const scope1 = bundle.nest();
-      const scope2 = scope1.nest({ ns: { comment: 'Nested' } });
+  });
 
-      expect(scope2.ns.toString()).toBe('/* Nested */');
-      expect(bundle.ns.encloses(scope2.ns)).toBe(true);
-      expect(scope1.ns.encloses(scope2.ns)).toBe(true);
+  describe('isGenerator', () => {
+    it('is always false', () => {
+      expect(bundle.isGenerator()).toBe(false);
     });
   });
 

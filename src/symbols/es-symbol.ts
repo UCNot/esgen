@@ -112,10 +112,12 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
     };
   }
 
-  #declareIn(scope: EsScope, { as }: EsDeclarationRequest<TNaming>): EsSnippet {
+  #declareIn(scope: EsScope, { as, at }: EsDeclarationRequest<TNaming>): EsSnippet {
     let snippet!: EsSnippet;
 
-    scope.ns.addSymbol(this, naming => {
+    const ns = at?.(scope) ?? scope.ns;
+
+    ns.addSymbol(this, naming => {
       const [declSnippet, symbolNaming] = as({
         naming,
         refer: noop, // Local declaration order is not maintained.
@@ -188,6 +190,18 @@ export interface EsDeclarationRequest<out TNaming extends EsNaming = EsNaming> {
    * @returns Tuple of code snippet containing symbol declaration, and symbol naming.
    */
   as(this: void, context: EsDeclarationContext): readonly [declaration: EsSnippet, naming: TNaming];
+
+  /**
+   * Selects namespace to declare the symbol in.
+   *
+   * By default, selects the namespace of the `scope`. This, however, have to be changed when declaring named
+   * `function` or variable with `var` keyword.
+   *
+   * @param scope - Code emission scope.
+   *
+   * @returns Selected namespace, or none to select the default one.
+   */
+  readonly at?: ((this: void, scope: EsScope) => EsNamespace | undefined) | undefined;
 }
 
 /**

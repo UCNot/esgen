@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import { jsStringLiteral } from 'httongue';
 import { EsCode } from './es-code.js';
 import { EsOutput } from './es-output.js';
 import { EsBundle } from './scopes/es-bundle.js';
@@ -161,6 +162,22 @@ describe('EsCode', () => {
       expect(() => code.write('second();')).toThrow(new TypeError('Code printed already'));
 
       await bundle.done().whenDone();
+    });
+  });
+
+  describe('scope', () => {
+    it('starts code emission within nested scope', async () => {
+      const bundle = new EsBundle();
+
+      await expect(
+        bundle
+          .emit(code => {
+            code.scope((code, { kind }) => {
+              code.write(`const scopeKind = ${jsStringLiteral(kind)};`);
+            });
+          })
+          .asText(),
+      ).resolves.toBe(`const scopeKind = 'block';\n`);
     });
   });
 });
