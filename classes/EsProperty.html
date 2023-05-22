@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>EsSymbol | ECMAScript Generator</title><meta name="description" content="Documentation for ECMAScript Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
+<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>EsProperty | ECMAScript Generator</title><meta name="description" content="Documentation for ECMAScript Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
 <div class="tsd-toolbar-contents container">
 <div class="table-cell" id="tsd-search" data-base="..">
 <div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M15.7824 13.833L12.6666 10.7177C12.5259 10.5771 12.3353 10.499 12.1353 10.499H11.6259C12.4884 9.39596 13.001 8.00859 13.001 6.49937C13.001 2.90909 10.0914 0 6.50048 0C2.90959 0 0 2.90909 0 6.49937C0 10.0896 2.90959 12.9987 6.50048 12.9987C8.00996 12.9987 9.39756 12.4863 10.5008 11.6239V12.1332C10.5008 12.3332 10.5789 12.5238 10.7195 12.6644L13.8354 15.7797C14.1292 16.0734 14.6042 16.0734 14.8948 15.7797L15.7793 14.8954C16.0731 14.6017 16.0731 14.1267 15.7824 13.833ZM6.50048 10.499C4.29094 10.499 2.50018 8.71165 2.50018 6.49937C2.50018 4.29021 4.28781 2.49976 6.50048 2.49976C8.71001 2.49976 10.5008 4.28708 10.5008 6.49937C10.5008 8.70852 8.71314 10.499 6.50048 10.499Z" fill="var(--color-text)"></path></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div>
@@ -13,37 +13,19 @@
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb">
 <li><a href="../modules.html">ECMAScript Generator</a></li>
-<li><a href="EsSymbol.html">EsSymbol</a></li></ul>
-<h1>Class EsSymbol&lt;TNaming&gt;</h1></div>
+<li><a href="EsProperty.html">EsProperty</a></li></ul>
+<h1>Class EsProperty</h1></div>
 <section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>Program symbol.</p>
-<p>Requests a <a href="EsArgSymbol.html#requestedName" class="tsd-kind-accessor">name</a> within program. The actual name, however, may differ to avoid naming conflicts.
-In order to receive an actual name, the symbol has to be <a href="EsNamespace.html#addSymbol" class="tsd-kind-method">named</a> first. Then, the symbol
-becomes <a href="EsNamespace.html#findSymbol" class="tsd-kind-method">visible</a> under its actual <a href="EsNamespace.html#refer" class="tsd-kind-method">name</a> in target
-namespace and its nested namespaces.</p>
-</div></section> 
-<section class="tsd-panel">
-<h4>Type Parameters</h4>
-<ul class="tsd-type-parameter-list">
-<li>
-<h4>out <span class="tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol"> extends </span><a href="../interfaces/EsNaming.html" class="tsd-signature-type tsd-kind-interface">EsNaming</a> = <a href="../interfaces/EsNaming.html" class="tsd-signature-type tsd-kind-interface">EsNaming</a></h4>
-<div class="tsd-comment tsd-typography"><p>Type of symbol naming.</p>
-</div></li></ul></section> 
+<div class="tsd-comment tsd-typography"><p>Class property representation.</p>
+</div></section>
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
-<li><span class="target">EsSymbol</span>
+<li><a href="EsMember-1.html" class="tsd-signature-type tsd-kind-class">EsMember</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/EsPropertyHandle.html" class="tsd-signature-type tsd-kind-interface">EsPropertyHandle</a><span class="tsd-signature-symbol">&gt;</span>
 <ul class="tsd-hierarchy">
-<li><a href="EsArgSymbol.html" class="tsd-signature-type tsd-kind-class">EsArgSymbol</a></li>
-<li><a href="EsImportSymbol.html" class="tsd-signature-type tsd-kind-class">EsImportSymbol</a></li>
-<li><a href="EsVarSymbol.html" class="tsd-signature-type tsd-kind-class">EsVarSymbol</a></li></ul></li></ul></section>
-<section class="tsd-panel">
-<h4>Implements</h4>
-<ul class="tsd-hierarchy">
-<li><a href="../interfaces/EsReference.html" class="tsd-signature-type tsd-kind-interface">EsReference</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">&gt;</span></li>
-<li><a href="../interfaces/EsEmitter.html" class="tsd-signature-type tsd-kind-interface">EsEmitter</a></li></ul></section><aside class="tsd-sources">
+<li><span class="target">EsProperty</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/symbols/es-symbol.ts#L18">run-z/esgen/src/symbols/es-symbol.ts:18</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/classes/es-property.ts#L13">run-z/esgen/src/classes/es-property.ts:13</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -51,173 +33,173 @@ namespace and its nested namespaces.</p>
 <div class="tsd-accordion-details">
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Constructors</h3>
-<div class="tsd-index-list"><a href="EsSymbol.html#constructor" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#4D7FFF" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-512-path"></rect><path d="M11.898 16.1201C11.098 16.1201 10.466 15.8961 10.002 15.4481C9.53803 15.0001 9.30603 14.3841 9.30603 13.6001V9.64012C9.30603 8.85612 9.53803 8.24012 10.002 7.79212C10.466 7.34412 11.098 7.12012 11.898 7.12012C12.682 7.12012 13.306 7.34812 13.77 7.80412C14.234 8.25212 14.466 8.86412 14.466 9.64012H13.386C13.386 9.14412 13.254 8.76412 12.99 8.50012C12.734 8.22812 12.37 8.09212 11.898 8.09212C11.426 8.09212 11.054 8.22412 10.782 8.48812C10.518 8.75212 10.386 9.13212 10.386 9.62812V13.6001C10.386 14.0961 10.518 14.4801 10.782 14.7521C11.054 15.0161 11.426 15.1481 11.898 15.1481C12.37 15.1481 12.734 15.0161 12.99 14.7521C13.254 14.4801 13.386 14.0961 13.386 13.6001H14.466C14.466 14.3761 14.234 14.9921 13.77 15.4481C13.306 15.8961 12.682 16.1201 11.898 16.1201Z" fill="var(--color-text)" id="icon-512-text"></path></svg><span>constructor</span></a>
+<div class="tsd-index-list"><a href="EsProperty.html#constructor" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#4D7FFF" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-512-path"></rect><path d="M11.898 16.1201C11.098 16.1201 10.466 15.8961 10.002 15.4481C9.53803 15.0001 9.30603 14.3841 9.30603 13.6001V9.64012C9.30603 8.85612 9.53803 8.24012 10.002 7.79212C10.466 7.34412 11.098 7.12012 11.898 7.12012C12.682 7.12012 13.306 7.34812 13.77 7.80412C14.234 8.25212 14.466 8.86412 14.466 9.64012H13.386C13.386 9.14412 13.254 8.76412 12.99 8.50012C12.734 8.22812 12.37 8.09212 11.898 8.09212C11.426 8.09212 11.054 8.22412 10.782 8.48812C10.518 8.75212 10.386 9.13212 10.386 9.62812V13.6001C10.386 14.0961 10.518 14.4801 10.782 14.7521C11.054 15.0161 11.426 15.1481 11.898 15.1481C12.37 15.1481 12.734 15.0161 12.99 14.7521C13.254 14.4801 13.386 14.0961 13.386 13.6001H14.466C14.466 14.3761 14.234 14.9921 13.77 15.4481C13.306 15.8961 12.682 16.1201 11.898 16.1201Z" fill="var(--color-text)" id="icon-512-text"></path></svg><span>constructor</span></a>
+</div></section>
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading">Properties</h3>
+<div class="tsd-index-list"><a href="EsProperty.html#__handle__" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF984D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-1024-path"></rect><path d="M9.354 16V7.24H12.174C12.99 7.24 13.638 7.476 14.118 7.948C14.606 8.412 14.85 9.036 14.85 9.82C14.85 10.604 14.606 11.232 14.118 11.704C13.638 12.168 12.99 12.4 12.174 12.4H10.434V16H9.354ZM10.434 11.428H12.174C12.646 11.428 13.022 11.284 13.302 10.996C13.59 10.7 13.734 10.308 13.734 9.82C13.734 9.324 13.59 8.932 13.302 8.644C13.022 8.356 12.646 8.212 12.174 8.212H10.434V11.428Z" fill="var(--color-text)" id="icon-1024-text"></path></svg><span>__handle__?</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Accessors</h3>
-<div class="tsd-index-list"><a href="EsSymbol.html#comment" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4D4D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-262144-path"></rect><path d="M8.85 16L11.13 7.24H12.582L14.85 16H13.758L13.182 13.672H10.53L9.954 16H8.85ZM10.746 12.76H12.954L12.282 10.06C12.154 9.548 12.054 9.12 11.982 8.776C11.91 8.432 11.866 8.208 11.85 8.104C11.834 8.208 11.79 8.432 11.718 8.776C11.646 9.12 11.546 9.544 11.418 10.048L10.746 12.76Z" fill="var(--color-text)" id="icon-262144-text"></path></svg><span>comment</span></a>
-<a href="EsSymbol.html#requestedName" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>requested<wbr/>Name</span></a>
-<a href="EsSymbol.html#symbol" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>symbol</span></a>
+<div class="tsd-index-list"><a href="EsProperty.html#requestedName" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4D4D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-262144-path"></rect><path d="M8.85 16L11.13 7.24H12.582L14.85 16H13.758L13.182 13.672H10.53L9.954 16H8.85ZM10.746 12.76H12.954L12.282 10.06C12.154 9.548 12.054 9.12 11.982 8.776C11.91 8.432 11.866 8.208 11.85 8.104C11.834 8.208 11.79 8.432 11.718 8.776C11.646 9.12 11.546 9.544 11.418 10.048L10.746 12.76Z" fill="var(--color-text)" id="icon-262144-text"></path></svg><span>requested<wbr/>Name</span></a>
+<a href="EsProperty.html#visibility" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>visibility</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Methods</h3>
-<div class="tsd-index-list"><a href="EsSymbol.html#declareSymbol" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-2048-path"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)" id="icon-2048-text"></path></svg><span>declare<wbr/>Symbol</span></a>
-<a href="EsSymbol.html#emit" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>emit</span></a>
-<a href="EsSymbol.html#isUnique" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>is<wbr/>Unique</span></a>
-<a href="EsSymbol.html#refer" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>refer</span></a>
-<a href="EsSymbol.html#toString" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>to<wbr/>String</span></a>
+<div class="tsd-index-list"><a href="EsProperty.html#autoDeclare" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-2048-path"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)" id="icon-2048-text"></path></svg><span>auto<wbr/>Declare</span></a>
+<a href="EsProperty.html#declareIn" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>declare<wbr/>In</span></a>
+<a href="EsProperty.html#inherit" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>inherit</span></a>
+<a href="EsProperty.html#toString" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>to<wbr/>String</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Constructors</h2>
-<section class="tsd-panel tsd-member"><a id="constructor" class="tsd-anchor"></a>
+<section class="tsd-panel tsd-member tsd-is-inherited"><a id="constructor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="constructor.new_EsSymbol"><span class="tsd-kind-constructor-signature">new <wbr/>Es<wbr/>Symbol</span><span class="tsd-signature-symbol">&lt;</span>out <span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">requestedName</span>, <span class="tsd-kind-parameter">init</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="EsSymbol.html" class="tsd-signature-type tsd-kind-class">EsSymbol</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">&gt;</span><a href="#constructor.new_EsSymbol" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_EsProperty"><span class="tsd-kind-constructor-signature">new <wbr/>Es<wbr/>Property</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">requestedName</span>, <span class="tsd-kind-parameter">init</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="EsProperty.html" class="tsd-signature-type tsd-kind-class">EsProperty</a><a href="#constructor.new_EsProperty" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Constructs symbol.</p>
-</div>
-<section class="tsd-panel">
-<h4>Type Parameters</h4>
-<ul class="tsd-type-parameter-list">
-<li>
-<h4>out <span class="tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol"> extends </span><a href="../interfaces/EsNaming.html" class="tsd-signature-type tsd-kind-interface">EsNaming</a> = <a href="../interfaces/EsNaming.html" class="tsd-signature-type tsd-kind-interface">EsNaming</a></h4></li></ul></section>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">requestedName</span>: <span class="tsd-signature-type">string</span></h5>
-<div class="tsd-comment tsd-typography"><p>Requested symbol name. Will be converted to <a href="../functions/esSafeId.html" class="tsd-kind-function">ECMAScript-safe</a> identifier.</p>
-</div></li>
+<h5><span class="tsd-kind-parameter">requestedName</span>: <span class="tsd-signature-type">string</span></h5></li>
 <li>
-<h5><span class="tsd-kind-parameter">init</span>: <a href="../interfaces/EsSymbolInit.html" class="tsd-signature-type tsd-kind-interface">EsSymbolInit</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = {}</span></h5>
-<div class="tsd-comment tsd-typography"><p>Initialization options.</p>
-</div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="EsSymbol.html" class="tsd-signature-type tsd-kind-class">EsSymbol</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">init</span>: <a href="../interfaces/EsMemberInit.html" class="tsd-signature-type tsd-kind-interface">EsMemberInit</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="EsProperty.html" class="tsd-signature-type tsd-kind-class">EsProperty</a></h4><aside class="tsd-sources">
+<p>Inherited from <a href="EsMember-1.html">EsMember</a>.<a href="EsMember-1.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/symbols/es-symbol.ts#L31">run-z/esgen/src/symbols/es-symbol.ts:31</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/classes/es-member.ts#L16">run-z/esgen/src/classes/es-member.ts:16</a></li></ul></aside></li></ul></section></section>
+<section class="tsd-panel-group tsd-member-group">
+<h2>Properties</h2>
+<section class="tsd-panel tsd-member tsd-is-inherited"><a id="__handle__" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>__handle__</span><a href="#__handle__" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">__handle__</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/EsPropertyHandle.html" class="tsd-signature-type tsd-kind-interface">EsPropertyHandle</a></div>
+<div class="tsd-comment tsd-typography"><p>Brand field to make type inference work.</p>
+</div><aside class="tsd-sources">
+<p>Inherited from <a href="EsMember-1.html">EsMember</a>.<a href="EsMember-1.html#__handle__">__handle__</a></p>
+<ul>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/classes/es-member.ts#L89">run-z/esgen/src/classes/es-member.ts:89</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Accessors</h2>
-<section class="tsd-panel tsd-member"><a id="comment" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>comment</span><a href="#comment" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature" id="comment.comment-1"><span class="tsd-signature-symbol">get</span> comment<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="EsComment.html" class="tsd-signature-type tsd-kind-class">EsComment</a></li>
-<li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Symbol comment.</p>
-</div>
-<h4 class="tsd-returns-title">Returns <a href="EsComment.html" class="tsd-signature-type tsd-kind-class">EsComment</a></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/symbols/es-symbol.ts#L59">run-z/esgen/src/symbols/es-symbol.ts:59</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="requestedName" class="tsd-anchor"></a>
+<section class="tsd-panel tsd-member tsd-is-inherited"><a id="requestedName" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>requested<wbr/>Name</span><a href="#requestedName" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
+<ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature" id="requestedName.requestedName-1"><span class="tsd-signature-symbol">get</span> requestedName<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Requested symbol name.</p>
-<p>Always <a href="../functions/esSafeId.html" class="tsd-kind-function">ECMAScript-safe</a> identifier.</p>
+<div class="tsd-comment tsd-typography"><p>Requested member name.</p>
+<p>Note that the class may decide to rename it in order to resolve naming conflicts.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
+<p>Inherited from EsMember.requestedName</p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/symbols/es-symbol.ts#L52">run-z/esgen/src/symbols/es-symbol.ts:52</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="symbol" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>symbol</span><a href="#symbol" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature" id="symbol.symbol-1"><span class="tsd-signature-symbol">get</span> symbol<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/classes/es-member.ts#L27">run-z/esgen/src/classes/es-member.ts:27</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited"><a id="visibility" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>visibility</span><a href="#visibility" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-signature" id="visibility.visibility-1"><span class="tsd-signature-symbol">get</span> visibility<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../enums/EsMemberVisibility.html" class="tsd-signature-type tsd-kind-enum">EsMemberVisibility</a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Always refers to itself.</p>
+<div class="tsd-comment tsd-typography"><p>Visibility of this member.</p>
 </div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4><aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/EsReference.html">EsReference</a>.<a href="../interfaces/EsReference.html#symbol">symbol</a></p>
+<h4 class="tsd-returns-title">Returns <a href="../enums/EsMemberVisibility.html" class="tsd-signature-type tsd-kind-enum">EsMemberVisibility</a></h4><aside class="tsd-sources">
+<p>Inherited from EsMember.visibility</p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/symbols/es-symbol.ts#L43">run-z/esgen/src/symbols/es-symbol.ts:43</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/classes/es-member.ts#L34">run-z/esgen/src/classes/es-member.ts:34</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
-<section class="tsd-panel tsd-member"><a id="declareSymbol" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>declare<wbr/>Symbol</span><a href="#declareSymbol" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="declareSymbol.declareSymbol-1"><span class="tsd-kind-call-signature">declare<wbr/>Symbol</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">request</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../types/EsSnippet.html" class="tsd-signature-type tsd-kind-type-alias">EsSnippet</a><a href="#declareSymbol.declareSymbol-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<section class="tsd-panel tsd-member tsd-is-inherited"><a id="autoDeclare" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>auto<wbr/>Declare</span><a href="#autoDeclare" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-signature tsd-anchor-link" id="autoDeclare.autoDeclare-1"><span class="tsd-kind-call-signature">auto<wbr/>Declare</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">hostClass</span>, <span class="tsd-kind-parameter">ref</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/EsPropertyHandle.html" class="tsd-signature-type tsd-kind-interface">EsPropertyHandle</a><a href="#autoDeclare.autoDeclare-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Declares symbol in the most generic way.</p>
-<p>The symbol can be used after that.</p>
+<div class="tsd-comment tsd-typography"><p>Declares member automatically rather explicitly.</p>
+<p>Called by host class if this member is not declared in the base class.</p>
+<p>Automatic declaration would be disposed of once the member is declared explicitly.</p>
+
+<h3>Throws</h3><p><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError">ReferenceError</a> by default.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">request</span>: <a href="../interfaces/EsDeclarationRequest.html" class="tsd-signature-type tsd-kind-interface">EsDeclarationRequest</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">&gt;</span></h5>
-<div class="tsd-comment tsd-typography"><p>Symbol declaration request.</p>
-</div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="../types/EsSnippet.html" class="tsd-signature-type tsd-kind-type-alias">EsSnippet</a></h4><p>Symbol&#39;s declaration statement.</p>
-<aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/symbols/es-symbol.ts#L109">run-z/esgen/src/symbols/es-symbol.ts:109</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="emit" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>emit</span><a href="#emit" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="emit.emit-1"><span class="tsd-kind-call-signature">emit</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">scope</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../types/EsEmissionResult.html" class="tsd-signature-type tsd-kind-type-alias">EsEmissionResult</a><a href="#emit.emit-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Emits the name of the symbol visible to <a href="../interfaces/EsScope.html#ns" class="tsd-kind-accessor">emission namespace</a>.</p>
-</div>
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">scope</span>: <a href="../interfaces/EsScope.html" class="tsd-signature-type tsd-kind-interface">EsScope</a></h5>
-<div class="tsd-comment tsd-typography"><p>Code emission scope.</p>
-</div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="../types/EsEmissionResult.html" class="tsd-signature-type tsd-kind-type-alias">EsEmissionResult</a></h4><p>Emission result.</p>
-<aside class="tsd-sources">
-<p>Implementation of <a href="../interfaces/EsEmitter.html">EsEmitter</a>.<a href="../interfaces/EsEmitter.html#emit">emit</a></p>
-<ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/symbols/es-symbol.ts#L141">run-z/esgen/src/symbols/es-symbol.ts:141</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="isUnique" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>is<wbr/>Unique</span><a href="#isUnique" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="isUnique.isUnique-1"><span class="tsd-kind-call-signature">is<wbr/>Unique</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><a href="#isUnique.isUnique-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Informs whether this is a unique symbol.</p>
-<p>Non-unique symbols may be named multiple times in unrelated namespaces.</p>
-</div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><p><code>true</code> by default.</p>
-<aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/symbols/es-symbol.ts#L70">run-z/esgen/src/symbols/es-symbol.ts:70</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="refer" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>refer</span><a href="#refer" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="refer.refer-1"><span class="tsd-kind-call-signature">refer</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">resolution</span>, <span class="tsd-kind-parameter">ns</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/EsResolution.html" class="tsd-signature-type tsd-kind-interface">EsResolution</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">, </span><a href="EsSymbol.html" class="tsd-signature-type tsd-kind-class">EsSymbol</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#refer.refer-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Adjusts this symbol resolution when it is <a href="EsNamespace.html#refer" class="tsd-kind-method">referred</a>.</p>
-<p>Automatically declares the symbol if automatic declaration <a href="../interfaces/EsSymbolInit.html#declare" class="tsd-kind-property">requested</a>, or does nothing
-otherwise.</p>
-</div>
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">resolution</span>: <a href="../interfaces/EsResolution.html" class="tsd-signature-type tsd-kind-interface">EsResolution</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">, </span><a href="EsSymbol.html" class="tsd-signature-type tsd-kind-class">EsSymbol</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h5>
-<div class="tsd-comment tsd-typography"><p>Symbol resolution.</p>
+<h5><span class="tsd-kind-parameter">hostClass</span>: <a href="EsClass.html" class="tsd-signature-type tsd-kind-class">EsClass</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/EsSignature.Args.html" class="tsd-signature-type tsd-kind-type-alias">Args</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h5>
+<div class="tsd-comment tsd-typography"><p>Host class to declare member for.</p>
 </div></li>
 <li>
-<h5><span class="tsd-kind-parameter">ns</span>: <a href="EsNamespace.html" class="tsd-signature-type tsd-kind-class">EsNamespace</a></h5>
-<div class="tsd-comment tsd-typography"><p>Referring namespace.</p>
+<h5><span class="tsd-kind-parameter">ref</span>: <span class="tsd-signature-type ">Omit</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/EsMemberRef.html" class="tsd-signature-type tsd-kind-interface">EsMemberRef</a><span class="tsd-signature-symbol">&lt;</span><a href="EsProperty.html" class="tsd-signature-type tsd-kind-class">EsProperty</a><span class="tsd-signature-symbol">, </span><a href="../interfaces/EsPropertyHandle.html" class="tsd-signature-type tsd-kind-interface">EsPropertyHandle</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">&quot;getHandle&quot;</span><span class="tsd-signature-symbol">&gt;</span></h5>
+<div class="tsd-comment tsd-typography"><p>Incomplete member reference.</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="../interfaces/EsResolution.html" class="tsd-signature-type tsd-kind-interface">EsResolution</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">, </span><a href="EsSymbol.html" class="tsd-signature-type tsd-kind-class">EsSymbol</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TNaming</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><p>Adjusted resolution.</p>
-<aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <a href="../interfaces/EsPropertyHandle.html" class="tsd-signature-type tsd-kind-interface">EsPropertyHandle</a></h4><aside class="tsd-sources">
+<p>Inherited from <a href="EsMember-1.html">EsMember</a>.<a href="EsMember-1.html#autoDeclare">autoDeclare</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/symbols/es-symbol.ts#L85">run-z/esgen/src/symbols/es-symbol.ts:85</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="toString" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>to<wbr/>String</span><a href="#toString" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/classes/es-member.ts#L52">run-z/esgen/src/classes/es-member.ts:52</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="declareIn" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>declare<wbr/>In</span><a href="#declareIn" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="toString.toString-1"><span class="tsd-kind-call-signature">to<wbr/>String</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><a href="#toString.toString-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="declareIn.declareIn-1"><span class="tsd-kind-call-signature">declare<wbr/>In</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">hostClass</span>, <span class="tsd-kind-parameter">declaration</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/EsPropertyHandle.html" class="tsd-signature-type tsd-kind-interface">EsPropertyHandle</a><a href="#declareIn.declareIn-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Builds a string representation of this symbol.</p>
+<div class="tsd-comment tsd-typography"><p>Declares this property in the given class.</p>
 </div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><ul>
-<li>String representation of this symbol.</li>
-</ul>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">hostClass</span>: <a href="EsClass.html" class="tsd-signature-type tsd-kind-class">EsClass</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/EsSignature.Args.html" class="tsd-signature-type tsd-kind-type-alias">Args</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h5>
+<div class="tsd-comment tsd-typography"><p>Host class to declare field in.</p>
+</div></li>
+<li>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">declaration</span>: <a href="../interfaces/EsPropertyDeclaration.html" class="tsd-signature-type tsd-kind-interface">EsPropertyDeclaration</a></h5>
+<div class="tsd-comment tsd-typography"><p>Accessor declaration details.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../interfaces/EsPropertyHandle.html" class="tsd-signature-type tsd-kind-interface">EsPropertyHandle</a></h4><p>Declared property handle.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/symbols/es-symbol.ts#L150">run-z/esgen/src/symbols/es-symbol.ts:150</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/classes/es-property.ts#L23">run-z/esgen/src/classes/es-property.ts:23</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited"><a id="inherit" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>inherit</span><a href="#inherit" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-signature tsd-anchor-link" id="inherit.inherit-1"><span class="tsd-kind-call-signature">inherit</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">hostClass</span>, <span class="tsd-kind-parameter">ref</span>, <span class="tsd-kind-parameter">baseClass</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/EsPropertyHandle.html" class="tsd-signature-type tsd-kind-interface">EsPropertyHandle</a><a href="#inherit.inherit-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Inherits this member from the base class.</p>
+<p>Called by host class to update inherited member handle.</p>
+<p>Returns the <code>handle</code> as is by default.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">hostClass</span>: <a href="EsClass.html" class="tsd-signature-type tsd-kind-class">EsClass</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/EsSignature.Args.html" class="tsd-signature-type tsd-kind-type-alias">Args</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h5>
+<div class="tsd-comment tsd-typography"><p>Host class to inherit member for.</p>
+</div></li>
+<li>
+<h5><span class="tsd-kind-parameter">ref</span>: <a href="../interfaces/EsMemberRef.html" class="tsd-signature-type tsd-kind-interface">EsMemberRef</a><span class="tsd-signature-symbol">&lt;</span><a href="EsProperty.html" class="tsd-signature-type tsd-kind-class">EsProperty</a><span class="tsd-signature-symbol">, </span><a href="../interfaces/EsPropertyHandle.html" class="tsd-signature-type tsd-kind-interface">EsPropertyHandle</a><span class="tsd-signature-symbol">&gt;</span></h5>
+<div class="tsd-comment tsd-typography"><p>Inherited member reference.</p>
+</div></li>
+<li>
+<h5><span class="tsd-kind-parameter">baseClass</span>: <a href="EsClass.html" class="tsd-signature-type tsd-kind-class">EsClass</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/EsSignature.Args.html" class="tsd-signature-type tsd-kind-type-alias">Args</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h5>
+<div class="tsd-comment tsd-typography"><p>Base class the member inherited from.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../interfaces/EsPropertyHandle.html" class="tsd-signature-type tsd-kind-interface">EsPropertyHandle</a></h4><p>Member handle updated for inherited member.</p>
+<aside class="tsd-sources">
+<p>Inherited from <a href="EsMember-1.html">EsMember</a>.<a href="EsMember-1.html#inherit">inherit</a></p>
+<ul>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/classes/es-member.ts#L69">run-z/esgen/src/classes/es-member.ts:69</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited"><a id="toString" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>to<wbr/>String</span><a href="#toString" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-signature tsd-anchor-link" id="toString.toString-1"><span class="tsd-kind-call-signature">to<wbr/>String</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">__namedParameters</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><a href="#toString.toString-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">__namedParameters</span>: <span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">accessor</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol"> = {}</span></h5>
+<ul class="tsd-parameters">
+<li class="tsd-parameter">
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span class="tsd-kind-property">accessor</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5></li></ul></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="EsMember-1.html">EsMember</a>.<a href="EsMember-1.html#toString">toString</a></p>
+<ul>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/7992fdf/src/classes/es-member.ts#L75">run-z/esgen/src/classes/es-member.ts:75</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -236,15 +218,14 @@ otherwise.</p>
 <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg>On This Page</h3></summary>
 <div class="tsd-accordion-details">
 <ul>
-<li><a href="#constructor" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-512-path"></use><use href="#icon-512-text"></use></svg><span>constructor</span></a></li>
-<li><a href="#comment" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>comment</span></a></li>
-<li><a href="#requestedName" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>requested<wbr/>Name</span></a></li>
-<li><a href="#symbol" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>symbol</span></a></li>
-<li><a href="#declareSymbol" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>declare<wbr/>Symbol</span></a></li>
-<li><a href="#emit" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>emit</span></a></li>
-<li><a href="#isUnique" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>is<wbr/>Unique</span></a></li>
-<li><a href="#refer" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>refer</span></a></li>
-<li><a href="#toString" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>to<wbr/>String</span></a></li></ul></div></details></div>
+<li><a href="#constructor" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-512-path"></use><use href="#icon-512-text"></use></svg><span>constructor</span></a></li>
+<li><a href="#__handle__" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>__handle__</span></a></li>
+<li><a href="#requestedName" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>requested<wbr/>Name</span></a></li>
+<li><a href="#visibility" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>visibility</span></a></li>
+<li><a href="#autoDeclare" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>auto<wbr/>Declare</span></a></li>
+<li><a href="#declareIn" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>declare<wbr/>In</span></a></li>
+<li><a href="#inherit" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>inherit</span></a></li>
+<li><a href="#toString" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>to<wbr/>String</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-4-path"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)" id="icon-4-text"></path></svg><span>ECMAScript <wbr/>Generator</span></a>
 <ul class="tsd-small-nested-navigation">
@@ -314,9 +295,9 @@ otherwise.</p>
 <li><a href="EsNameRegistry.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Name<wbr/>Registry</span></a></li>
 <li><a href="EsNamespace.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Namespace</span></a></li>
 <li><a href="EsOutput.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Output</span></a></li>
-<li><a href="EsProperty.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Property</span></a></li>
+<li><a href="EsProperty.html" class="current"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Property</span></a></li>
 <li><a href="EsSignature-1.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Signature</span></a></li>
-<li><a href="EsSymbol.html" class="current"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Symbol</span></a></li>
+<li><a href="EsSymbol.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Symbol</span></a></li>
 <li><a href="EsVarSymbol.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Es<wbr/>Var<wbr/>Symbol</span></a></li>
 <li><a href="../interfaces/EsArgInit.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Arg<wbr/>Init</span></a></li>
 <li><a href="../interfaces/EsArgNaming.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Es<wbr/>Arg<wbr/>Naming</span></a></li>
