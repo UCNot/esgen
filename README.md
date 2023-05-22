@@ -10,7 +10,7 @@
 Supported features:
 
 - [Pretty-printed] code generation.
-- [Symbol] naming conflict resolutions.
+- [Naming] conflicts resolution.
 - API for generating variables, [functions], [classes], modules, etc.
 - Generated [code evaluation].
 
@@ -40,7 +40,7 @@ See [API Documentation] for detailed usage examples.
 ```typescript
 import { EsBundle } from 'esgen';
 
-await new EsBundle()
+const result = await new EsBundle()
   .emit(code => {
     code
       .write(`function print(text) {`)
@@ -58,13 +58,13 @@ The following code will be emitted:
 function print(text) {
   console.log(text);
 }
-const greeting = 'Hello, World!;
+const greeting = 'Hello, World!';
 print(greeting);
 ```
 
 ## Symbols And Functions
 
-[symbol]: #symbols-and-functions
+[naming]: #symbols-and-functions
 [functions]: #symbols-and-functions
 
 Symbols used to avoid naming conflicts. If the same name requested for two different symbols, one of them will be
@@ -73,7 +73,7 @@ automatically renamed.
 The example above can utilize symbols:
 
 ```typescript
-import { esline, esStringLiteral, EsBundle, EsFunction, EsVarSymbol } from 'esgen';
+import { EsBundle, EsFunction, EsVarSymbol, esStringLiteral, esline } from 'esgen';
 
 // Create function.
 const print = new EsFunction(
@@ -94,7 +94,7 @@ const print = new EsFunction(
   },
 );
 
-await new EsBundle()
+const result = await new EsBundle()
   .emit(code => {
     // Create variable symbol.
     const greeting = new EsVarSymbol('greeting');
@@ -110,16 +110,16 @@ await new EsBundle()
       .write(
         // Call `print()` function.
         esline`${print.call({
-          test: greeting /* Pass variable as argument. */,
+          text: greeting /* Pass variable as argument. */,
         })};`,
       );
   })
   .asText();
 ```
 
-## Symbol Export And Code Evaluation
+## Symbol Exports And Code Evaluation
 
-[code evaluation]: #symbol-export-and-code-evaluation
+[code evaluation]: #symbol-exports-and-code-evaluation
 
 Symbols can be exported from the bundle. In this case it is possible to evaluate emitted code immediately and obtain
 the exported symbols.
@@ -127,10 +127,10 @@ the exported symbols.
 For example, to export the function `print()` from the example above, the following can be done:
 
 ```typescript
-import { esline, EsBundle, EsBundleFormat, EsFunction } from 'esgen';
+import { EsBundle, EsBundleFormat, EsFunction, esline } from 'esgen';
 
 // Create function.
-const print = new EsFunction(
+const printFn = new EsFunction(
   'print',
   {
     text: {}, // Require argument called `text`.
@@ -154,7 +154,7 @@ const bundle = new EsBundle({
 });
 
 // Explicitly refer the function to force its emission.
-bundle.ns.refer(print);
+bundle.ns.refer(printFn);
 
 // Evaluate emitted code.
 // Only possible for IIFE.
@@ -172,7 +172,7 @@ Classes represented `EsClass` instances.
 Class may have a base class, constructor, and members.
 
 ```typescript
-import { esline, EsClass, EsField, EsMemberVisibility, EsMethod } from 'esgen';
+import { EsBundle, EsBundleFormat, EsClass, EsField, EsMemberVisibility, EsMethod, esline } from 'esgen';
 
 // Declare class
 //
@@ -197,7 +197,9 @@ const printer = new EsClass('Printer', {
 //
 // #defaultText;
 //
-const defaultText = new EsField('defaultText', { visibility: EsMemberVisibility.Private }).declareIn(printer);
+const defaultText = new EsField('defaultText', {
+  visibility: EsMemberVisibility.Private,
+}).declareIn(printer);
 
 // Declare class constructor.
 //
@@ -212,7 +214,11 @@ printer.declareConstructor({
       declare: naming => esline`${naming} = 'Hello, World!'`,
     },
   },
-  body: ({ args: { initialText } }) => esline`${defaultText.set('this', initialText)};`,
+  body: ({
+    member: {
+      args: { initialText },
+    },
+  }) => esline`${defaultText.set('this', initialText)};`,
 });
 
 // Declare public method.
@@ -221,13 +227,19 @@ printer.declareConstructor({
 //   console.log(test);
 // }
 //
-const print = new EsMethod('print', { 'text?': { comment: 'Text to print' } }).declareIn(printer, {
+new EsMethod('print', {
+  args: { 'text?': { comment: 'Text to print' } },
+}).declareIn(printer, {
   args: {
     text: {
       declare: naming => esline`${naming} = ${defaultText.get('this')}`,
     },
   },
-  body: ({ args: { text } }) => esline`console.log(${text});`,
+  body: ({
+    member: {
+      args: { text },
+    },
+  }) => esline`console.log(${text});`,
 });
 
 // Create bundle.
@@ -240,11 +252,11 @@ bundle.ns.refer(printer);
 
 // Evaluate emitted code.
 const { Printer } = (await bundle.emit().asExports()) as {
-  Printer: new (initialText?: string) => { print(text: string): void };
+  Printer: new (initialText?: string) => { print(text?: string): void };
 };
 
 const instance = new Printer();
 
-result.print(); // Hello, World!
-result.print('My text'); // My text.
+instance.print(); // Hello, World!
+instance.print('My text'); // My text.
 ```
