@@ -1,8 +1,6 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { EsSnippet } from '../es-snippet.js';
-import { esline } from '../esline.tag.js';
 import { EsScope } from '../scopes/es-scope.js';
-import { esSymbolString } from '../symbols/es-symbol-string.js';
 import { EsNaming, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
 import { EsSignature } from './es-signature.js';
 
@@ -39,6 +37,22 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming> {
    */
   get signature(): EsSignature {
     return this.#signature;
+  }
+
+  /**
+   * Argument {@link EsArg.Key key} including modifiers.
+   */
+  get argKey(): EsArg.Key {
+    const { kind, requestedName } = this;
+
+    switch (kind) {
+      case EsArgKind.Required:
+        return requestedName;
+      case EsArgKind.Optional:
+        return `${requestedName}?`;
+      case EsArgKind.VarArg:
+        return `...${requestedName}`;
+    }
   }
 
   /**
@@ -94,47 +108,23 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming> {
     return ns.addSymbol(this, naming => ({
       ...naming,
       symbol: this,
-      asDeclaration: lazyValue(() => {
-        const { comment } = this;
-        const commentCode = comment ? ` /* ${comment} */` : '';
+      asDeclaration: lazyValue(() => code => {
+        code.line(code => {
+          const { comment } = this;
 
-        return esline`${declare(naming, this)}${commentCode}`;
+          code.write(declare(naming, this));
+          if (comment.lineCount) {
+            code.write(' ', comment);
+          }
+        });
       }),
     }));
   }
 
-  override toString({
-    tag = `[Arg #${this.position}]`,
-    comment = this.comment,
-  }: {
-    /**
-     * Symbol tag to include. Defaults to `[Arg #${position}]`.
-     */
-    readonly tag?: string | null | undefined;
-    /**
-     * Comment to include. Defaults to {@link comment symbol comment}.
-     */
-    readonly comment?: string | null | undefined;
-  } = {}): string {
-    const { kind, requestedName } = this;
-    let name: string;
+  override toString(): string {
+    const { argKey, comment } = this;
 
-    switch (kind) {
-      case EsArgKind.Required:
-        name = requestedName;
-
-        break;
-      case EsArgKind.Optional:
-        name = `${requestedName}?`;
-
-        break;
-      case EsArgKind.VarArg:
-        name = `...${requestedName}`;
-
-        break;
-    }
-
-    return esSymbolString(name, { tag, comment });
+    return comment.appendTo(argKey, `[Arg #${this.position}]`);
   }
 
 }

@@ -477,7 +477,9 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
   }
 
   toString(): string {
-    return this.symbol.toString({ tag: '[Class]' });
+    const { requestedName, comment } = this.symbol;
+
+    return comment.appendTo(requestedName, '[Class]');
   }
 
 }

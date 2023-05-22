@@ -75,20 +75,10 @@ export class EsImportSymbol<
     return resolution;
   }
 
-  override toString({
-    tag = `[from ${jsStringLiteral(this.from.moduleName, '"')}]`,
-    comment = this.comment,
-  }: {
-    /**
-     * Symbol tag to include. Defaults to `[from "${moduleName}"]`.
-     */
-    readonly tag?: string | null | undefined;
-    /**
-     * Comment to include. Defaults to {@link comment symbol comment}.
-     */
-    readonly comment?: string | null | undefined;
-  } = {}): string {
-    return super.toString({ tag, comment });
+  override toString(): string {
+    const { requestedName, comment } = this;
+
+    return comment.appendTo(requestedName, `[from ${jsStringLiteral(this.from.moduleName, '"')}]`);
   }
 
 }
