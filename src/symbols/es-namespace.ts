@@ -1,4 +1,5 @@
 import { lazyValue } from '@proc7ts/primitives';
+import { EsComment } from '../es-comment.js';
 import { EsScope } from '../scopes/es-scope.js';
 import { EsNameRegistry } from './es-name-registry.js';
 import { EsNaming, EsReference, EsResolution, EsSymbol } from './es-symbol.js';
@@ -12,7 +13,7 @@ export class EsNamespace implements EsNamingHost {
   readonly #enclosing: EsNamespace | undefined;
   readonly #shared: EsNamespace$SharedState;
   readonly #names: EsNameRegistry;
-  readonly #comment: string;
+  readonly #comment: EsComment;
   readonly #nonUniques = new Map<EsSymbol, EsNonUniqueNaming<any>>();
   #nestedSeq = 0;
 
@@ -35,6 +36,7 @@ export class EsNamespace implements EsNamingHost {
   ) {
     this.#scope = scope;
     this.#enclosing = enclosing;
+
     if (enclosing) {
       this.#shared = enclosing.#shared;
       this.#names = enclosing.names.nest();
@@ -42,7 +44,8 @@ export class EsNamespace implements EsNamingHost {
       this.#shared = { uniques: new Map() };
       this.#names = new EsNameRegistry();
     }
-    this.#comment = comment;
+
+    this.#comment = EsComment.from(comment);
   }
 
   /**
@@ -71,6 +74,13 @@ export class EsNamespace implements EsNamingHost {
    */
   get names(): EsNameRegistry {
     return this.#names;
+  }
+
+  /**
+   * Namespace comment.
+   */
+  get comment(): EsComment {
+    return this.#comment;
   }
 
   /**
@@ -366,7 +376,7 @@ export class EsNamespace implements EsNamingHost {
   }
 
   toString(): string {
-    return `/* ${this.#comment} */`;
+    return this.comment.toString();
   }
 
 }
@@ -386,11 +396,9 @@ export interface EsNamingHost {
  */
 export interface EsNamespaceInit {
   /**
-   * Arbitrary human-readable comment.
-   *
-   * Used as for string representation of namespace.
+   * Human-readable namespace comment used in its string representation.
    */
-  readonly comment?: string | undefined;
+  readonly comment?: EsComment | string | undefined;
 
   /**
    * Enclosing namespace. The constructed one is {@link EsNamespace#nest nested} within it.
