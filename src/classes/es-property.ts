@@ -137,7 +137,7 @@ export interface EsPropertyHandle {
   writable: boolean;
 
   /**
-   * Reads property value via {@link EsProperty#get getter}, if defined.
+   * Reads property value via {@link EsPropertyDeclaration#get getter}, if defined.
    *
    * @param target - Class instance expression.
    *
@@ -150,7 +150,7 @@ export interface EsPropertyHandle {
   get(this: void, target: EsSnippet): EsSnippet;
 
   /**
-   * Assigns property value via {@link EsPropertyDeclaration#setter setter}, if defined.
+   * Assigns property value via {@link EsPropertyDeclaration#set setter}, if defined.
    *
    * @param target - Class instance expression.
    * @param value - Assigned value expression.
