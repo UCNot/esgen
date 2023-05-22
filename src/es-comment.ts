@@ -6,7 +6,7 @@ import { EsOutput, EsPrinter } from './es-output.js';
 export class EsComment implements EsPrinter {
 
   /**
-   * Empty comment.
+   * Empty comment. I.e. comment with {@link lineCount zero lines}.
    */
   static get empty(): EsComment {
     return EsComment$empty;
@@ -57,7 +57,7 @@ export class EsComment implements EsPrinter {
   /**
    * Prints block comment to the given code output.
    *
-   * Does nothing if comment is {@link isEmpty empty}.
+   * Does nothing if comment is {@link EsComment.empty empty}.
    *
    * @param out - Code output.
    */
