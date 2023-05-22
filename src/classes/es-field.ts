@@ -54,8 +54,6 @@ export interface EsFieldDeclaration {
 
 /**
  * Class {@link EsField field} handle used to read and assign field value.
- *
- * Grants access to the field stored in class instance.
  */
 export interface EsFieldHandle {
   /**
@@ -64,7 +62,7 @@ export interface EsFieldHandle {
   readonly field: EsField;
 
   /**
-   * Read field value.
+   * Reads field value.
    *
    * @param target - Class instance expression.
    *
