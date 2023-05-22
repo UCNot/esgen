@@ -1,6 +1,8 @@
 import { EsSnippet } from '../es-snippet.js';
 import { esline } from '../esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
+import { esMemberAccessor } from '../impl/es-member-accessor.js';
+import { EsScopeKind } from '../scopes/es-scope.js';
 import { EsClass } from './es-class.js';
 import { EsMember, EsMemberInit, EsMemberRef } from './es-member.js';
 
@@ -57,7 +59,7 @@ export class EsMethod<out TArgs extends EsSignature.Args> extends EsMember<EsMet
       call: (target, args: EsSignature.ValuesOf<TArgs>) => esline`${target}${ref.accessor}${this.signature.call(args)}`,
     };
     const ref = hostClass.addMember(this, handle, code => {
-      code.scope(code => {
+      code.scope({ kind: EsScopeKind.Function, ns: { comment: `[${this}]` } }, code => {
         code
           .line(ref.key, this.signature.declare(args), ' {')
           .indent(body(ref, hostClass))
@@ -66,6 +68,14 @@ export class EsMethod<out TArgs extends EsSignature.Args> extends EsMember<EsMet
     });
 
     return handle;
+  }
+
+  toString({
+    accessor = esMemberAccessor(this.requestedName, this.visibility).accessor,
+  }: {
+    readonly accessor?: string | undefined;
+  } = {}): string {
+    return `${accessor}${this.signature}`;
   }
 
 }

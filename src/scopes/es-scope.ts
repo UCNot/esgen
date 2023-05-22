@@ -21,6 +21,18 @@ export interface EsScope extends EsNamingHost {
   get bundle(): EsBundle;
 
   /**
+   * Enclosing scope.
+   *
+   * Returns itself for the {@link EsBundle}.
+   */
+  get enclosing(): EsScope;
+
+  /**
+   * Scope kind.
+   */
+  get kind(): EsScopeKind;
+
+  /**
    * Format of the bundled code.
    */
   get format(): EsBundleFormat;
@@ -39,6 +51,25 @@ export interface EsScope extends EsNamingHost {
    * Namespace used to name the symbols.
    */
   get ns(): EsNamespace;
+
+  /**
+   * Informs whether this is an asynchronous scope.
+   *
+   * `await` expressions can be emitted only within asynchronous scopes.
+   *
+   * @returns `true` for a top-level {@link EsBundle bundle}, or a scope within {@link EsScopeInit#async
+   * asynchronous function}.
+   */
+  isAsync(): boolean;
+
+  /**
+   * Informs whether this is a generator scope.
+   *
+   * `yield` expressions can be emitted only within generator scopes.
+   *
+   * @returns `true` for scope within {@link EsScopeInit#generator generator function}.
+   */
+  isGenerator(): boolean;
 
   /**
    * Checks whether the emission is still active.
@@ -78,9 +109,55 @@ export interface EsScope extends EsNamingHost {
  */
 export interface EsScopeInit {
   /**
+   * Kind of created scope.
+   *
+   * @defaultValue {@link EsScopeKind.Block block scope}.
+   */
+  readonly kind?: Exclude<EsScopeKind, EsScopeKind.Bundle> | undefined;
+
+  /**
+   * Whether this is a scope within asynchronous function.
+   *
+   * Accepted only for {@link EsScopeKind.Function function} scope. Derived from enclosing scope otherwise.
+   *
+   * `await` expressions can be emitted only within asynchronous scopes.
+   */
+  readonly async?: boolean | undefined;
+
+  /**
+   * Whether this is a scope within generator function.
+   *
+   * Accepted only for {@link EsScopeKind.Function function} scope. Derived from {@link EsScope#enclosing enclosing}
+   * scope otherwise.
+   *
+   * `yield` expressions can be emitted only within generator scopes.
+   */
+  readonly generator?: boolean | undefined;
+
+  /**
    * Initialization options for {@link EsNamespace#nest nested namespace}.
    */
   readonly ns?: Omit<EsNamespaceInit, 'enclosing'> | undefined;
+}
+
+/**
+ * Kind of code emission {@link EsScope scope}.
+ */
+export enum EsScopeKind {
+  /**
+   * Top-level {@link EsBundle bundle}.
+   */
+  Bundle = 'bundle',
+
+  /**
+   * Function.
+   */
+  Function = 'function',
+
+  /**
+   * Block within {@link Function function} or {@link Function bundle}.
+   */
+  Block = 'block',
 }
 
 /**

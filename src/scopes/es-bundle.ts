@@ -7,7 +7,7 @@ import { EsSnippet } from '../es-snippet.js';
 import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
-import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit } from './es-scope.js';
+import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit, EsScopeKind } from './es-scope.js';
 
 /**
  * Emitted code bundle.
@@ -49,6 +49,17 @@ export class EsBundle implements EsScope {
     return this;
   }
 
+  /**
+   * Always refers to itself.
+   */
+  get enclosing(): this {
+    return this;
+  }
+
+  get kind(): EsScopeKind.Bundle {
+    return EsScopeKind.Bundle;
+  }
+
   get format(): EsBundleFormat {
     return this.#format;
   }
@@ -65,12 +76,20 @@ export class EsBundle implements EsScope {
     return this.#ns();
   }
 
+  isAsync(): true {
+    return true;
+  }
+
+  isGenerator(): false {
+    return false;
+  }
+
   isActive(): boolean {
     return this.#state[0].isActive();
   }
 
   nest(init?: EsScopeInit): EsScope {
-    return new NestedEsScope(this, this.#state, scope => this.ns.nest(scope, { ...init?.ns }));
+    return new NestedEsScope(this, this.#state, init, scope => this.ns.nest(scope, { ...init?.ns }));
   }
 
   span(...emitters: EsEmitter[]): EsEmissionSpan {
@@ -241,17 +260,43 @@ export interface EsBundleResult extends EsPrinter {
 class NestedEsScope implements EsScope {
 
   readonly #bundle: EsBundle;
+  readonly #enclosing: EsScope;
+  readonly #kind: EsScopeKind;
+  readonly #async: boolean;
+  readonly #generator: boolean;
   readonly #state: [EsScope$State];
   readonly #ns: () => EsNamespace;
 
-  constructor(bundle: EsBundle, state: [EsScope$State], ns: (scope: EsScope) => EsNamespace) {
-    this.#bundle = bundle;
+  constructor(
+    enclosing: EsScope,
+    state: [EsScope$State],
+    { kind = EsScopeKind.Block, async, generator }: EsScopeInit = {},
+    ns: (scope: EsScope) => EsNamespace,
+  ) {
+    this.#enclosing = enclosing;
+    this.#bundle = enclosing.bundle;
     this.#state = state;
+    this.#kind = kind;
+    if (kind === EsScopeKind.Function) {
+      this.#async = async ?? false;
+      this.#generator = generator ?? false;
+    } else {
+      this.#async = enclosing.isAsync();
+      this.#generator = enclosing.isGenerator();
+    }
     this.#ns = lazyValue(() => ns(this));
+  }
+
+  get kind(): EsScopeKind {
+    return this.#kind;
   }
 
   get bundle(): EsBundle {
     return this.#bundle;
+  }
+
+  get enclosing(): EsScope {
+    return this.#enclosing;
   }
 
   get format(): EsBundleFormat {
@@ -270,12 +315,20 @@ class NestedEsScope implements EsScope {
     return this.#ns();
   }
 
+  isAsync(): boolean {
+    return this.#async;
+  }
+
+  isGenerator(): boolean {
+    return this.#generator;
+  }
+
   isActive(): boolean {
     return this.bundle.isActive();
   }
 
   nest(init?: EsScopeInit): EsScope {
-    return new NestedEsScope(this.bundle, this.#state, scope => this.ns.nest(scope, init?.ns));
+    return new NestedEsScope(this, this.#state, init, scope => this.ns.nest(scope, init?.ns));
   }
 
   span(...emitters: EsEmitter[]): EsEmissionSpan {
