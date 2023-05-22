@@ -7,17 +7,20 @@ describe('EsComment', () => {
     it('returns empty comment without parameter', () => {
       const comment = EsComment.from();
 
-      expect(comment.isEmpty()).toBe(true);
+      expect(comment.lineCount).toBe(0);
       expect(comment).toBe(EsComment.empty);
     });
     it('returns empty comment for empty parameter', () => {
       const comment = EsComment.from('');
 
-      expect(comment.isEmpty()).toBe(true);
+      expect(comment.lineCount).toBe(0);
       expect(comment).toBe(EsComment.empty);
     });
     it('splits non-empty input onto lines', () => {
-      expect(EsComment.from('\nFirst\nSecond\n').toString()).toBe(
+      const comment = EsComment.from('\nFirst\nSecond\n');
+
+      expect(comment.lineCount).toBe(4);
+      expect(comment.toString()).toBe(
         `
 /*
 
@@ -41,11 +44,12 @@ describe('EsComment', () => {
       comment = new EsComment();
     });
 
-    describe('isEmpty()', () => {
-      it('returns true', () => {
-        expect(comment.isEmpty()).toBe(true);
+    describe('lineCount', () => {
+      it('is 0', () => {
+        expect(comment.lineCount).toBe(0);
       });
     });
+
     describe('toString()', () => {
       it('prints without prefix', () => {
         expect(comment.toString()).toBe('/**/');
@@ -69,9 +73,9 @@ describe('EsComment', () => {
       comment = new EsComment('Comment text');
     });
 
-    describe('isEmpty()', () => {
-      it('returns false', () => {
-        expect(comment.isEmpty()).toBe(false);
+    describe('lineCount', () => {
+      it('is 1', () => {
+        expect(comment.lineCount).toBe(1);
       });
     });
 
@@ -98,9 +102,9 @@ describe('EsComment', () => {
       comment = new EsComment('');
     });
 
-    describe('isEmpty()', () => {
-      it('returns false', () => {
-        expect(comment.isEmpty()).toBe(false);
+    describe('lineCount', () => {
+      it('is 1', () => {
+        expect(comment.lineCount).toBe(1);
       });
     });
 
@@ -125,9 +129,9 @@ describe('EsComment', () => {
       comment = new EsComment('First', 'Second');
     });
 
-    describe('isEmpty()', () => {
-      it('returns false', () => {
-        expect(comment.isEmpty()).toBe(false);
+    describe('lineCount', () => {
+      it('reflects line count 1', () => {
+        expect(comment.lineCount).toBe(2);
       });
     });
 

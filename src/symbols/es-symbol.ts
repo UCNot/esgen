@@ -1,9 +1,9 @@
 import { noop } from '@proc7ts/primitives';
+import { EsComment } from '../es-comment.js';
 import { EsSnippet } from '../es-snippet.js';
 import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsNamespace } from './es-namespace.js';
-import { esSymbolString } from './es-symbol-string.js';
 
 /**
  * Program symbol.
@@ -20,7 +20,7 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
 
   readonly #requestedName: string;
   readonly #declare: EsDeclarationPolicy<TNaming> | undefined;
-  readonly #comment: string | undefined;
+  readonly #comment: EsComment;
 
   /**
    * Constructs symbol.
@@ -34,7 +34,7 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
     const { declare, comment } = init;
 
     this.#declare = declare;
-    this.#comment = comment;
+    this.#comment = EsComment.from(comment);
   }
 
   /**
@@ -54,9 +54,9 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
   }
 
   /**
-   * Human-readable symbol comment.
+   * Symbol comment.
    */
-  get comment(): string | undefined {
+  get comment(): EsComment {
     return this.#comment;
   }
 
@@ -145,22 +145,10 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
    *
    * @returns - String representation of this symbol.
    */
-  toString({
-    tag = '[Symbol]',
-    comment = this.comment,
-  }: {
-    /**
-     * Symbol tag to include. Defaults to `[Symbol]`.
-     */
-    readonly tag?: string | null | undefined;
-    /**
-     * Comment to include. Defaults to {@link comment symbol comment}.
-     */
-    readonly comment?: string | null | undefined;
-  } = {}): string {
-    const { requestedName } = this;
+  toString(): string {
+    const { requestedName, comment } = this;
 
-    return esSymbolString(requestedName, { tag, comment });
+    return comment.appendTo(requestedName, '[Symbol]');
   }
 
 }
@@ -183,7 +171,7 @@ export interface EsSymbolInit<out TNaming extends EsNaming = EsNaming> {
   /**
    * Human-readable symbol comment used in its string representation.
    */
-  readonly comment?: string | undefined;
+  readonly comment?: string | EsComment | undefined;
 }
 
 /**

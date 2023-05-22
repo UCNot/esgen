@@ -6,7 +6,7 @@ import { EsOutput, EsPrinter } from './es-output.js';
 export class EsComment implements EsPrinter {
 
   /**
-   * {@link isEmpty Empty} comment.
+   * Empty comment.
    */
   static get empty(): EsComment {
     return EsComment$empty;
@@ -48,12 +48,10 @@ export class EsComment implements EsPrinter {
   }
 
   /**
-   * Informs whether this comment is empty.
-   *
-   * @returns `true` if comment has no lines, or `false` if it has at least one line of text.
+   * Comment line count. When `0` the comment is considered {@link empty}.
    */
-  isEmpty(): boolean {
-    return !this.#lines.length;
+  get lineCount(): number {
+    return this.#lines.length;
   }
 
   /**
@@ -83,7 +81,19 @@ export class EsComment implements EsPrinter {
   }
 
   /**
-   * Builds string representation of comment.
+   * Appends comment to some code.
+   *
+   * @param commented - Code to comment.
+   * @param prefix - Optional comment prefix
+   *
+   * @returns Commented code.
+   */
+  appendTo(commented: string, prefix?: string): string {
+    return this.lineCount || prefix ? `${commented} ${this.toString(prefix)}` : commented;
+  }
+
+  /**
+   * Builds a string representation of this comment.
    *
    * @param prefix - A prefix to place to comment text.
    *

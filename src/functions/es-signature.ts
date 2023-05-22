@@ -136,7 +136,7 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
       const decls = Object.entries<EsArgSymbol>(this.args).map(([name, arg]) => {
         const declaration = declarations[name as EsSignature.NamesOf<TArgs>];
 
-        hasCustomDeclaration ||= !!arg.comment || !!declaration?.declare;
+        hasCustomDeclaration ||= !!arg.comment.lineCount || !!declaration?.declare;
 
         return arg.declare(declaration);
       });
@@ -298,7 +298,7 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
     return (
       `(`
       + Object.values<EsArgSymbol>(this.args)
-        .map(arg => arg.toString({ tag: null }))
+        .map(({ argKey, comment }) => comment.appendTo(argKey))
         .join(', ')
       + ')'
     );
