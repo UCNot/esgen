@@ -33,6 +33,12 @@ describe('EsBundle', () => {
     });
   });
 
+  describe('functionOrBundle', () => {
+    it('refers itself', () => {
+      expect(bundle.functionOrBundle).toBe(bundle);
+    });
+  });
+
   describe('format', () => {
     it('is ES2015 by default', () => {
       expect(bundle.format).toBe(EsBundleFormat.ES2015);

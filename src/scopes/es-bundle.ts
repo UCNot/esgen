@@ -56,6 +56,13 @@ export class EsBundle implements EsScope {
     return this;
   }
 
+  /**
+   * Always refers to itself.
+   */
+  get functionOrBundle(): this {
+    return this;
+  }
+
   get kind(): EsScopeKind.Bundle {
     return EsScopeKind.Bundle;
   }
@@ -297,6 +304,10 @@ class NestedEsScope implements EsScope {
 
   get enclosing(): EsScope {
     return this.#enclosing;
+  }
+
+  get functionOrBundle(): EsScope {
+    return this.#kind === EsScopeKind.Function ? this : this.enclosing.functionOrBundle;
   }
 
   get format(): EsBundleFormat {

@@ -28,6 +28,11 @@ export interface EsScope extends EsNamingHost {
   get enclosing(): EsScope;
 
   /**
+   * Closest {@link EsScopeKind.Function function} or {@link EsScopeKind.Bundle scope}.
+   */
+  get functionOrBundle(): EsScope;
+
+  /**
    * Scope kind.
    */
   get kind(): EsScopeKind;

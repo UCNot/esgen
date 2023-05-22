@@ -1,8 +1,8 @@
 import { EsSnippet } from '../es-snippet.js';
+import { esFunctionOrBundle } from '../impl/es-function-or-bundle.js';
 import {
   EsDeclarationContext,
   EsDeclarationPolicy,
-  EsDeclarationRequest,
   EsNaming,
   EsSymbol,
   EsSymbolInit,
@@ -20,7 +20,7 @@ export class EsVarSymbol extends EsSymbol {
       ...init,
       declare: declare && {
         ...declare,
-        as: context => this.#declare(context, declare, EsVarKind.Var),
+        as: context => this.#declare(context, declare, declare.as ?? EsVarKind.Var),
       },
     });
   }
@@ -33,23 +33,25 @@ export class EsVarSymbol extends EsSymbol {
    * @returns Variable declaration statement.
    */
   declare(request: EsVarDeclarationRequest = {}): EsSnippet {
+    const { value, as = value ? EsVarKind.Const : EsVarKind.Let } = request;
+
     return this.declareSymbol({
-      ...request,
-      as: context => this.#declare(context, request, EsVarKind.Let),
+      as: context => this.#declare(context, request, as),
+      at: as === EsVarKind.Var ? esFunctionOrBundle : undefined,
     });
   }
 
   #declare(
     context: EsDeclarationContext,
-    { as, value }: EsVarDeclarationPolicy | EsVarDeclarationRequest,
-    withoutValue: EsVarKind,
+    { value }: EsVarDeclarationPolicy | EsVarDeclarationRequest,
+    as: EsVarKind,
   ): readonly [EsSnippet, EsNaming] {
     return [
       code => {
         code.line(code => {
           const init = value?.(context, this);
 
-          code.write(as ?? init == null ? withoutValue : EsVarKind.Const, ' ', context.naming);
+          code.write(as, ' ', context.naming);
 
           if (init) {
             code.write(' = ', init);
@@ -118,19 +120,19 @@ export interface EsVarDeclarationPolicy extends Omit<EsDeclarationPolicy, 'as'> 
    * @param context - Variable declaration context.
    * @param symbol - Variable symbol.
    *
-   * @returns Variable initialization expression, or none to leave the variable uninitialized.
+   * @returns Variable initialization expression.
    *
    * @defaultValue `undefined`.
    */
   readonly value?:
-    | ((this: void, context: EsDeclarationContext, symbol: EsVarSymbol) => EsSnippet | undefined)
+    | ((this: void, context: EsDeclarationContext, symbol: EsVarSymbol) => EsSnippet)
     | undefined;
 }
 
 /**
  * Explicit variable {@link EsVarSymbol#declare declaration} request.
  */
-export interface EsVarDeclarationRequest extends Omit<EsDeclarationRequest, 'as'> {
+export interface EsVarDeclarationRequest {
   /**
    * How to declare variable.
    *
@@ -145,11 +147,11 @@ export interface EsVarDeclarationRequest extends Omit<EsDeclarationRequest, 'as'
    * @param context - Variable declaration context.
    * @param symbol - Variable symbol.
    *
-   * @returns Variable initialization expression, or none to leave the variable uninitialized.
+   * @returns Variable initialization expression.
    *
    * @defaultValue `undefined`.
    */
   readonly value?:
-    | ((this: void, context: EsDeclarationContext, symbol: EsVarSymbol) => EsSnippet | undefined)
+    | ((this: void, context: EsDeclarationContext, symbol: EsVarSymbol) => EsSnippet)
     | undefined;
 }

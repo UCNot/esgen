@@ -35,6 +35,20 @@ describe('EsScope', () => {
     });
   });
 
+  describe('functionOrBundle', () => {
+    it('refers closest function or bundle', () => {
+      expect(scope.functionOrBundle).toBe(bundle);
+      expect(scope.nest().functionOrBundle).toBe(bundle);
+      expect(scope.nest().nest().functionOrBundle).toBe(bundle);
+
+      const fn = bundle.nest({ kind: EsScopeKind.Function });
+
+      expect(fn.functionOrBundle).toBe(fn);
+      expect(fn.nest().functionOrBundle).toBe(fn);
+      expect(fn.nest().nest().functionOrBundle).toBe(fn);
+    });
+  });
+
   describe('ns', () => {
     it('is nested within bundle namespace', () => {
       const scope = bundle.nest({ ns: { comment: 'Nested' } });
