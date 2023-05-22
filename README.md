@@ -7,7 +7,16 @@
 [![GitHub Project][github-image]][github-url]
 [![API Documentation][api-docs-image]][api documentation]
 
-> [See API Documentation >>>][API Documentation]
+Supported features:
+
+- [Pretty-printed] code generation.
+- [Symbol] naming conflict resolutions.
+- API for generating variables, [functions], [classes], modules, etc.
+- Generated [code evaluation].
+
+Choose what you need. If strings concatenation is just enough - that's definitely the way to go.
+
+See [API Documentation] for detailed usage examples.
 
 [npm-image]: https://img.shields.io/npm/v/esgen.svg?logo=npm
 [npm-url]: https://www.npmjs.com/package/esgen
@@ -23,3 +32,219 @@
 [API documentation]: https://run-z.github.io/esgen/
 [explanation]: https://github.com/run-z/esgen/blob/master/doc/explanation.md
 [URI charge]: https://github.com/run-z/esgen/blob/master/doc/uri-charge-format.md
+
+## Simple Usage
+
+[pretty-printed]: #simple-usage
+
+```typescript
+import { EsBundle } from 'esgen';
+
+await new EsBundle()
+  .emit(code => {
+    code
+      .write(`function print(text) {`)
+      .indent(`console.log(text);`)
+      .write('}')
+      .write(`const greeting = 'Hello, World!';`)
+      .write(`print(greeting);`);
+  })
+  .asText();
+```
+
+The following code will be emitted:
+
+```javascript
+function print(text) {
+  console.log(text);
+}
+const greeting = 'Hello, World!;
+print(greeting);
+```
+
+## Symbols And Functions
+
+[symbol]: #symbols-and-functions
+[functions]: #symbols-and-functions
+
+Symbols used to avoid naming conflicts. If the same name requested for two different symbols, one of them will be
+automatically renamed.
+
+The example above can utilize symbols:
+
+```typescript
+import { esline, esStringLiteral, EsBundle, EsFunction, EsVarSymbol } from 'esgen';
+
+// Create function.
+const print = new EsFunction(
+  'print',
+  {
+    text: {}, // Require argument called `text`.
+  },
+  {
+    declare: {
+      at: 'bundle', // Automatically declare function at top level once referred.
+      body: fn => code => {
+        code.write(
+          // Place on one line.
+          esline`console.log(${fn.args.text /* Refer declared argument symbol */});`,
+        );
+      },
+    },
+  },
+);
+
+await new EsBundle()
+  .emit(code => {
+    // Create variable symbol.
+    const greeting = new EsVarSymbol('greeting');
+
+    code
+      .write(
+        // Declare variable explicitly.
+        greeting.declare({
+          // Initialize it with string literal.
+          value: () => esStringLiteral('Hello, World!'),
+        }),
+      )
+      .write(
+        // Call `print()` function.
+        esline`${print.call({
+          test: greeting /* Pass variable as argument. */,
+        })};`,
+      );
+  })
+  .asText();
+```
+
+## Symbol Export And Code Evaluation
+
+[code evaluation]: #symbol-export-and-code-evaluation
+
+Symbols can be exported from the bundle. In this case it is possible to evaluate emitted code immediately and obtain
+the exported symbols.
+
+For example, to export the function `print()` from the example above, the following can be done:
+
+```typescript
+import { esline, EsBundle, EsBundleFormat, EsFunction } from 'esgen';
+
+// Create function.
+const print = new EsFunction(
+  'print',
+  {
+    text: {}, // Require argument called `text`.
+  },
+  {
+    declare: {
+      at: 'exports', // Automatically export function once referred.
+      body: fn => code => {
+        code.write(
+          // Place on one line.
+          esline`console.log(${fn.args.text /* Refer declared argument symbol */});`,
+        );
+      },
+    },
+  },
+);
+
+// Create bundle.
+const bundle = new EsBundle({
+  format: EsBundleFormat.IIFE /* Emit IIFE instead of ESM module */,
+});
+
+// Explicitly refer the function to force its emission.
+bundle.ns.refer(print);
+
+// Evaluate emitted code.
+// Only possible for IIFE.
+const { print } = (await bundle.emit().asExports()) as { print: (text: string) => void };
+
+print('Hello, World!');
+```
+
+## Classes
+
+[classes]: #classes
+
+Classes represented `EsClass` instances.
+
+Class may have a base class, constructor, and members.
+
+```typescript
+import { esline, EsClass, EsField, EsMemberVisibility, EsMethod } from 'esgen';
+
+// Declare class
+//
+// export class Printer { ... }
+//
+const printer = new EsClass('Printer', {
+  classConstructor: {
+    args: {
+      // Optional argument key ends with `?`.
+      'initialText?': {
+        comment: 'Default text to print',
+      },
+    },
+  },
+  declare: {
+    // Export class from the bundle.
+    at: 'exports',
+  },
+});
+
+// Declare private field (without initializer).
+//
+// #defaultText;
+//
+const defaultText = new EsField('defaultText', { visibility: EsMemberVisibility.Private }).declareIn(printer);
+
+// Declare class constructor.
+//
+// constructor(initialText = 'Hello, World!') {
+//   this.#defaultText = initialText;
+// }
+//
+printer.declareConstructor({
+  args: {
+    initialText: {
+      // Assign default value to optional argument.
+      declare: naming => esline`${naming} = 'Hello, World!'`,
+    },
+  },
+  body: ({ args: { initialText } }) => esline`${defaultText.set('this', initialText)};`,
+});
+
+// Declare public method.
+//
+// print(text = this.#defaultText) {
+//   console.log(test);
+// }
+//
+const print = new EsMethod('print', { 'text?': { comment: 'Text to print' } }).declareIn(printer, {
+  args: {
+    text: {
+      declare: naming => esline`${naming} = ${defaultText.get('this')}`,
+    },
+  },
+  body: ({ args: { text } }) => esline`console.log(${text});`,
+});
+
+// Create bundle.
+const bundle = new EsBundle({
+  format: EsBundleFormat.IIFE /* Emit IIFE instead of ESM module */,
+});
+
+// Explicitly refer the class to force its emission.
+bundle.ns.refer(printer);
+
+// Evaluate emitted code.
+const { Printer } = (await bundle.emit().asExports()) as {
+  Printer: new (initialText?: string) => { print(text: string): void };
+};
+
+const instance = new Printer();
+
+result.print(); // Hello, World!
+result.print('My text'); // My text.
+```
