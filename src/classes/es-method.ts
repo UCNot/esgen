@@ -24,7 +24,7 @@ export class EsMethod<out TArgs extends EsSignature.Args> extends EsMember<EsMet
   constructor(requestedName: string, init: EsMethodInit<TArgs>) {
     super(requestedName, init);
 
-    this.#signature = EsSignature.for(init.args);
+    this.#signature = EsSignature.from(init.args);
   }
 
   /**

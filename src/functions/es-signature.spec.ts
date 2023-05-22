@@ -38,14 +38,14 @@ describe('EsSignature', () => {
 
   describe('for', () => {
     it('returns new signature instance', () => {
-      const signature = EsSignature.for({ arg: {} });
+      const signature = EsSignature.from({ arg: {} });
 
       expect(signature.args.arg.requestedName).toBe('arg');
     });
     it('returns signature instance itself', () => {
       const signature = new EsSignature({});
 
-      expect(EsSignature.for(signature)).toBe(signature);
+      expect(EsSignature.from(signature)).toBe(signature);
     });
   });
 

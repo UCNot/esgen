@@ -16,14 +16,20 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
   implements Iterable<EsArgSymbol> {
 
   /**
-   * Creates signature for the given arguments definition.
+   * Creates signature from the given `input`.
    *
-   * @param args - Either function signature or arguments definition.
+   * Builds new signature from `input` arguments definition.
    *
-   * @returns Signature itself if `args` is a signature instance already, or new signature instance.
+   * Returns `input` signature instance as is.
+   *
+   * @param input - Either function signature or arguments definition.
+   *
+   * @returns Signature instance.
    */
-  static for<TArgs extends EsSignature.Args>(args: EsSignature<TArgs> | TArgs): EsSignature<TArgs> {
-    return args instanceof EsSignature ? args : new EsSignature(args);
+  static from<TArgs extends EsSignature.Args>(
+    input: EsSignature<TArgs> | TArgs,
+  ): EsSignature<TArgs> {
+    return input instanceof EsSignature ? input : new EsSignature(input);
   }
 
   readonly #args: EsSignature.Symbols<TArgs>;

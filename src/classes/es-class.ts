@@ -77,13 +77,13 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
     this.#baseClass = baseClass;
     if (baseClass) {
       this.#classConstructor = (
-        classConstructor ? EsConstructor.for(classConstructor) : baseClass.classConstructor
+        classConstructor ? EsConstructor.from(classConstructor) : baseClass.classConstructor
       ) as EsConstructor<TArgs>;
       this.#shared = baseClass.#shared;
       this.#names = baseClass.#names.nest();
       this.#allMembersDerived = false;
     } else {
-      this.#classConstructor = EsConstructor.for(classConstructor) as EsConstructor<TArgs>;
+      this.#classConstructor = EsConstructor.from(classConstructor) as EsConstructor<TArgs>;
       this.#shared = { memberNames: new Map() };
       this.#names = new EsNameRegistry();
       this.#allMembersDerived = true;

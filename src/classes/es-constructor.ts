@@ -14,34 +14,42 @@ export class EsConstructor<out TArgs extends EsSignature.Args = EsSignature.Args
 > {
 
   /**
-   * Creates no-args constructor for the given initialization options.
+   * Creates no-args constructor from the given `input`.
    *
-   * @param value - Either constructor instance, or its initialization options.
+   * Builds new constructor instance from `input` initialization options.
    *
-   * @returns Constructor itself if the `value` is a constructor instance already, or new constructor instance.
+   * Returns `input` constructor instance as is.
+   *
+   * @param input - Either constructor instance, or its initialization options.
+   *
+   * @returns Constructor instance.
    */
-  static for(
-    value?: EsConstructor<EsSignature.NoArgs> | EsConstructorInit<EsSignature.NoArgs>,
+  static from(
+    input?: EsConstructor<EsSignature.NoArgs> | EsConstructorInit<EsSignature.NoArgs>,
   ): EsConstructor<EsSignature.NoArgs>;
 
   /**
-   * Creates constructor for the given initialization options.
+   * Creates constructor from the given `input``.
+   *
+   * Builds new constructor instance from `input` options.
+   *
+   * Returns `input` constructor instance as is.
    *
    * @typeParam TArgs - Type of class constructor arguments definition.
-   * @param value - Either constructor instance, or its initialization options.
+   * @param input - Either constructor instance, or its initialization options.
    *
-   * @returns Constructor itself if the `value` is a constructor instance already, or new constructor instance.
+   * @returns Constructor instance.
    */
-  static for<TArgs extends EsSignature.Args>(
-    value: EsConstructor<TArgs> | EsConstructorInit<TArgs>,
+  static from<TArgs extends EsSignature.Args>(
+    input: EsConstructor<TArgs> | EsConstructorInit<TArgs>,
   ): EsConstructor<TArgs>;
 
-  static for<TArgs extends EsSignature.Args>(
-    value: EsConstructor<TArgs> | EsConstructorInit<TArgs> = {
+  static from<TArgs extends EsSignature.Args>(
+    input: EsConstructor<TArgs> | EsConstructorInit<TArgs> = {
       args: {},
     } as EsConstructorInit<TArgs>,
   ): EsConstructor<TArgs> {
-    return value instanceof EsConstructor ? value : new EsConstructor(value);
+    return input instanceof EsConstructor ? input : new EsConstructor(input);
   }
 
   readonly #signature: EsSignature<TArgs>;
@@ -56,7 +64,7 @@ export class EsConstructor<out TArgs extends EsSignature.Args = EsSignature.Args
 
     const { args } = init;
 
-    this.#signature = EsSignature.for(args);
+    this.#signature = EsSignature.from(args);
   }
 
   /**

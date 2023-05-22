@@ -21,7 +21,7 @@ export function esImportFunction<TArgs extends EsSignature.Args>(
   args: EsSignature<TArgs> | TArgs,
   init?: Omit<EsImportInit.Default, 'createNaming'>,
 ): EsImportSymbol<EsFunctionNaming<TArgs>> {
-  const signature = EsSignature.for(args);
+  const signature = EsSignature.from(args);
 
   return esImport(from, name, {
     ...init,

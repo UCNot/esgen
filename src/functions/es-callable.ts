@@ -17,7 +17,7 @@ export class EsCallable<out TArgs extends EsSignature.Args> {
    * @param args - Either function signature or arguments definition.
    */
   constructor(args: EsSignature<TArgs> | TArgs) {
-    this.#signature = EsSignature.for(args);
+    this.#signature = EsSignature.from(args);
   }
 
   /**
