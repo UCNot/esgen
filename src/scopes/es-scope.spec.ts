@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { EsBundle } from './es-bundle.js';
 import { EsScope, EsScopeKind } from './es-scope.js';
+import { EsScopedValueKey } from './es-scoped-value-key.js';
 
 describe('EsScope', () => {
   let bundle: EsBundle;
@@ -99,6 +100,25 @@ describe('EsScope', () => {
           .nest({ kind: EsScopeKind.Function, generator: true })
           .isGenerator(),
       ).toBe(true);
+    });
+  });
+
+  describe('get', () => {
+    let counter: number;
+    let key: EsScopedValueKey<number>;
+
+    beforeEach(() => {
+      counter = 0;
+      key = {
+        esScopedValue(_scope) {
+          return counter++;
+        },
+      };
+    });
+
+    it('constructs scoped value once', () => {
+      expect(scope.get(key)).toBe(0);
+      expect(scope.get(key)).toBe(0);
     });
   });
 });

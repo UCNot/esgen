@@ -4,6 +4,7 @@ import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace, EsNamespaceInit, EsNamingHost } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsBundle } from './es-bundle.js';
+import { EsScopedValueKey } from './es-scoped-value-key.js';
 
 /**
  * Code emission scope.
@@ -82,6 +83,18 @@ export interface EsScope extends EsNamingHost {
    * @returns `true` if emission is in process, or `false` if emission is {@link EsBundle#done completed}.
    */
   isActive(): boolean;
+
+  /**
+   * Obtains scoped value stored under the given `key`.
+   *
+   * {@link EsScopedValueKey#esScopedValue Creates new value} and stores it, unless the value stored already.
+   *
+   * @typeParam T - Scoped value type.
+   * @param key - Scoped value key.
+   *
+   * @returns Scoped value.
+   */
+  get<T>(key: EsScopedValueKey<T>): T;
 
   /**
    * Creates nested emission scope.

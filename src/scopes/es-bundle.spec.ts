@@ -5,6 +5,7 @@ import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsBundle } from './es-bundle.js';
 import { EsScopeKind } from './es-scope.js';
+import { EsScopedValueKey } from './es-scoped-value-key.js';
 
 describe('EsBundle', () => {
   let bundle: EsBundle;
@@ -124,6 +125,25 @@ describe('EsBundle', () => {
       expect(scope.isActive()).toBe(false);
 
       await bundle.whenDone();
+    });
+  });
+
+  describe('get', () => {
+    let counter: number;
+    let key: EsScopedValueKey<number>;
+
+    beforeEach(() => {
+      counter = 0;
+      key = {
+        esScopedValue(_scope) {
+          return counter++;
+        },
+      };
+    });
+
+    it('constructs scoped value once', () => {
+      expect(bundle.get(key)).toBe(0);
+      expect(bundle.get(key)).toBe(0);
     });
   });
 
