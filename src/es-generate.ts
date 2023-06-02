@@ -32,7 +32,7 @@ export async function esGenerate(
 }
 
 /**
- * Options for code {@link EsGenerator#generate generation}.
+ * Options for code {@link esGenerate generation}.
  */
 export interface EsGenerationOptions {
   /**

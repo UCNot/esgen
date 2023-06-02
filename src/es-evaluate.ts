@@ -39,7 +39,7 @@ export async function esEvaluate(
 }
 
 /**
- * Options for code {@link EsGenerator#evaluate evaluation}.
+ * Options for code {@link esEvaluate evaluation}.
  */
 export interface EsEvaluationOptions extends EsGenerationOptions {
   /**
