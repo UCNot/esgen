@@ -7,6 +7,7 @@ import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit, EsScopeKind } from './es-scope.js';
+import { EsScopedValueKey } from './es-scoped-value-key.js';
 
 /**
  * Emitted code bundle.
@@ -17,6 +18,7 @@ import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit, EsScopeKind } from './
 export class EsBundle implements EsScope {
 
   readonly #state: [EsScope$State];
+  readonly #store: EsScope$Store;
   readonly #format: EsBundleFormat;
   readonly #imports: () => EsImports;
   readonly #declarations: () => EsDeclarations;
@@ -34,11 +36,12 @@ export class EsBundle implements EsScope {
     imports = bundle => new EsImports(bundle),
     declarations = bundle => new EsDeclarations(bundle),
   }: EsBundleInit = {}) {
+    this.#state = [new EsScope$ActiveState(newState => (this.#state[0] = newState))];
+    this.#store = new EsScope$Store(this);
     this.#format = format;
     this.#ns = lazyValue(() => ns(this));
     this.#imports = lazyValue(() => imports(this));
     this.#declarations = lazyValue(() => declarations(this));
-    this.#state = [new EsScope$ActiveState(newState => (this.#state[0] = newState))];
   }
 
   /**
@@ -94,6 +97,10 @@ export class EsBundle implements EsScope {
     return this.#state[0].isActive();
   }
 
+  get<T>(key: EsScopedValueKey<T>): T {
+    return this.#store.get(key);
+  }
+
   nest(init?: EsScopeInit): EsScope {
     return new NestedEsScope(this, this.#state, init, scope => this.ns.nest(scope, { ...init?.ns }));
   }
@@ -130,10 +137,11 @@ class NestedEsScope implements EsScope {
 
   readonly #bundle: EsBundle;
   readonly #enclosing: EsScope;
+  readonly #state: [EsScope$State];
+  readonly #store: EsScope$Store;
   readonly #kind: EsScopeKind;
   readonly #async: boolean;
   readonly #generator: boolean;
-  readonly #state: [EsScope$State];
   readonly #ns: () => EsNamespace;
 
   constructor(
@@ -145,6 +153,7 @@ class NestedEsScope implements EsScope {
     this.#enclosing = enclosing;
     this.#bundle = enclosing.bundle;
     this.#state = state;
+    this.#store = new EsScope$Store(this);
     this.#kind = kind;
     if (kind === EsScopeKind.Function) {
       this.#async = async ?? false;
@@ -200,6 +209,10 @@ class NestedEsScope implements EsScope {
     return this.bundle.isActive();
   }
 
+  get<T>(key: EsScopedValueKey<T>): T {
+    return this.#store.get(key);
+  }
+
   nest(init?: EsScopeInit): EsScope {
     return new NestedEsScope(this, this.#state, init, scope => this.ns.nest(scope, init?.ns));
   }
@@ -210,6 +223,31 @@ class NestedEsScope implements EsScope {
 
   async whenDone(): Promise<void> {
     await this.bundle.whenDone();
+  }
+
+}
+
+class EsScope$Store {
+
+  readonly #scope: EsScope;
+  readonly #values = new Map<EsScopedValueKey<unknown>, () => unknown>();
+
+  constructor(scope: EsScope) {
+    this.#scope = scope;
+  }
+
+  get<T>(key: EsScopedValueKey<T>): T {
+    const found = this.#values.get(key) as (() => T) | undefined;
+
+    if (found) {
+      return found();
+    }
+
+    const factory = lazyValue(() => key.esScopedValue(this.#scope));
+
+    this.#values.set(key, factory);
+
+    return factory();
   }
 
 }
