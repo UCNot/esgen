@@ -1,5 +1,5 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { EsSnippet } from '../es-snippet.js';
+import { EsSnippet } from '../code/es-snippet.js';
 import { EsScope } from '../scopes/es-scope.js';
 import { EsNaming, EsSymbol, EsSymbolInit } from '../symbols/es-symbol.js';
 import { EsSignature } from './es-signature.js';

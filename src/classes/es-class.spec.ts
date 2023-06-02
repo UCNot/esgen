@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsCode } from '../es-code.js';
-import { esline } from '../esline.tag.js';
+import { EsCode } from '../code/es-code.js';
+import { esline } from '../code/esline.tag.js';
+import { esGenerate } from '../es-generate.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsBundle } from '../scopes/es-bundle.js';
 import { EsVarSymbol } from '../symbols/es-var.symbol.js';
@@ -258,11 +259,11 @@ describe('EsClass', () => {
       const baseClass = new EsClass('Base', { declare: { at: 'bundle' } });
       const cls = new EsClass('Test', { baseClass, declare: { at: 'bundle' } });
 
-      bundle.ns.refer(cls);
-
-      await expect(bundle.emit().asText()).resolves.toBe(
-        'class Base {\n}\nclass Test extends Base {\n}\n',
-      );
+      await expect(
+        esGenerate((_, { ns }) => {
+          ns.refer(cls);
+        }),
+      ).resolves.toBe('class Base {\n}\nclass Test extends Base {\n}\n');
     });
   });
 
@@ -277,14 +278,12 @@ describe('EsClass', () => {
       const cls = new EsClass<EsSignature.NoArgs>('Test');
 
       await expect(
-        bundle
-          .emit(
-            cls.declare(),
-            new EsVarSymbol('instance').declare({
-              value: () => esline`new ${cls}()`,
-            }),
-          )
-          .asText(),
+        esGenerate(
+          cls.declare(),
+          new EsVarSymbol('instance').declare({
+            value: () => esline`new ${cls}()`,
+          }),
+        ),
       ).resolves.toBe(`class Test {\n}\nconst instance = new Test();\n`);
     });
   });

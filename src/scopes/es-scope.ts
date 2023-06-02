@@ -1,5 +1,5 @@
+import { EsPrinter } from '../code/es-output.js';
 import { EsDeclarations } from '../declarations/es-declarations.js';
-import { EsPrinter } from '../es-output.js';
 import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace, EsNamespaceInit, EsNamingHost } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';

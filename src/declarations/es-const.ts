@@ -1,5 +1,5 @@
 import { asArray } from '@proc7ts/primitives';
-import { esline } from '../esline.tag.js';
+import { esline } from '../code/esline.tag.js';
 import {
   EsDeclarationLocation,
   EsDeclarationPolicy,

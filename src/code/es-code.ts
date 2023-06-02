@@ -1,7 +1,7 @@
 import { noop } from '@proc7ts/primitives';
+import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit } from '../scopes/es-scope.js';
 import { EsOutput, EsPrinter } from './es-output.js';
 import { EsBuilder, EsSnippet } from './es-snippet.js';
-import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit } from './scopes/es-scope.js';
 
 /**
  * Writable fragment of code.

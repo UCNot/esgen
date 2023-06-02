@@ -1,4 +1,4 @@
-import { EsSnippet } from '../es-snippet.js';
+import { EsSnippet } from '../code/es-snippet.js';
 import { esFunctionOrBundle } from '../impl/es-function-or-bundle.js';
 import {
   EsDeclarationContext,

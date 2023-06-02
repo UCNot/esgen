@@ -1,80 +1,64 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { describe, expect, it } from '@jest/globals';
+import { esGenerate } from '../es-generate.js';
 import { EsBundleFormat } from '../scopes/es-bundle-format.js';
-import { EsBundle } from '../scopes/es-bundle.js';
 import { EsExternalModule } from './es-external-module.js';
 import { esImport } from './es-import.js';
 
 describe('EsImports', () => {
   describe('ES2015', () => {
-    let bundle: EsBundle;
-
-    beforeEach(() => {
-      bundle = new EsBundle();
-    });
-
     it('declares import', async () => {
       await expect(
-        bundle
-          .emit(code => {
-            const test = esImport('test-module', 'test');
+        esGenerate(code => {
+          const test = esImport('test-module', 'test');
 
-            code.line(test, `();`);
-          })
-          .asText(),
+          code.line(test, `();`);
+        }),
       ).resolves.toBe(`import { test } from 'test-module';\ntest();\n`);
     });
     it('declares import from custom module', async () => {
       const from = new EsExternalModule('test-module');
 
       await expect(
-        bundle
-          .emit(code => {
-            const test = esImport(from, 'test');
+        esGenerate(code => {
+          const test = esImport(from, 'test');
 
-            code.line(test, `();`);
-          })
-          .asText(),
+          code.line(test, `();`);
+        }),
       ).resolves.toBe(`import { test } from 'test-module';\ntest();\n`);
     });
     it('does not duplicate imports', async () => {
       await expect(
-        bundle
-          .emit(
-            code => {
-              const test = esImport('test-module', 'test');
+        esGenerate(
+          code => {
+            const test = esImport('test-module', 'test');
 
-              code.line(test, `(1);`);
-            },
-            code => {
-              const test = esImport('test-module', 'test');
+            code.line(test, `(1);`);
+          },
+          code => {
+            const test = esImport('test-module', 'test');
 
-              code.line(test, `(2);`);
-            },
-          )
-          .asText(),
+            code.line(test, `(2);`);
+          },
+        ),
       ).resolves.toBe(`import { test } from 'test-module';\ntest(1);\ntest(2);\n`);
     });
     it('renames imported symbol', async () => {
       await expect(
-        bundle
-          .emit(code => {
-            const test = esImport('test-module', 'test', { as: 'myTest' });
+        esGenerate(code => {
+          const test = esImport('test-module', 'test', { as: 'myTest' });
 
-            code.line(test, `();`);
-          })
-          .asText(),
+          code.line(test, `();`);
+        }),
       ).resolves.toBe(`import { test as myTest } from 'test-module';\nmyTest();\n`);
     });
     it('resolves conflicts', async () => {
       await expect(
-        bundle
-          .emit(code => {
-            const test1 = esImport('test-module1', 'test');
-            const test2 = esImport('test-module2', 'test');
+        esGenerate(code => {
+          const test1 = esImport('test-module1', 'test');
+          const test2 = esImport('test-module2', 'test');
 
-            code.line(test1, `(1);`).line(test2, `(2);`);
-          })
-          .asText(),
+          code.line(test1, `(1);`).line(test2, `(2);`);
+        }),
       ).resolves.toBe(
         `import { test } from 'test-module1';\n`
           + `import { test as test$0 } from 'test-module2';\n`
@@ -84,34 +68,24 @@ describe('EsImports', () => {
     });
     it('joins imports from the same module', async () => {
       await expect(
-        bundle
-          .emit(code => {
-            const test1 = esImport('test-module', 'test1');
-            const test2 = esImport('test-module', 'test2');
+        esGenerate(code => {
+          const test1 = esImport('test-module', 'test1');
+          const test2 = esImport('test-module', 'test2');
 
-            code.line(test1, `();`).line(test2, `();`);
-          })
-          .asText(),
+          code.line(test1, `();`).line(test2, `();`);
+        }),
       ).resolves.toBe(`import {\n  test1,\n  test2,\n} from 'test-module';\ntest1();\ntest2();\n`);
     });
   });
 
   describe('IIFE', () => {
-    let bundle: EsBundle;
-
-    beforeEach(() => {
-      bundle = new EsBundle({ format: EsBundleFormat.IIFE });
-    });
-
     it('declares import', async () => {
       await expect(
-        bundle
-          .emit(code => {
-            const test = esImport('test-module', 'test');
+        esGenerate({ format: EsBundleFormat.IIFE }, code => {
+          const test = esImport('test-module', 'test');
 
-            code.line(test, `();`);
-          })
-          .asText(),
+          code.line(test, `();`);
+        }),
       ).resolves.toBe(
         `(async () => {\n`
           + `  const { test } = await import('test-module');\n`
@@ -121,20 +95,19 @@ describe('EsImports', () => {
     });
     it('does not duplicate imports', async () => {
       await expect(
-        bundle
-          .emit(
-            code => {
-              const test = esImport('test-module', 'test');
+        esGenerate(
+          { format: EsBundleFormat.IIFE },
+          code => {
+            const test = esImport('test-module', 'test');
 
-              code.line(test, `(1);`);
-            },
-            code => {
-              const test = esImport('test-module', 'test');
+            code.line(test, `(1);`);
+          },
+          code => {
+            const test = esImport('test-module', 'test');
 
-              code.line(test, `(2);`);
-            },
-          )
-          .asText(),
+            code.line(test, `(2);`);
+          },
+        ),
       ).resolves.toBe(
         `(async () => {\n`
           + `  const { test } = await import('test-module');\n`
@@ -145,13 +118,11 @@ describe('EsImports', () => {
     });
     it('renames imported symbol', async () => {
       await expect(
-        bundle
-          .emit(code => {
-            const test = esImport('test-module', 'test', { as: 'myTest' });
+        esGenerate({ format: EsBundleFormat.IIFE }, code => {
+          const test = esImport('test-module', 'test', { as: 'myTest' });
 
-            code.line(test, `();`);
-          })
-          .asText(),
+          code.line(test, `();`);
+        }),
       ).resolves.toBe(
         `(async () => {\n`
           + `  const { test: myTest } = await import('test-module');\n`
@@ -161,14 +132,12 @@ describe('EsImports', () => {
     });
     it('resolves conflicts', async () => {
       await expect(
-        bundle
-          .emit(code => {
-            const test1 = esImport('test-module1', 'test');
-            const test2 = esImport('test-module2', 'test');
+        esGenerate({ format: EsBundleFormat.IIFE }, code => {
+          const test1 = esImport('test-module1', 'test');
+          const test2 = esImport('test-module2', 'test');
 
-            code.line(test1, `(1);`).line(test2, `(2);`);
-          })
-          .asText(),
+          code.line(test1, `(1);`).line(test2, `(2);`);
+        }),
       ).resolves.toBe(
         `(async () => {\n`
           + `  const { test } = await import('test-module1');\n`
@@ -180,14 +149,12 @@ describe('EsImports', () => {
     });
     it('joins imports from the same module', async () => {
       await expect(
-        bundle
-          .emit(code => {
-            const test1 = esImport('test-module', 'test1');
-            const test2 = esImport('test-module', 'test2');
+        esGenerate({ format: EsBundleFormat.IIFE }, code => {
+          const test1 = esImport('test-module', 'test1');
+          const test2 = esImport('test-module', 'test2');
 
-            code.line(test1, `();`).line(test2, `();`);
-          })
-          .asText(),
+          code.line(test1, `();`).line(test2, `();`);
+        }),
       ).resolves.toBe(
         `(async () => {\n`
           + `  const {\n`

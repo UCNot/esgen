@@ -1,6 +1,6 @@
 import { noop } from '@proc7ts/primitives';
-import { EsComment } from '../es-comment.js';
-import { EsSnippet } from '../es-snippet.js';
+import { EsComment } from '../code/es-comment.js';
+import { EsSnippet } from '../code/es-snippet.js';
 import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsNamespace } from './es-namespace.js';

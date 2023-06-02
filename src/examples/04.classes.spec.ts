@@ -1,13 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import {
-  EsBundle,
-  EsBundleFormat,
-  EsClass,
-  EsField,
-  EsMemberVisibility,
-  EsMethod,
-  esline,
-} from 'esgen';
+import { EsClass, EsField, EsMemberVisibility, EsMethod, esEvaluate, esline } from 'esgen';
 
 describe('Classes', () => {
   let logSpy: jest.SpiedFunction<(...args: unknown[]) => void>;
@@ -88,16 +80,11 @@ describe('Classes', () => {
       }) => esline`console.log(${text});`,
     });
 
-    // Create bundle.
-    const bundle = new EsBundle({
-      format: EsBundleFormat.IIFE /* Emit IIFE instead of ESM module */,
-    });
-
-    // Explicitly refer the class to force its emission.
-    bundle.ns.refer(printer);
-
     // Evaluate emitted code.
-    const { Printer } = (await bundle.emit().asExports()) as {
+    const { Printer } = (await esEvaluate((_, { ns }) => {
+      // Explicitly refer the class to force its emission.
+      ns.refer(printer);
+    })) as {
       Printer: new (initialText?: string) => { print(text?: string): void };
     };
 

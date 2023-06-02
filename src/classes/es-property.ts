@@ -1,6 +1,6 @@
 import { asis } from '@proc7ts/primitives';
-import { EsSnippet } from '../es-snippet.js';
-import { esline } from '../esline.tag.js';
+import { EsSnippet } from '../code/es-snippet.js';
+import { esline } from '../code/esline.tag.js';
 import { EsScopeKind } from '../scopes/es-scope.js';
 import { EsVarSymbol } from '../symbols/es-var.symbol.js';
 import { EsClass } from './es-class.js';

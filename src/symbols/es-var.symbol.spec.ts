@@ -1,57 +1,47 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsBundleFormat } from '../scopes/es-bundle-format.js';
-import { EsBundle } from '../scopes/es-bundle.js';
+import { describe, expect, it } from '@jest/globals';
+import { esEvaluate } from '../es-evaluate.js';
+import { esGenerate } from '../es-generate.js';
 import { EsVarKind, EsVarSymbol } from './es-var.symbol.js';
 
 describe('EsVarSymbol', () => {
   describe('auto-declare', () => {
-    let bundle: EsBundle;
-
-    beforeEach(() => {
-      bundle = new EsBundle({ format: EsBundleFormat.IIFE });
-    });
-
     it('exports declared variable with initializer', async () => {
       const symbol = new EsVarSymbol('test', { declare: { at: 'exports', value: () => '10 + 3' } });
 
-      bundle.ns.refer(symbol);
-
-      await expect(bundle.emit().asExports()).resolves.toEqual({ test: 13 });
+      await expect(
+        esEvaluate((_, { ns }) => {
+          ns.refer(symbol);
+        }),
+      ).resolves.toEqual({ test: 13 });
     });
     it('exports variable without initializer', async () => {
       const symbol = new EsVarSymbol('test', { declare: { at: 'exports' } });
 
-      bundle.ns.refer(symbol);
-
-      await expect(bundle.emit().asExports()).resolves.toHaveProperty('test');
+      await expect(
+        esEvaluate((_, { ns }) => {
+          ns.refer(symbol);
+        }),
+      ).resolves.toHaveProperty('test');
     });
   });
 
   describe('declare', () => {
-    let bundle: EsBundle;
-
-    beforeEach(() => {
-      bundle = new EsBundle();
-    });
-
     it('declares local constant with initializer', async () => {
       const symbol = new EsVarSymbol('test');
 
-      await expect(bundle.emit(symbol.declare({ value: () => '10 + 3' })).asText()).resolves.toBe(
+      await expect(esGenerate(symbol.declare({ value: () => '10 + 3' }))).resolves.toBe(
         'const test = 10 + 3;\n',
       );
     });
     it('declares local variable without initializer', async () => {
       const symbol = new EsVarSymbol('test');
 
-      await expect(bundle.emit(symbol.declare()).asText()).resolves.toBe('let test;\n');
+      await expect(esGenerate(symbol.declare())).resolves.toBe('let test;\n');
     });
     it('declares local variable with var keyword', async () => {
       const symbol = new EsVarSymbol('test');
 
-      await expect(bundle.emit(symbol.declare({ as: EsVarKind.Var })).asText()).resolves.toBe(
-        'var test;\n',
-      );
+      await expect(esGenerate(symbol.declare({ as: EsVarKind.Var }))).resolves.toBe('var test;\n');
     });
   });
 });

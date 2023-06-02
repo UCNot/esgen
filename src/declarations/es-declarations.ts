@@ -1,7 +1,7 @@
 import { asArray, lazyValue } from '@proc7ts/primitives';
-import { EsCode } from '../es-code.js';
-import { EsOutput, EsPrinter } from '../es-output.js';
-import { EsSnippet } from '../es-snippet.js';
+import { EsCode } from '../code/es-code.js';
+import { EsOutput, EsPrinter } from '../code/es-output.js';
+import { EsSnippet } from '../code/es-snippet.js';
 import { EsBundleFormat } from '../scopes/es-bundle-format.js';
 import { EsBundle } from '../scopes/es-bundle.js';
 import { EsDeclarationPolicy, EsNaming, EsReference, EsSymbol } from '../symbols/es-symbol.js';
