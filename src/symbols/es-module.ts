@@ -1,5 +1,5 @@
 import { jsStringLiteral } from 'httongue';
-import { EsOutput, EsPrinter } from '../es-output.js';
+import { EsOutput, EsPrinter } from '../code/es-output.js';
 import { EsBundleFormat } from '../scopes/es-bundle-format.js';
 import { EsImportInit, EsImportSymbol } from './es-import.symbol.js';
 import { EsImports } from './es-imports.js';

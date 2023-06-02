@@ -1,6 +1,6 @@
+import { EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { EsCode } from './es-code.js';
 import { EsPrinter } from './es-output.js';
-import { EsEmitter, EsScope } from './scopes/es-scope.js';
 
 /**
  * Code snippet that can be {@link EsCode#write written} to code fragment.

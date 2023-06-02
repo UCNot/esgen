@@ -1,4 +1,4 @@
-import { collectLines } from './impl/collect-lines.js';
+import { collectLines } from '../impl/collect-lines.js';
 
 /**
  * Code output collects {@link print printed} code. The printed code can be {@link asText() serialized} then.

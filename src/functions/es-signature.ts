@@ -1,6 +1,6 @@
 import { isArray } from '@proc7ts/primitives';
 import { jsStringLiteral } from 'httongue';
-import { EsSnippet } from '../es-snippet.js';
+import { EsSnippet } from '../code/es-snippet.js';
 import { EsArg, EsArgKind, EsArgSymbol } from './es-arg.symbol.js';
 
 /**

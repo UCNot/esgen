@@ -1,7 +1,7 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { EsCode } from '../es-code.js';
-import { EsSnippet } from '../es-snippet.js';
-import { esline } from '../esline.tag.js';
+import { EsCode } from '../code/es-code.js';
+import { EsSnippet } from '../code/es-snippet.js';
+import { esline } from '../code/esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { esMemberAccessor } from '../impl/es-member-accessor.js';
 import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';

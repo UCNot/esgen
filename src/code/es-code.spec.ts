@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { jsStringLiteral } from 'httongue';
+import { EsBundle } from '../scopes/es-bundle.js';
 import { EsCode } from './es-code.js';
 import { EsOutput } from './es-output.js';
-import { EsBundle } from './scopes/es-bundle.js';
 
 describe('EsCode', () => {
   let code: EsCode;

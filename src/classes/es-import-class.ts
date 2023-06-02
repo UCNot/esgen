@@ -1,4 +1,4 @@
-import { esline } from '../esline.tag.js';
+import { esline } from '../code/esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { esImport } from '../symbols/es-import.js';
 import { EsImportInit, EsImportSymbol } from '../symbols/es-import.symbol.js';

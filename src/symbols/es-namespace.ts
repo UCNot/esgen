@@ -1,5 +1,5 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { EsComment } from '../es-comment.js';
+import { EsComment } from '../code/es-comment.js';
 import { EsScope } from '../scopes/es-scope.js';
 import { EsNameRegistry } from './es-name-registry.js';
 import { EsNaming, EsReference, EsResolution, EsSymbol } from './es-symbol.js';

@@ -1,9 +1,9 @@
 import { EveryPromiseResolver, PromiseResolver } from '@proc7ts/async';
 import { lazyValue } from '@proc7ts/primitives';
+import { EsCode } from '../code/es-code.js';
+import { EsOutput, EsPrinter } from '../code/es-output.js';
+import { EsSnippet } from '../code/es-snippet.js';
 import { EsDeclarations } from '../declarations/es-declarations.js';
-import { EsCode } from '../es-code.js';
-import { EsOutput, EsPrinter } from '../es-output.js';
-import { EsSnippet } from '../es-snippet.js';
 import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';

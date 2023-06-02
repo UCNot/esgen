@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { esline } from '../esline.tag.js';
+import { esline } from '../code/esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsBundleFormat } from '../scopes/es-bundle-format.js';
 import { EsBundle } from '../scopes/es-bundle.js';

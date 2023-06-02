@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { esline } from './esline.tag.js';
-import { EsBundle } from './scopes/es-bundle.js';
-import { esImport } from './symbols/es-import.js';
+import { EsBundle } from '../scopes/es-bundle.js';
+import { esImport } from '../symbols/es-import.js';
 
 describe('esline', () => {
   let bundle: EsBundle;

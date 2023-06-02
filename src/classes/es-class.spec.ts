@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsCode } from '../es-code.js';
-import { esline } from '../esline.tag.js';
+import { EsCode } from '../code/es-code.js';
+import { esline } from '../code/esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsBundle } from '../scopes/es-bundle.js';
 import { EsVarSymbol } from '../symbols/es-var.symbol.js';

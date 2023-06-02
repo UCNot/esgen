@@ -1,5 +1,5 @@
-import { EsSnippet } from '../es-snippet.js';
-import { esline } from '../esline.tag.js';
+import { EsSnippet } from '../code/es-snippet.js';
+import { esline } from '../code/esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { esMemberAccessor } from '../impl/es-member-accessor.js';
 import { EsScopeKind } from '../scopes/es-scope.js';

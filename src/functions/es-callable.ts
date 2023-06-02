@@ -1,4 +1,4 @@
-import { EsSnippet } from '../es-snippet.js';
+import { EsSnippet } from '../code/es-snippet.js';
 import { EsScopeInit, EsScopeKind } from '../scopes/es-scope.js';
 import { EsSignature } from './es-signature.js';
 

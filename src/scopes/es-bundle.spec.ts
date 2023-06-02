@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import { EsCode } from '../code/es-code.js';
+import { EsOutput } from '../code/es-output.js';
 import { EsDeclarations } from '../declarations/es-declarations.js';
-import { EsCode } from '../es-code.js';
-import { EsOutput } from '../es-output.js';
 import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
