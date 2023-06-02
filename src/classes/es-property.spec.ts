@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { esline } from '../code/esline.tag.js';
+import { esEvaluate } from '../es-evaluate.js';
+import { esGenerate } from '../es-generate.js';
 import { EsSignature } from '../functions/es-signature.js';
-import { EsBundleFormat } from '../scopes/es-bundle-format.js';
-import { EsBundle } from '../scopes/es-bundle.js';
 import { EsVarSymbol } from '../symbols/es-var.symbol.js';
 import { EsClass } from './es-class.js';
 import { EsProperty, EsPropertyDeclaration } from './es-property.js';
@@ -36,15 +36,13 @@ describe('EsProperty', () => {
       const handle = property.declareIn(hostClass, { get: () => `return 13;` });
 
       await expect(
-        new EsBundle()
-          .emit(code => {
-            const instance = new EsVarSymbol('instance');
+        esGenerate(code => {
+          const instance = new EsVarSymbol('instance');
 
-            code
-              .line(instance.declare({ value: () => hostClass.instantiate() }))
-              .line('console.log(', handle.get(instance), ');');
-          })
-          .asText(),
+          code
+            .line(instance.declare({ value: () => hostClass.instantiate() }))
+            .line('console.log(', handle.get(instance), ');');
+        }),
       ).resolves.toBe(
         `
 export class Test {
@@ -81,15 +79,13 @@ console.log(instance.property);
       const handle = property.declareIn(hostClass, { set: value => esline`this.val = ${value};` });
 
       await expect(
-        new EsBundle()
-          .emit(code => {
-            const instance = new EsVarSymbol('instance');
+        esGenerate(code => {
+          const instance = new EsVarSymbol('instance');
 
-            code
-              .line(instance.declare({ value: () => hostClass.instantiate() }))
-              .line(handle.set(instance, '13'), ';');
-          })
-          .asText(),
+          code
+            .line(instance.declare({ value: () => hostClass.instantiate() }))
+            .line(handle.set(instance, '13'), ';');
+        }),
       ).resolves.toBe(
         `
 export class Test {
@@ -114,12 +110,11 @@ instance.property = 13;
   async function newInstance(
     declaration?: EsPropertyDeclaration,
   ): Promise<{ property: unknown; val: unknown }> {
-    const bundle = new EsBundle({ format: EsBundleFormat.IIFE });
-
     property.declareIn(hostClass, declaration);
-    bundle.ns.refer(hostClass);
 
-    const { Test } = (await bundle.emit().asExports()) as {
+    const { Test } = (await esEvaluate((_, { ns }) => {
+      ns.refer(hostClass);
+    })) as {
       Test: new () => { property: unknown; val: unknown };
     };
 

@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { describe, expect, it } from '@jest/globals';
 import { esline } from '../code/esline.tag.js';
-import { EsBundle } from '../scopes/es-bundle.js';
+import { esGenerate } from '../es-generate.js';
 import { EsArgKind } from './es-arg.symbol.js';
 import { EsSignature } from './es-signature.js';
 
@@ -50,44 +50,38 @@ describe('EsSignature', () => {
   });
 
   describe('declare', () => {
-    let bundle: EsBundle;
-
-    beforeEach(() => {
-      bundle = new EsBundle();
-    });
-
     it('prints arg and comment on one line', async () => {
       const signature = new EsSignature({ test: { comment: 'Test' } });
 
-      await expect(
-        bundle.emit(esline`function test${signature.declare()} {}`).asText(),
-      ).resolves.toBe(`function test(test /* Test */) {}\n`);
+      await expect(esGenerate(esline`function test${signature.declare()} {}`)).resolves.toBe(
+        `function test(test /* Test */) {}\n`,
+      );
     });
     it('prints multiple args with comments each on new line', async () => {
       const signature = new EsSignature({ arg1: { comment: 'Arg 1' }, arg2: {} });
 
-      await expect(bundle.emit(signature.declare()).asText()).resolves.toBe(
+      await expect(esGenerate(signature.declare())).resolves.toBe(
         `(\n  arg1 /* Arg 1 */,\n  arg2,\n)\n`,
       );
     });
     it('prints thee args without comments on one line', async () => {
       const signature = new EsSignature({ arg1: {}, arg2: {}, arg3: {} });
 
-      await expect(bundle.emit(signature.declare()).asText()).resolves.toBe(`(arg1, arg2, arg3)\n`);
+      await expect(esGenerate(signature.declare())).resolves.toBe(`(arg1, arg2, arg3)\n`);
     });
     it('prints four args without comments each on new line', async () => {
       const signature = new EsSignature({ arg1: {}, arg2: {}, arg3: {}, arg4: {} });
 
-      await expect(bundle.emit(signature.declare()).asText()).resolves.toBe(
+      await expect(esGenerate(signature.declare())).resolves.toBe(
         `(\n  arg1,\n  arg2,\n  arg3,\n  arg4,\n)\n`,
       );
     });
     it('prints vararg', async () => {
       const signature = new EsSignature({ '...arg': {} });
 
-      await expect(
-        bundle.emit(esline`function test${signature.declare()} {}`).asText(),
-      ).resolves.toBe(`function test(...arg) {}\n`);
+      await expect(esGenerate(esline`function test${signature.declare()} {}`)).resolves.toBe(
+        `function test(...arg) {}\n`,
+      );
     });
     it('does not print comma after vararg', async () => {
       const signature = new EsSignature({
@@ -95,9 +89,9 @@ describe('EsSignature', () => {
         '...rest': { comment: 'Rest' },
       });
 
-      await expect(
-        bundle.emit(esline`function test${signature.declare()} {}`).asText(),
-      ).resolves.toBe(`function test(\n  arg /* First */,\n  ...rest /* Rest */\n) {}\n`);
+      await expect(esGenerate(esline`function test${signature.declare()} {}`)).resolves.toBe(
+        `function test(\n  arg /* First */,\n  ...rest /* Rest */\n) {}\n`,
+      );
     });
   });
 
@@ -135,51 +129,43 @@ describe('EsSignature', () => {
   });
 
   describe('call', () => {
-    let bundle: EsBundle;
-
-    beforeEach(() => {
-      bundle = new EsBundle();
-    });
-
     it('prints empty args', async () => {
       const signature = new EsSignature({});
 
-      await expect(bundle.emit(esline`test${signature.call()};`).asText()).resolves.toBe(
-        `test();\n`,
-      );
+      await expect(esGenerate(esline`test${signature.call()};`)).resolves.toBe(`test();\n`);
     });
     it('prints three args on one line', async () => {
       const signature = new EsSignature({ foo: {}, bar: {}, baz: {} });
 
       await expect(
-        bundle.emit(esline`test${signature.call({ foo: '1', baz: '3', bar: '2' })};`).asText(),
+        esGenerate(esline`test${signature.call({ foo: '1', baz: '3', bar: '2' })};`),
       ).resolves.toBe(`test(1, 2, 3);\n`);
     });
     it('prints four args each on new line', async () => {
       const signature = new EsSignature({ arg1: {}, arg2: {}, arg3: {}, arg4: {} });
 
       await expect(
-        bundle.emit(signature.call({ arg1: '1', arg3: '3', arg4: '4', arg2: '2' })).asText(),
+        esGenerate(signature.call({ arg1: '1', arg3: '3', arg4: '4', arg2: '2' })),
       ).resolves.toBe(`(\n  1,\n  2,\n  3,\n  4,\n)\n`);
     });
     it('omits trailing optional args', async () => {
       const signature = new EsSignature({ arg1: {}, arg2: {}, arg3: {}, 'arg4?': {} });
 
-      await expect(
-        bundle.emit(signature.call({ arg1: '1', arg3: '3', arg2: '2' })).asText(),
-      ).resolves.toBe(`(1, 2, 3)\n`);
+      await expect(esGenerate(signature.call({ arg1: '1', arg3: '3', arg2: '2' }))).resolves.toBe(
+        `(1, 2, 3)\n`,
+      );
     });
     it('substitutes undefined to missing args optional args', async () => {
       const signature = new EsSignature({ arg1: {}, arg2: {}, 'arg3?': {}, 'arg4?': {} });
 
-      await expect(
-        bundle.emit(signature.call({ arg1: '1', arg4: '4', arg2: '2' })).asText(),
-      ).resolves.toBe(`(\n  1,\n  2,\n  undefined,\n  4,\n)\n`);
+      await expect(esGenerate(signature.call({ arg1: '1', arg4: '4', arg2: '2' }))).resolves.toBe(
+        `(\n  1,\n  2,\n  undefined,\n  4,\n)\n`,
+      );
     });
     it('substitutes vararg values', async () => {
       const signature = new EsSignature({ 'arg?': {}, '...rest': {} });
 
-      await expect(bundle.emit(signature.call({ rest: ['1', '2'] })).asText()).resolves.toBe(
+      await expect(esGenerate(signature.call({ rest: ['1', '2'] }))).resolves.toBe(
         `(undefined, 1, 2)\n`,
       );
     });

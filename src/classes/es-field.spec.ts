@@ -1,18 +1,16 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { esline } from '../code/esline.tag.js';
+import { esEvaluate } from '../es-evaluate.js';
+import { esGenerate } from '../es-generate.js';
 import { EsSignature } from '../functions/es-signature.js';
-import { EsBundleFormat } from '../scopes/es-bundle-format.js';
-import { EsBundle } from '../scopes/es-bundle.js';
 import { EsVarSymbol } from '../symbols/es-var.symbol.js';
 import { EsClass } from './es-class.js';
 import { EsField } from './es-field.js';
 
 describe('EsField', () => {
-  let bundle: EsBundle;
   let hostClass: EsClass<EsSignature.NoArgs>;
 
   beforeEach(() => {
-    bundle = new EsBundle({ format: EsBundleFormat.IIFE });
     hostClass = new EsClass('Test', { declare: { at: 'exports' } });
   });
 
@@ -20,9 +18,10 @@ describe('EsField', () => {
     const field = new EsField('test field\n');
 
     field.declareIn(hostClass);
-    bundle.ns.refer(hostClass);
 
-    const { Test } = (await bundle.emit().asExports()) as {
+    const { Test } = (await esEvaluate((_, { ns }) => {
+      ns.refer(hostClass);
+    })) as {
       Test: new () => Record<string, unknown>;
     };
 
@@ -34,9 +33,10 @@ describe('EsField', () => {
     const field = new EsField('test');
 
     field.declareIn(hostClass, { initializer: () => esline`2 + 3` });
-    bundle.ns.refer(hostClass);
 
-    const { Test } = (await bundle.emit().asExports()) as {
+    const { Test } = (await esEvaluate((_, { ns }) => {
+      ns.refer(hostClass);
+    })) as {
       Test: new () => Record<string, unknown>;
     };
 
@@ -47,26 +47,23 @@ describe('EsField', () => {
 
   describe('handle', () => {
     it('accesses field value', async () => {
-      const bundle = new EsBundle();
       const field = new EsField('test');
 
       field.declareIn(hostClass, { initializer: () => esline`2 + 3` });
 
       await expect(
-        bundle
-          .emit(code => {
-            const handle = hostClass.member(field);
-            const instance = new EsVarSymbol('instance');
+        esGenerate(code => {
+          const handle = hostClass.member(field);
+          const instance = new EsVarSymbol('instance');
 
-            code
-              .write(
-                instance.declare({
-                  value: () => hostClass.instantiate(),
-                }),
-              )
-              .line(handle.set(instance, esline`${handle.get(instance)} + 1`), `;`);
-          })
-          .asText(),
+          code
+            .write(
+              instance.declare({
+                value: () => hostClass.instantiate(),
+              }),
+            )
+            .line(handle.set(instance, esline`${handle.get(instance)} + 1`), `;`);
+        }),
       ).resolves.toBe(
         `export class Test {\n`
           + `  test = 2 + 3;\n`

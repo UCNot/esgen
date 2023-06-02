@@ -1,9 +1,8 @@
 import { EveryPromiseResolver, PromiseResolver } from '@proc7ts/async';
 import { lazyValue } from '@proc7ts/primitives';
-import { EsCode } from '../code/es-code.js';
-import { EsOutput, EsPrinter } from '../code/es-output.js';
-import { EsSnippet } from '../code/es-snippet.js';
+import { EsPrinter } from '../code/es-output.js';
 import { EsDeclarations } from '../declarations/es-declarations.js';
+import { EsGenerationOptions } from '../es-generate.js';
 import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
@@ -12,7 +11,7 @@ import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit, EsScopeKind } from './
 /**
  * Emitted code bundle.
  *
- * A top-level emission {@link EsScope scope}. A code amitted in this scope supposed to be placed to the same bundle
+ * A top-level emission {@link EsScope scope}. Code emitted in this scope supposed to be placed to the same bundle
  * (i.e. module, file, etc.).
  */
 export class EsBundle implements EsScope {
@@ -120,149 +119,12 @@ export class EsBundle implements EsScope {
     return this;
   }
 
-  /**
-   * Bundles emitted code.
-   *
-   * Signals code bundling to {@link done stop}.
-   *
-   * @param snippets - Emitted code snippets.
-   *
-   * @returns Bundling result in appropriate {@link format}.
-   */
-  emit(...snippets: EsSnippet[]): EsBundleResult {
-    const { printer } = this.span(
-      new EsCode().write(
-        this.imports,
-        this.declarations.body,
-        ...snippets,
-        this.declarations.exports,
-      ),
-    );
-
-    this.done();
-
-    const printBundle = lazyValue(() => this.#printBundle(printer));
-    const asText = lazyValue(
-      async (): Promise<string> => await new EsOutput().print(printBundle()).asText(),
-    );
-
-    return {
-      printTo: out => {
-        out.print(printBundle());
-      },
-      asText,
-      asExports: lazyValue(this.#asExports(printBundle)),
-    };
-  }
-
-  #printBundle(body: EsPrinter): EsPrinter {
-    return {
-      printTo: async out => {
-        await this.whenDone();
-
-        switch (this.format) {
-          case EsBundleFormat.IIFE:
-            out.print(this.#printIIFE(body));
-
-            break;
-          case EsBundleFormat.ES2015:
-            out.print(body);
-        }
-      },
-    };
-  }
-
-  #printIIFE(content: EsPrinter): EsPrinter {
-    return {
-      printTo: out => {
-        out.line(out => {
-          out
-            .print(`(async () => {`)
-            .indent(out => out.print(content, ''))
-            .print(`})()`);
-        });
-      },
-    };
-  }
-
-  #asExports(printBundle: () => EsPrinter): () => Promise<unknown> {
-    const { format } = this;
-
-    if (format !== EsBundleFormat.IIFE) {
-      return this.#doNotExport.bind(this);
-    }
-
-    return async () => await this.#returnExports(printBundle());
-  }
-
-  async #returnExports(bundle: EsPrinter): Promise<unknown> {
-    const text = await new EsOutput().line(out => out.print('return ', bundle, ';')).asText();
-
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval
-    const factory = Function(text);
-
-    return await factory();
-  }
-
-  #doNotExport(): Promise<never> {
-    return Promise.reject(new TypeError(`Can not export from ${this.format} bundle`));
-  }
-
 }
 
 /**
  * Initialization options for {@link EsBundle code bundle}.
  */
-export interface EsBundleInit {
-  /**
-   * Format of the bundled code.
-   *
-   * @defaultValue {@link EsBundleFormat.Default}.
-   */
-  readonly format?: EsBundleFormat | undefined;
-
-  /**
-   * Bundle namespace factory.
-   *
-   * @defaultValue New namespace instance factory.
-   */
-  readonly ns?: ((this: void, bundle: EsBundle) => EsNamespace) | undefined;
-
-  /**
-   * Import declarations collection factory.
-   *
-   * @defaultValue New import declarations collection factory.
-   */
-  readonly imports?: ((this: void, bundle: EsBundle) => EsImports) | undefined;
-
-  /**
-   * Bundle declarations collection factory.
-   *
-   * @defaultValue New declarations collection factory.
-   */
-  readonly declarations?: ((this: void, bundle: EsBundle) => EsDeclarations) | undefined;
-}
-
-/**
- * Result of code {@link EsBundle#bundle bundling}.
- */
-export interface EsBundleResult extends EsPrinter {
-  /**
-   * Represents bundled code as text.
-   *
-   * @returns Promise resolved to printed text.
-   */
-  asText(this: void): Promise<string>;
-
-  /**
-   * Represents bundled code as exports.
-   *
-   * Works only for {@link EsBundleFormat.IIFE IIFE} format.
-   *
-   * @returns Promise resolved to bundle exports.
-   */
-  asExports(): Promise<unknown>;
-}
+export type EsBundleInit = EsGenerationOptions;
 
 class NestedEsScope implements EsScope {
 

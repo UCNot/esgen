@@ -1,27 +1,21 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { describe, expect, it } from '@jest/globals';
 import { jsStringLiteral } from 'httongue';
 import { EsCode } from '../code/es-code.js';
 import { esline } from '../code/esline.tag.js';
+import { esGenerate } from '../es-generate.js';
 import { EsSignature } from '../functions/es-signature.js';
-import { EsBundle } from '../scopes/es-bundle.js';
 import { EsClass } from './es-class.js';
 import { EsConstructor } from './es-constructor.js';
 import { EsField } from './es-field.js';
 import { EsMemberVisibility } from './es-member.js';
 
 describe('EsConstructor', () => {
-  let bundle: EsBundle;
-
-  beforeEach(() => {
-    bundle = new EsBundle();
-  });
-
   it('is available by default without arguments', async () => {
     const hostClass = new EsClass<EsSignature.NoArgs>('Test');
 
     expect(hostClass.getHandle()).toBeDefined();
     await expect(
-      bundle.emit(hostClass.declare(), esline`${hostClass.instantiate()};`).asText(),
+      esGenerate(hostClass.declare(), esline`${hostClass.instantiate()};`),
     ).resolves.toBe(`class Test {\n}\nnew Test();\n`);
   });
   it('requires to be declared with arguments', () => {
@@ -48,13 +42,11 @@ describe('EsConstructor', () => {
 
     expect(hostClass.getHandle()).toBeDefined();
     await expect(
-      bundle
-        .emit(
-          baseClass.declare(),
-          hostClass.declare(),
-          esline`${hostClass.instantiate({ test: '1' })};`,
-        )
-        .asText(),
+      esGenerate(
+        baseClass.declare(),
+        hostClass.declare(),
+        esline`${hostClass.instantiate({ test: '1' })};`,
+      ),
     ).resolves.toBe(
       `
 class Base {
@@ -112,9 +104,7 @@ new Test(1);
       },
     });
     await expect(
-      bundle
-        .emit(baseClass.declare(), hostClass.declare(), esline`${hostClass.instantiate()};`)
-        .asText(),
+      esGenerate(baseClass.declare(), hostClass.declare(), esline`${hostClass.instantiate()};`),
     ).resolves.toBe(
       `
 class Base {

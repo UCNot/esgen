@@ -1,6 +1,4 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { EsCode } from '../code/es-code.js';
-import { EsOutput } from '../code/es-output.js';
 import { EsDeclarations } from '../declarations/es-declarations.js';
 import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
@@ -155,28 +153,6 @@ describe('EsBundle', () => {
       expect(bundle.isActive()).toBe(false);
 
       await bundle.whenDone();
-    });
-  });
-
-  describe('emit', () => {
-    it('emits module', async () => {
-      const result = bundle.emit(new EsCode().write(`const a = 'test';`));
-      const text = await result.asText();
-
-      expect(text).toBe(`const a = 'test';\n`);
-      await expect(new EsOutput().print(result).asText()).resolves.toBe(text);
-      await expect(result.asExports()).rejects.toThrow(
-        new TypeError(`Can not export from ES2015 bundle`),
-      );
-    });
-    it('emits IIFE code', async () => {
-      const bundle = new EsBundle({ format: EsBundleFormat.IIFE });
-      const result = bundle.emit(new EsCode().write(`const a = 'test';`));
-      const text = await result.asText();
-
-      expect(text).toBe(`(async () => {\n  const a = 'test';\n})()\n`);
-      await expect(new EsOutput().print(result).asText()).resolves.toBe(text);
-      await expect(result.asExports()).resolves.toBeUndefined();
     });
   });
 });

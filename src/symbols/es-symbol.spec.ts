@@ -1,16 +1,10 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { describe, expect, it } from '@jest/globals';
 import { asis } from '@proc7ts/primitives';
-import { EsBundle } from '../scopes/es-bundle.js';
+import { esGenerate } from '../es-generate.js';
 import { EsNamingHost } from './es-namespace.js';
 import { EsNaming, EsSymbol } from './es-symbol.js';
 
 describe('EsSymbol', () => {
-  let bundle: EsBundle;
-
-  beforeEach(() => {
-    bundle = new EsBundle();
-  });
-
   describe('requestedName', () => {
     it('converted to ECMAScript-safe identifier', () => {
       expect(new TestSymbol('').requestedName).toBe('__');
@@ -23,15 +17,13 @@ describe('EsSymbol', () => {
   describe('emit', () => {
     it('emits symbol name', async () => {
       const symbol = new TestSymbol('test');
-      const { name } = symbol.declareIn(bundle);
 
       await expect(
-        bundle
-          .emit(code => {
-            code.line(symbol, '();');
-          })
-          .asText(),
-      ).resolves.toBe(`${name}();\n`);
+        esGenerate((code, scope) => {
+          symbol.declareIn(scope);
+          code.line(symbol, '();');
+        }),
+      ).resolves.toBe(`test();\n`);
     });
   });
 });

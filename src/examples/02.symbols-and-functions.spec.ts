@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { EsBundle, EsFunction, EsVarSymbol, esStringLiteral, esline } from 'esgen';
+import { EsFunction, EsVarSymbol, esGenerate, esStringLiteral, esline } from 'esgen';
 
 describe('Symbols And Functions', () => {
   it('contains valid example', async () => {
@@ -22,27 +22,25 @@ describe('Symbols And Functions', () => {
       },
     );
 
-    const text = await new EsBundle()
-      .emit(code => {
-        // Create variable symbol.
-        const greeting = new EsVarSymbol('greeting');
+    const text = await esGenerate(code => {
+      // Create variable symbol.
+      const greeting = new EsVarSymbol('greeting');
 
-        code
-          .write(
-            // Declare variable explicitly.
-            greeting.declare({
-              // Initialize it with string literal.
-              value: () => esStringLiteral('Hello, World!'),
-            }),
-          )
-          .write(
-            // Call `print()` function.
-            esline`${print.call({
-              text: greeting /* Pass variable as argument. */,
-            })};`,
-          );
-      })
-      .asText();
+      code
+        .write(
+          // Declare variable explicitly.
+          greeting.declare({
+            // Initialize it with string literal.
+            value: () => esStringLiteral('Hello, World!'),
+          }),
+        )
+        .write(
+          // Call `print()` function.
+          esline`${print.call({
+            text: greeting /* Pass variable as argument. */,
+          })};`,
+        );
+    });
 
     expect(text).toBe(
       `

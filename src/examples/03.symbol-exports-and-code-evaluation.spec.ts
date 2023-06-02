@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { EsBundle, EsBundleFormat, EsFunction, esline } from 'esgen';
+import { EsFunction, esEvaluate, esline } from 'esgen';
 
 describe('Symbol Exports And Code Evaluation', () => {
   let logSpy: jest.SpiedFunction<(...args: unknown[]) => void>;
@@ -31,17 +31,11 @@ describe('Symbol Exports And Code Evaluation', () => {
       },
     );
 
-    // Create bundle.
-    const bundle = new EsBundle({
-      format: EsBundleFormat.IIFE /* Emit IIFE instead of ESM module */,
-    });
-
-    // Explicitly refer the function to force its emission.
-    bundle.ns.refer(printFn);
-
     // Evaluate emitted code.
-    // Only possible for IIFE.
-    const { print } = (await bundle.emit().asExports()) as { print: (text: string) => void };
+    const { print } = (await esEvaluate((_, { ns }) => {
+      // Explicitly refer the function to force its emission.
+      ns.refer(printFn);
+    })) as { print: (text: string) => void };
 
     print('Hello, World!');
 

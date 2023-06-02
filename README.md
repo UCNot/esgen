@@ -38,18 +38,16 @@ See [API Documentation] for the details.
 [pretty-printed]: #simple-usage
 
 ```typescript
-import { EsBundle } from 'esgen';
+import { esGenerate } from 'esgen';
 
-const result = await new EsBundle()
-  .emit(code => {
-    code
-      .write(`function print(text) {`)
-      .indent(`console.log(text);`)
-      .write('}')
-      .write(`const greeting = 'Hello, World!';`)
-      .write(`print(greeting);`);
-  })
-  .asText();
+const text = await esGenerate(code => {
+  code
+    .write(`function print(text) {`)
+    .indent(`console.log(text);`)
+    .write('}')
+    .write(`const greeting = 'Hello, World!';`)
+    .write(`print(greeting);`);
+});
 ```
 
 The following code will be emitted:
@@ -73,7 +71,7 @@ automatically renamed.
 The example above can utilize symbols:
 
 ```typescript
-import { EsBundle, EsFunction, EsVarSymbol, esStringLiteral, esline } from 'esgen';
+import { EsFunction, EsVarSymbol, esGenerate, esStringLiteral, esline } from 'esgen';
 
 // Create function.
 const print = new EsFunction(
@@ -94,27 +92,25 @@ const print = new EsFunction(
   },
 );
 
-const result = await new EsBundle()
-  .emit(code => {
-    // Create variable symbol.
-    const greeting = new EsVarSymbol('greeting');
+const text = await esGenerate(code => {
+  // Create variable symbol.
+  const greeting = new EsVarSymbol('greeting');
 
-    code
-      .write(
-        // Declare variable explicitly.
-        greeting.declare({
-          // Initialize it with string literal.
-          value: () => esStringLiteral('Hello, World!'),
-        }),
-      )
-      .write(
-        // Call `print()` function.
-        esline`${print.call({
-          text: greeting /* Pass variable as argument. */,
-        })};`,
-      );
-  })
-  .asText();
+  code
+    .write(
+      // Declare variable explicitly.
+      greeting.declare({
+        // Initialize it with string literal.
+        value: () => esStringLiteral('Hello, World!'),
+      }),
+    )
+    .write(
+      // Call `print()` function.
+      esline`${print.call({
+        text: greeting /* Pass variable as argument. */,
+      })};`,
+    );
+});
 ```
 
 ## Symbol Exports And Code Evaluation
@@ -127,7 +123,7 @@ the exported symbols.
 For example, to export the function `print()` from the example above, the following can be done:
 
 ```typescript
-import { EsBundle, EsBundleFormat, EsFunction, esline } from 'esgen';
+import { EsFunction, esEvaluate, esline } from 'esgen';
 
 // Create function.
 const printFn = new EsFunction(
@@ -148,17 +144,11 @@ const printFn = new EsFunction(
   },
 );
 
-// Create bundle.
-const bundle = new EsBundle({
-  format: EsBundleFormat.IIFE /* Emit IIFE instead of ESM module */,
-});
-
-// Explicitly refer the function to force its emission.
-bundle.ns.refer(printFn);
-
 // Evaluate emitted code.
-// Only possible for IIFE.
-const { print } = (await bundle.emit().asExports()) as { print: (text: string) => void };
+const { print } = (await esEvaluate((_, { ns }) => {
+  // Explicitly refer the function to force its emission.
+  ns.refer(printFn);
+})) as { print: (text: string) => void };
 
 print('Hello, World!');
 ```
@@ -172,7 +162,7 @@ Classes represented `EsClass` instances.
 Class may have a base class, constructor, and members.
 
 ```typescript
-import { EsBundle, EsBundleFormat, EsClass, EsField, EsMemberVisibility, EsMethod, esline } from 'esgen';
+import { EsClass, EsField, EsMemberVisibility, EsMethod, esEvaluate, esline } from 'esgen';
 
 // Declare class
 //
@@ -242,16 +232,11 @@ new EsMethod('print', {
   }) => esline`console.log(${text});`,
 });
 
-// Create bundle.
-const bundle = new EsBundle({
-  format: EsBundleFormat.IIFE /* Emit IIFE instead of ESM module */,
-});
-
-// Explicitly refer the class to force its emission.
-bundle.ns.refer(printer);
-
 // Evaluate emitted code.
-const { Printer } = (await bundle.emit().asExports()) as {
+const { Printer } = (await esEvaluate((_, { ns }) => {
+  // Explicitly refer the class to force its emission.
+  ns.refer(printer);
+})) as {
   Printer: new (initialText?: string) => { print(text?: string): void };
 };
 

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { jsStringLiteral } from 'httongue';
+import { esGenerate } from '../es-generate.js';
 import { EsBundle } from '../scopes/es-bundle.js';
 import { EsCode } from './es-code.js';
 import { EsOutput } from './es-output.js';
@@ -15,7 +16,7 @@ describe('EsCode', () => {
     it('emits no code', async () => {
       code.write(EsCode.none);
 
-      await expect(new EsBundle().emit(code).asText()).resolves.toBe('');
+      await expect(esGenerate(code)).resolves.toBe('');
     });
   });
 
@@ -28,7 +29,7 @@ describe('EsCode', () => {
         })
         .write('}');
 
-      await expect(new EsBundle().emit(code).asText()).resolves.toBe('{\n}\n');
+      await expect(esGenerate(code)).resolves.toBe('{\n}\n');
     });
     it('appends at most one new line', async () => {
       code
@@ -38,19 +39,19 @@ describe('EsCode', () => {
         })
         .write('}');
 
-      await expect(new EsBundle().emit(code).asText()).resolves.toBe('{\n\n}\n');
+      await expect(esGenerate(code)).resolves.toBe('{\n\n}\n');
     });
     it('accepts another code fragment', async () => {
       code.write(new EsCode().write('foo();'));
 
-      await expect(new EsBundle().emit(code).asText()).resolves.toBe('foo();\n');
+      await expect(esGenerate(code)).resolves.toBe('foo();\n');
     });
     it('prevents adding code fragment to itself', async () => {
       code.write(inner => {
         inner.write(code);
       });
 
-      await expect(new EsBundle().emit(code).asText()).rejects.toThrow(
+      await expect(esGenerate(code)).rejects.toThrow(
         new TypeError(`Can not insert code fragment into itself`),
       );
     });
@@ -72,9 +73,7 @@ describe('EsCode', () => {
         })
         .write('}');
 
-      await expect(new EsBundle().emit(code).asText()).resolves.toBe(
-        '{\n  {\n    foo();bar();\n  }\n}\n',
-      );
+      await expect(esGenerate(code)).resolves.toBe('{\n  {\n    foo();bar();\n  }\n}\n');
     });
   });
 
@@ -94,7 +93,7 @@ describe('EsCode', () => {
         })
         .write('};');
 
-      await expect(new EsBundle().emit(code).asText()).resolves.toBe(
+      await expect(esGenerate(code)).resolves.toBe(
         'const test = {\n  a: {\n    foo: 1,\n    bar: 2,\n  },\n};\n',
       );
     });
@@ -116,7 +115,7 @@ describe('EsCode', () => {
         })
         .write('};');
 
-      await expect(new EsBundle().emit(code).asText()).resolves.toBe(
+      await expect(esGenerate(code)).resolves.toBe(
         'const test = {\n  a: {foo: 1,\n  bar: 2},\n};\n',
       );
     });
@@ -167,16 +166,12 @@ describe('EsCode', () => {
 
   describe('scope', () => {
     it('starts code emission within nested scope', async () => {
-      const bundle = new EsBundle();
-
       await expect(
-        bundle
-          .emit(code => {
-            code.scope((code, { kind }) => {
-              code.write(`const scopeKind = ${jsStringLiteral(kind)};`);
-            });
-          })
-          .asText(),
+        esGenerate(code => {
+          code.scope((code, { kind }) => {
+            code.write(`const scopeKind = ${jsStringLiteral(kind)};`);
+          });
+        }),
       ).resolves.toBe(`const scopeKind = 'block';\n`);
     });
   });

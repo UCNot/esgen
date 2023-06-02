@@ -1,18 +1,16 @@
 import { describe, expect, it } from '@jest/globals';
-import { EsBundle } from 'esgen';
+import { esGenerate } from 'esgen';
 
 describe('Simple Usage', () => {
   it('contains valid example', async () => {
-    const text = await new EsBundle()
-      .emit(code => {
-        code
-          .write(`function print(text) {`)
-          .indent(`console.log(text);`)
-          .write('}')
-          .write(`const greeting = 'Hello, World!';`)
-          .write(`print(greeting);`);
-      })
-      .asText();
+    const text = await esGenerate(code => {
+      code
+        .write(`function print(text) {`)
+        .indent(`console.log(text);`)
+        .write('}')
+        .write(`const greeting = 'Hello, World!';`)
+        .write(`print(greeting);`);
+    });
 
     expect(text).toBe(
       `
