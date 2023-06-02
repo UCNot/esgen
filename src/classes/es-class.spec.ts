@@ -3,7 +3,6 @@ import { EsCode } from '../code/es-code.js';
 import { esline } from '../code/esline.tag.js';
 import { esGenerate } from '../es-generate.js';
 import { EsSignature } from '../functions/es-signature.js';
-import { EsBundle } from '../scopes/es-bundle.js';
 import { EsVarSymbol } from '../symbols/es-var.symbol.js';
 import { EsClass } from './es-class.js';
 import { EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
@@ -249,12 +248,6 @@ describe('EsClass', () => {
   });
 
   describe('auto-declare', () => {
-    let bundle: EsBundle;
-
-    beforeEach(() => {
-      bundle = new EsBundle();
-    });
-
     it('declares base class before the class itself', async () => {
       const baseClass = new EsClass('Base', { declare: { at: 'bundle' } });
       const cls = new EsClass('Test', { baseClass, declare: { at: 'bundle' } });
@@ -268,12 +261,6 @@ describe('EsClass', () => {
   });
 
   describe('declare', () => {
-    let bundle: EsBundle;
-
-    beforeEach(() => {
-      bundle = new EsBundle();
-    });
-
     it('declares local class', async () => {
       const cls = new EsClass<EsSignature.NoArgs>('Test');
 
