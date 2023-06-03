@@ -69,8 +69,19 @@ export class EsImportSymbol<
   override refer(
     resolution: EsResolution<TNaming, this>,
     ns: EsNamespace,
+  ): EsResolution<TNaming, this>;
+
+  override refer(
+    resolution: EsResolution<TNaming, this>,
+    {
+      scope: {
+        bundle: { ns },
+      },
+    }: EsNamespace,
   ): EsResolution<TNaming, this> {
-    ns.scope.bundle.ns.addSymbol(this, naming => ns.scope.imports.addImport(this, naming, this.#createNaming));
+    if (!ns.findSymbol(this)) {
+      ns.addSymbol(this, naming => ns.scope.imports.addImport(this, naming, this.#createNaming));
+    }
 
     return resolution;
   }
