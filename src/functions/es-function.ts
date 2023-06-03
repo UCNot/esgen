@@ -162,6 +162,15 @@ export class EsFunction<out TArgs extends EsSignature.Args>
     };
   }
 
+  toString(): string {
+    const {
+      symbol: { requestedName, comment },
+      signature,
+    } = this;
+
+    return comment.appendTo(`${requestedName}${signature}`);
+  }
+
 }
 
 /**

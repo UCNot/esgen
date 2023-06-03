@@ -139,4 +139,24 @@ describe('EsFunction', () => {
       });
     });
   });
+
+  describe('toString()', () => {
+    it('reflects function name, signature, and comments', () => {
+      const fn = new EsFunction(
+        'increase',
+        {
+          value: { comment: 'Value to increase' },
+        },
+        {
+          comment: 'Increases value',
+          declare: {
+            at: 'exports',
+            body: ({ args: { value } }) => esline`return ${value} + 1;`,
+          },
+        },
+      );
+
+      expect(fn.toString()).toBe(`increase(value /* Value to increase */) /* Increases value */`);
+    });
+  });
 });
