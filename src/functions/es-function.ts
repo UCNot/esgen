@@ -219,11 +219,6 @@ function isLambda(
 export interface EsFunctionInit<out TArgs extends EsSignature.Args>
   extends Omit<EsSymbolInit, 'declare'> {
   /**
-   * Whether asynchronous function declared.
-   */
-  readonly async?: boolean | undefined;
-
-  /**
    * Argument declarations.
    */
   readonly args?: EsSignature.Declarations<TArgs> | undefined;
