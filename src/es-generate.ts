@@ -3,6 +3,7 @@ import { EsDeclarations } from './declarations/es-declarations.js';
 import { generateEsCode } from './es-generate.impl.js';
 import { EsBundleFormat } from './scopes/es-bundle-format.js';
 import { EsBundle } from './scopes/es-bundle.js';
+import { EsScopeSetup } from './scopes/es-scope-setup.js';
 import { EsImports } from './symbols/es-imports.js';
 import { EsNamespace } from './symbols/es-namespace.js';
 
@@ -41,6 +42,11 @@ export interface EsGenerationOptions {
    * @defaultValue {@link EsBundleFormat.Default}.
    */
   readonly format?: EsBundleFormat | undefined;
+
+  /**
+   * Bundle initialization setup to perform.
+   */
+  readonly setup?: EsScopeSetup<EsBundle> | readonly EsScopeSetup<EsBundle>[] | undefined;
 
   /**
    * Bundle namespace factory.

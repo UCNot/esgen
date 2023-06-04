@@ -135,12 +135,7 @@ export class EsBundle implements EsScope {
 /**
  * Initialization options for {@link EsBundle code bundle}.
  */
-export interface EsBundleInit extends EsGenerationOptions {
-  /**
-   * Bundle initialization setup to perform.
-   */
-  readonly setup?: EsScopeSetup<EsBundle> | readonly EsScopeSetup<EsBundle>[] | undefined;
-}
+export type EsBundleInit = EsGenerationOptions;
 
 class NestedEsScope implements EsScope {
 
