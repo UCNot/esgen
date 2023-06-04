@@ -5,6 +5,7 @@ import { esGenerate } from '../es-generate.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsVarSymbol } from '../symbols/es-var.symbol.js';
 import { EsClass } from './es-class.js';
+import { esImportClass } from './es-import-class.js';
 import { EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
 
 describe('EsClass', () => {
@@ -14,6 +15,24 @@ describe('EsClass', () => {
   beforeEach(() => {
     baseClass = new EsClass('Base');
     hostClass = new EsClass('Test', { baseClass });
+  });
+
+  it('can be imported', async () => {
+    const baseClass = new EsClass(esImportClass('test-module', 'Base', {}));
+    const testClass = new EsClass('Test', { baseClass, declare: { at: 'bundle' } });
+
+    await expect(
+      esGenerate(code => {
+        code.line(testClass.instantiate(), ';');
+      }),
+    ).resolves.toBe(
+      `
+import { Base } from 'test-module';
+class Test extends Base {
+}
+new Test();
+`.trimStart(),
+    );
   });
 
   describe('declareMember', () => {

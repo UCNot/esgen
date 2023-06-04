@@ -49,30 +49,37 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
   /**
    * Constructs class representation.
    *
-   * @param requestedName - Requested class name.
+   * @param requestedName - Either requested class name, or symbol (e.g. {@link esImportClass imported} from another
+   * module).
    * @param init - Class initialization options.
    */
   constructor(
-    requestedName: string,
+    requestedName: string | EsSymbol<EsClassNaming<TArgs>>,
     ...init: EsSignature.NoArgs extends TArgs ? [EsClassInit<TArgs>?] : [EsClassInit<TArgs>]
   );
 
-  constructor(requestedName: string, init: Partial<EsClassInit<TArgs>> = {}) {
+  constructor(
+    requestedName: string | EsSymbol<EsClassNaming<TArgs>>,
+    init: Partial<EsClassInit<TArgs>> = {},
+  ) {
     const { baseClass, declare, classConstructor } = init;
 
-    this.#symbol = new EsSymbol(requestedName, {
-      ...init,
-      declare: declare && {
-        ...declare,
-        as: context => {
-          if (baseClass) {
-            context.refer(baseClass);
-          }
+    this.#symbol =
+      typeof requestedName === 'string'
+        ? new EsSymbol(requestedName, {
+            ...init,
+            declare: declare && {
+              ...declare,
+              as: context => {
+                if (baseClass) {
+                  context.refer(baseClass);
+                }
 
-          return [this.asDeclaration(), this.#createNaming(context.naming)];
-        },
-      },
-    });
+                return [this.asDeclaration(), this.#createNaming(context.naming)];
+              },
+            },
+          })
+        : requestedName;
 
     this.#baseClass = baseClass;
     if (baseClass) {
