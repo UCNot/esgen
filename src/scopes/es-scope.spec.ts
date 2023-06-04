@@ -120,5 +120,16 @@ describe('EsScope', () => {
       expect(scope.get(key)).toBe(0);
       expect(scope.get(key)).toBe(0);
     });
+    it('returns assigned value', () => {
+      const scope = bundle.nest({
+        setup: {
+          esSetupScope(context) {
+            context.set(key, 13);
+          },
+        },
+      });
+
+      expect(scope.get(key)).toBe(13);
+    });
   });
 });

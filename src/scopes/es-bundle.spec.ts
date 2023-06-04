@@ -145,6 +145,17 @@ describe('EsBundle', () => {
       expect(bundle.get(key)).toBe(0);
       expect(bundle.get(key)).toBe(0);
     });
+    it('returns assigned value', () => {
+      const bundle = new EsBundle({
+        setup: {
+          esSetupScope(context) {
+            context.set(key, 13);
+          },
+        },
+      });
+
+      expect(bundle.get(key)).toBe(13);
+    });
   });
 
   describe('span', () => {

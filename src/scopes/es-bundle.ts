@@ -1,11 +1,12 @@
 import { EveryPromiseResolver, PromiseResolver } from '@proc7ts/async';
-import { lazyValue } from '@proc7ts/primitives';
+import { asArray, lazyValue } from '@proc7ts/primitives';
 import { EsPrinter } from '../code/es-output.js';
 import { EsDeclarations } from '../declarations/es-declarations.js';
 import { EsGenerationOptions } from '../es-generate.js';
 import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
+import { EsScopeContext, EsScopeSetup } from './es-scope-setup.js';
 import { EsEmissionSpan, EsEmitter, EsScope, EsScopeInit, EsScopeKind } from './es-scope.js';
 import { EsScopedValueKey } from './es-scoped-value-key.js';
 
@@ -18,7 +19,7 @@ import { EsScopedValueKey } from './es-scoped-value-key.js';
 export class EsBundle implements EsScope {
 
   readonly #state: [EsScope$State];
-  readonly #store: EsScope$Store;
+  readonly #store: EsScope$Store<EsBundle>;
   readonly #format: EsBundleFormat;
   readonly #imports: () => EsImports;
   readonly #declarations: () => EsDeclarations;
@@ -35,6 +36,7 @@ export class EsBundle implements EsScope {
     ns = bundle => new EsNamespace(bundle, { comment: 'Bundle' }),
     imports = bundle => new EsImports(bundle),
     declarations = bundle => new EsDeclarations(bundle),
+    setup,
   }: EsBundleInit = {}) {
     this.#state = [new EsScope$ActiveState(newState => (this.#state[0] = newState))];
     this.#store = new EsScope$Store(this);
@@ -42,6 +44,8 @@ export class EsBundle implements EsScope {
     this.#ns = lazyValue(() => ns(this));
     this.#imports = lazyValue(() => imports(this));
     this.#declarations = lazyValue(() => declarations(this));
+
+    this.#store.setup(setup);
   }
 
   /**
@@ -131,14 +135,19 @@ export class EsBundle implements EsScope {
 /**
  * Initialization options for {@link EsBundle code bundle}.
  */
-export type EsBundleInit = EsGenerationOptions;
+export interface EsBundleInit extends EsGenerationOptions {
+  /**
+   * Bundle initialization setup to perform.
+   */
+  readonly setup?: EsScopeSetup<EsBundle> | readonly EsScopeSetup<EsBundle>[] | undefined;
+}
 
 class NestedEsScope implements EsScope {
 
   readonly #bundle: EsBundle;
   readonly #enclosing: EsScope;
   readonly #state: [EsScope$State];
-  readonly #store: EsScope$Store;
+  readonly #store: EsScope$Store<EsScope>;
   readonly #kind: EsScopeKind;
   readonly #async: boolean;
   readonly #generator: boolean;
@@ -147,7 +156,7 @@ class NestedEsScope implements EsScope {
   constructor(
     enclosing: EsScope,
     state: [EsScope$State],
-    { kind = EsScopeKind.Block, async, generator }: EsScopeInit = {},
+    { kind = EsScopeKind.Block, async, generator, setup }: EsScopeInit = {},
     ns: (scope: EsScope) => EsNamespace,
   ) {
     this.#enclosing = enclosing;
@@ -163,6 +172,8 @@ class NestedEsScope implements EsScope {
       this.#generator = enclosing.isGenerator();
     }
     this.#ns = lazyValue(() => ns(this));
+
+    this.#store.setup(setup);
   }
 
   get kind(): EsScopeKind {
@@ -227,13 +238,27 @@ class NestedEsScope implements EsScope {
 
 }
 
-class EsScope$Store {
+class EsScope$Store<out TScope extends EsScope> {
 
-  readonly #scope: EsScope;
+  readonly #scope: TScope;
   readonly #values = new Map<EsScopedValueKey<unknown>, () => unknown>();
 
-  constructor(scope: EsScope) {
+  constructor(scope: TScope) {
     this.#scope = scope;
+  }
+
+  setup(setup: EsScopeSetup<TScope> | readonly EsScopeSetup<TScope>[] | undefined): void {
+    const values = this.#values;
+    const context: EsScopeContext<TScope> = {
+      scope: this.#scope,
+      set<T>(key: EsScopedValueKey<T>, value: T) {
+        values.set(key, () => value);
+
+        return this;
+      },
+    };
+
+    asArray(setup).forEach(setup => setup.esSetupScope(context));
   }
 
   get<T>(key: EsScopedValueKey<T>): T {

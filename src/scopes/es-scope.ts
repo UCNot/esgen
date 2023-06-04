@@ -4,6 +4,7 @@ import { EsImports } from '../symbols/es-imports.js';
 import { EsNamespace, EsNamespaceInit, EsNamingHost } from '../symbols/es-namespace.js';
 import { EsBundleFormat } from './es-bundle-format.js';
 import { EsBundle } from './es-bundle.js';
+import { EsScopeSetup } from './es-scope-setup.js';
 import { EsScopedValueKey } from './es-scoped-value-key.js';
 
 /**
@@ -132,6 +133,11 @@ export interface EsScopeInit {
    * @defaultValue {@link EsScopeKind.Block block scope}.
    */
   readonly kind?: Exclude<EsScopeKind, EsScopeKind.Bundle> | undefined;
+
+  /**
+   * Scope initialization setup to perform.
+   */
+  readonly setup?: EsScopeSetup | readonly EsScopeSetup[] | undefined;
 
   /**
    * Whether this is a scope within asynchronous function.
