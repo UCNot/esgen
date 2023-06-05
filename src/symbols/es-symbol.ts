@@ -84,7 +84,7 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
    */
   refer(resolution: EsResolution<TNaming, this>, ns: EsNamespace): EsResolution<TNaming, this> {
     if (this.#declare) {
-      this.#autoDeclareIn(ns, this.#declare);
+      this.#autoDeclareIn(ns.scope.bundle.ns, this.#declare);
     }
 
     return resolution;
