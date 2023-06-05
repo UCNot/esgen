@@ -327,6 +327,18 @@ describe('EsNamespace', () => {
             ),
           );
         });
+        it('refers proper symbol', () => {
+          const nested1 = bundle.nest({ ns: { comment: 'nested 1' } }).ns;
+          const nested2 = bundle.nest({ ns: { comment: 'nested 2' } }).ns;
+          const symbol = new NonUniqueSymbol('test');
+
+          expect(symbol.declareIn(nested1).name).toBe('test');
+          expect(symbol.declareIn(nested2).name).toBe('test');
+          expect(nested1.refer(symbol).getNaming().name).toBe('test');
+          expect(nested1.refer(symbol).getNaming().ns).toBe(nested1);
+          expect(nested2.refer(symbol).getNaming().name).toBe('test');
+          expect(nested2.refer(symbol).getNaming().ns).toBe(nested2);
+        });
       });
     });
   });

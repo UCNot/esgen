@@ -315,11 +315,7 @@ export class EsNamespace implements EsNamingHost {
 
     const { naming, visible } = found;
 
-    if (!visible) {
-      throw new ReferenceError(`${symbol} is invisible to ${this}. It is named in ${naming.ns}`);
-    }
-
-    return naming;
+    return visible ? naming : undefined;
   }
 
   #getNaming<TNaming extends EsNaming>(
@@ -329,6 +325,20 @@ export class EsNamespace implements EsNamingHost {
     const naming = findNaming();
 
     if (!naming) {
+      if (!symbol.isUnique()) {
+        const nonUnique = this.#findNonUniqueSymbol(symbol);
+
+        if (nonUnique) {
+          const { naming, visible } = nonUnique;
+
+          if (!visible) {
+            throw new ReferenceError(
+              `${symbol} is invisible to ${this}. It is named in ${naming.ns}`,
+            );
+          }
+        }
+      }
+
       throw new ReferenceError(`${symbol} is unnamed`);
     }
 
