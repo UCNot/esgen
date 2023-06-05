@@ -1,4 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
+import { EsCode } from '../code/es-code.js';
 import { esline } from '../code/esline.tag.js';
 import { esEvaluate } from '../es-evaluate.js';
 import { esGenerate } from '../es-generate.js';
@@ -51,6 +52,29 @@ describe('EsFunction', () => {
       })) as { increase(value: number): number };
 
       expect(increase(1)).toBe(2);
+    });
+  });
+
+  describe('emit', () => {
+    it('emits function name', async () => {
+      const fn = new EsFunction(
+        'test',
+        {},
+        {
+          declare: {
+            at: 'bundle',
+            body: () => EsCode.none,
+          },
+        },
+      );
+
+      await expect(esGenerate(esline`${fn}();`)).resolves.toBe(
+        `
+function test() {
+}
+test();
+`.trimStart(),
+      );
     });
   });
 

@@ -1,6 +1,7 @@
 import { EsSnippet } from '../code/es-snippet.js';
 import { esline } from '../code/esline.tag.js';
 import { esFunctionOrBundle } from '../impl/es-function-or-bundle.js';
+import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import {
   EsDeclarationContext,
   EsDeclarationPolicy,
@@ -21,7 +22,7 @@ import { EsSignature } from './es-signature.js';
  */
 export class EsFunction<out TArgs extends EsSignature.Args>
   extends EsCallable<TArgs>
-  implements EsReference<EsFunctionNaming<TArgs>> {
+  implements EsReference<EsFunctionNaming<TArgs>>, EsEmitter {
 
   readonly #symbol: EsSymbol<EsFunctionNaming<TArgs>>;
 
@@ -68,6 +69,17 @@ export class EsFunction<out TArgs extends EsSignature.Args>
    */
   get symbol(): EsSymbol<EsFunctionNaming<TArgs>> {
     return this.#symbol;
+  }
+
+  /**
+   * Emits function reference.
+   *
+   * @param scope - Code emission scope.
+   *
+   * @returns Code emission result that prints function name.
+   */
+  emit(scope: EsScope): EsEmissionResult {
+    return this.symbol.emit(scope);
   }
 
   /**
