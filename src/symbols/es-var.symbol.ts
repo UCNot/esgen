@@ -20,7 +20,11 @@ export class EsVarSymbol extends EsSymbol {
       ...init,
       declare: declare && {
         ...declare,
-        as: context => this.#declare(context, declare, declare.as ?? EsVarKind.Var),
+        as: context => this.#declare(
+            context,
+            declare,
+            declare.as ?? declare.value ? EsVarKind.Const : EsVarKind.Var,
+          ),
       },
     });
   }
