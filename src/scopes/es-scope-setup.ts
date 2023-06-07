@@ -19,7 +19,7 @@ export interface EsScopeSetup<in TScope extends EsScope = EsScope> {
 }
 
 /**
- * Context of code emission scope {@link EsScopSetup#esSetupScope setup}.
+ * Context of code emission scope {@link EsScopeSetup#esSetupScope setup}.
  *
  * @typeParam TScope - Supported type of scope.
  */
