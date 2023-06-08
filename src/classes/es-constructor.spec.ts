@@ -7,7 +7,7 @@ import { EsSignature } from '../functions/es-signature.js';
 import { EsClass } from './es-class.js';
 import { EsConstructor } from './es-constructor.js';
 import { EsField } from './es-field.js';
-import { EsMemberVisibility } from './es-member.js';
+import { EsMemberVisibility } from './es-member-visibility.js';
 
 describe('EsConstructor', () => {
   it('is available by default without arguments', async () => {

@@ -1,8 +1,8 @@
 import { EsSnippet } from '../code/es-snippet.js';
 import { esline } from '../code/esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
-import { esMemberAccessor } from '../impl/es-member-accessor.js';
 import { EsScopeKind } from '../scopes/es-scope.js';
+import { esMemberAccessor } from '../util/es-member-accessor.js';
 import { EsClass } from './es-class.js';
 import { EsMember, EsMemberInit, EsMemberRef } from './es-member.js';
 

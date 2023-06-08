@@ -2,7 +2,8 @@ import { EsSnippet } from '../code/es-snippet.js';
 import { EsSignature } from '../functions/es-signature.js';
 import { EsScopeKind } from '../scopes/es-scope.js';
 import { EsClass, EsClassHandle } from './es-class.js';
-import { EsMember, EsMemberInit, EsMemberRef, EsMemberVisibility } from './es-member.js';
+import { EsMemberVisibility } from './es-member-visibility.js';
+import { EsMember, EsMemberInit, EsMemberRef } from './es-member.js';
 
 /**
  * Constructor of {@link EsClass class}.

@@ -1,3 +1,5 @@
+import { esEscapeUnsafeId } from './es-safe-id.impl.js';
+
 /**
  * Converts arbitrary string to string safe to be used as ECMAScript identifier.
  *
@@ -9,19 +11,18 @@
  * Does not modify ECMAScript-safe identifiers.
  *
  * @param id - Arbitrary string to convert.
- * @param reserved - Read-only set of reserved words. Defaults to the set of reserved words prohibited in strict mode.
  *
  * @returns ECMAScript-safe identifier.
  *
  * [identifiers]: https://262.ecma-international.org/#prod-IdentifierName
  * [reserved word]: https://262.ecma-international.org/#prod-ReservedWord
  */
-export function esSafeId(id: string, reserved: ReadonlySet<string> = ES_KEYWORDS): string {
-  if (reserved.has(id)) {
+export function esSafeId(id: string): string {
+  if (ES_KEYWORDS.has(id)) {
     return id ? `__${id}__` : '__';
   }
 
-  return id.replace(ES_UNSAFE_ID_REPLACEMENT_PATTERN, esReplaceUnsafeIdChars);
+  return esEscapeUnsafeId(id);
 }
 
 // See https://262.ecma-international.org/#sec-keywords-and-reserved-words
@@ -75,17 +76,3 @@ const ES_KEYWORDS = new Set([
   'protected',
   'public',
 ]);
-
-const ES_UNSAFE_ID_REPLACEMENT_PATTERN =
-  // eslint-disable-next-line no-misleading-character-class
-  /(?:^[^\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}_$]|(?<!^)[^\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}\u{200c}\u{200d}_$])+/gu;
-
-function esReplaceUnsafeIdChars(chars: string): string {
-  let result = '_';
-
-  for (const char of chars) {
-    result += 'x' + char.codePointAt(0)!.toString(16).toUpperCase();
-  }
-
-  return result + '_';
-}

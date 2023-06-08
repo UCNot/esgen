@@ -3,7 +3,6 @@ import { EsCode } from '../code/es-code.js';
 import { EsSnippet } from '../code/es-snippet.js';
 import { esline } from '../code/esline.tag.js';
 import { EsSignature } from '../functions/es-signature.js';
-import { esMemberAccessor } from '../impl/es-member-accessor.js';
 import { EsEmissionResult, EsEmitter, EsScope } from '../scopes/es-scope.js';
 import { EsNameRegistry } from '../symbols/es-name-registry.js';
 import {
@@ -13,9 +12,11 @@ import {
   EsSymbol,
   EsSymbolInit,
 } from '../symbols/es-symbol.js';
+import { esMemberAccessor } from '../util/es-member-accessor.js';
 import { esSafeId } from '../util/es-safe-id.js';
 import { EsConstructor, EsConstructorDeclaration, EsConstructorInit } from './es-constructor.js';
-import { EsAnyMember, EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
+import { EsMemberVisibility } from './es-member-visibility.js';
+import { EsAnyMember, EsMember, EsMemberRef } from './es-member.js';
 
 /**
  * Mutable class representation.
@@ -654,10 +655,10 @@ class EsMemberEntry<
   constructor(hostClass: EsClass, member: TMember, name: string) {
     this.#hostClass = hostClass;
     this.#member = member;
-    this.#name = member.visibility === EsMemberVisibility.Private ? `#${name}` : name;
 
     const { key, accessor } = esMemberAccessor(name, member.visibility);
 
+    this.#name = member.visibility === EsMemberVisibility.Private ? key : name;
     this.#key = key;
     this.#accessor = accessor;
 

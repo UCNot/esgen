@@ -1,5 +1,6 @@
-import { esMemberAccessor } from '../impl/es-member-accessor.js';
+import { esMemberAccessor } from '../util/es-member-accessor.js';
 import { EsClass } from './es-class.js';
+import { EsMemberVisibility } from './es-member-visibility.js';
 
 /**
  * Member of {@link EsClass class}.
@@ -126,7 +127,7 @@ export interface EsMemberRef<
   /**
    * Actual member name.
    *
-   * {@link EsMemberVisibility.Private Private} class names always start with `#`.
+   * {@link EsMemberVisibility.Private Private} member names always start with `#`.
    */
   readonly name: string;
 
@@ -156,25 +157,6 @@ export interface EsMemberRef<
    * Obtains member handle.
    */
   getHandle(this: void): THandle;
-}
-
-/**
- * Class {@link EsMember member} visibility.
- */
-export enum EsMemberVisibility {
-  /**
-   * Member is [public] (the default).
-   *
-   * [public]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Classes/Public_class_fields
-   */
-  Public = 'public',
-
-  /**
-   * Member is [private].
-   *
-   * [private]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Classes/Private_class_fields
-   */
-  Private = 'private',
 }
 
 /**

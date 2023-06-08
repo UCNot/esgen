@@ -6,7 +6,8 @@ import { EsSignature } from '../functions/es-signature.js';
 import { EsVarSymbol } from '../symbols/es-var.symbol.js';
 import { EsClass } from './es-class.js';
 import { esImportClass } from './es-import-class.js';
-import { EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
+import { EsMemberVisibility } from './es-member-visibility.js';
+import { EsMember, EsMemberRef } from './es-member.js';
 
 describe('EsClass', () => {
   let baseClass: EsClass;

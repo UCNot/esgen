@@ -5,7 +5,8 @@ import { EsScopeKind } from '../scopes/es-scope.js';
 import { EsVarSymbol } from '../symbols/es-var.symbol.js';
 import { EsClass } from './es-class.js';
 import { EsField } from './es-field.js';
-import { EsMember, EsMemberRef, EsMemberVisibility } from './es-member.js';
+import { EsMemberVisibility } from './es-member-visibility.js';
+import { EsMember, EsMemberRef } from './es-member.js';
 
 /**
  * Class property representation.
