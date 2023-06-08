@@ -9,20 +9,22 @@
  * Does not modify ECMAScript-safe identifiers.
  *
  * @param id - Arbitrary string to convert.
+ * @param reserved - Read-only set of reserved words. Defaults to the set of reserved words prohibited in strict mode.
  *
  * @returns ECMAScript-safe identifier.
  *
  * [identifiers]: https://262.ecma-international.org/#prod-IdentifierName
  * [reserved word]: https://262.ecma-international.org/#prod-ReservedWord
  */
-export function esSafeId(id: string): string {
-  if (ES_KEYWORDS.has(id)) {
+export function esSafeId(id: string, reserved: ReadonlySet<string> = ES_KEYWORDS): string {
+  if (reserved.has(id)) {
     return id ? `__${id}__` : '__';
   }
 
   return id.replace(ES_UNSAFE_ID_REPLACEMENT_PATTERN, esReplaceUnsafeIdChars);
 }
 
+// See https://262.ecma-international.org/#sec-keywords-and-reserved-words
 const ES_KEYWORDS = new Set([
   '',
   'await',
@@ -63,6 +65,15 @@ const ES_KEYWORDS = new Set([
   'while',
   'with',
   'yield',
+  // Disallowed in strict mode.
+  'let',
+  'static',
+  'implements',
+  'interface',
+  'package',
+  'private',
+  'protected',
+  'public',
 ]);
 
 const ES_UNSAFE_ID_REPLACEMENT_PATTERN =
