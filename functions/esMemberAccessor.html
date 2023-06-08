@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>EsClassInit | ECMAScript Generator</title><meta name="description" content="Documentation for ECMAScript Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
+<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>esMemberAccessor | ECMAScript Generator</title><meta name="description" content="Documentation for ECMAScript Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
 <div class="tsd-toolbar-contents container">
 <div class="table-cell" id="tsd-search" data-base="..">
 <div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M15.7824 13.833L12.6666 10.7177C12.5259 10.5771 12.3353 10.499 12.1353 10.499H11.6259C12.4884 9.39596 13.001 8.00859 13.001 6.49937C13.001 2.90909 10.0914 0 6.50048 0C2.90959 0 0 2.90909 0 6.49937C0 10.0896 2.90959 12.9987 6.50048 12.9987C8.00996 12.9987 9.39756 12.4863 10.5008 11.6239V12.1332C10.5008 12.3332 10.5789 12.5238 10.7195 12.6644L13.8354 15.7797C14.1292 16.0734 14.6042 16.0734 14.8948 15.7797L15.7793 14.8954C16.0731 14.6017 16.0731 14.1267 15.7824 13.833ZM6.50048 10.499C4.29094 10.499 2.50018 8.71165 2.50018 6.49937C2.50018 4.29021 4.28781 2.49976 6.50048 2.49976C8.71001 2.49976 10.5008 4.28708 10.5008 6.49937C10.5008 8.70852 8.71314 10.499 6.50048 10.499Z" fill="var(--color-text)"></path></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div>
@@ -13,21 +13,45 @@
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb">
 <li><a href="../modules.html">ECMAScript Generator</a></li>
-<li><a href="EsClassInit.html">EsClassInit</a></li></ul>
-<h1>Namespace EsClassInit</h1></div><aside class="tsd-sources">
+<li><a href="esMemberAccessor.html">esMemberAccessor</a></li></ul>
+<h1>Function esMemberAccessor</h1></div>
+<section class="tsd-panel">
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="esMemberAccessor"><span class="tsd-kind-call-signature">es<wbr/>Member<wbr/>Accessor</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">name</span>, <span class="tsd-kind-parameter">visibility</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">accessor</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">key</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><a href="#esMemberAccessor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><g stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" id="icon-anchor"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></g></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Creates the named member accessor expression.</p>
+<p>If the given <code>name</code> is safe to be used as ID, a <code>.name</code> syntax is used. A <code>[&#39;name&#39;]</code> syntax is used otherwise.</p>
+<p><a href="../enums/EsMemberVisibility.html#Private" class="tsd-kind-enum-member">Private</a> member names always converted to the <a href="esSafeId.html" class="tsd-kind-function">safe form</a> and
+prepended by <code>#</code> sign.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">name</span>: <span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>Accessed member name.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li>
+<li>
+<h5><span class="tsd-kind-parameter">visibility</span>: <a href="../enums/EsMemberVisibility.html" class="tsd-signature-type tsd-kind-enum">EsMemberVisibility</a><span class="tsd-signature-symbol"> = EsMemberVisibility.Public</span></h5>
+<div class="tsd-comment tsd-typography"><p>Accessed member visibility. <a href="../enums/EsMemberVisibility.html#Public" class="tsd-kind-enum-member">Public</a> by default.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">accessor</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">key</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h4>
+<ul class="tsd-parameters">
+<li class="tsd-parameter">
+<h5><span class="tsd-kind-property">accessor</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>Member accessor to be appended to host object reference..</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li>
+<li class="tsd-parameter">
+<h5><span class="tsd-kind-property">key</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>Member key that can be used e.g. within class declarations or as object literal key.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li></ul>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/6c721c3/src/classes/es-class.ts#L500">run-z/esgen/src/classes/es-class.ts:500</a></li>
-<li>Defined in <a href="https://github.com/run-z/esgen/blob/6c721c3/src/classes/es-class.ts#L505">run-z/esgen/src/classes/es-class.ts:505</a></li></ul></aside>
-<section class="tsd-panel-group tsd-index-group">
-<section class="tsd-panel tsd-index-panel">
-<h3 class="tsd-index-heading uppercase">Index</h3>
-<section class="tsd-index-section">
-<h3 class="tsd-index-heading">Interfaces</h3>
-<div class="tsd-index-list"><a href="../interfaces/EsClassInit.BaseInit.html" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>Base<wbr/>Init</span></a>
-<a href="../interfaces/EsClassInit.Custom.html" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Custom</span></a>
-<a href="../interfaces/EsClassInit.Inherited.html" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited</span></a>
-<a href="../interfaces/EsClassInit.NoArgs.html" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>No<wbr/>Args</span></a>
-</div></section></section></section></div>
+<li>Defined in <a href="https://github.com/run-z/esgen/blob/6c721c3/src/util/es-member-accessor.ts#L19">run-z/esgen/src/util/es-member-accessor.ts:19</a></li></ul></aside></li></ul></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -45,18 +69,11 @@
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)"></path></g></svg><span>ECMAScript <wbr/>Generator</span></a>
 <ul class="tsd-small-nested-navigation">
-<li><a href="EsArg.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>Es<wbr/>Arg</span></a></li>
-<li>
-<details class="tsd-index-accordion" open data-key="EsClassInit"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><a href="EsClassInit.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>Es<wbr/>Class<wbr/>Init</span></a></summary>
-<div class="tsd-accordion-details">
-<ul class="tsd-nested-navigation">
-<li><a href="../interfaces/EsClassInit.BaseInit.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Base<wbr/>Init</span></a></li>
-<li><a href="../interfaces/EsClassInit.Custom.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Custom</span></a></li>
-<li><a href="../interfaces/EsClassInit.Inherited.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited</span></a></li>
-<li><a href="../interfaces/EsClassInit.NoArgs.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>No<wbr/>Args</span></a></li></ul></div></details></li>
-<li><a href="EsImportInit.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>Es<wbr/>Import<wbr/>Init</span></a></li>
-<li><a href="EsMember.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>Es<wbr/>Member</span></a></li>
-<li><a href="EsSignature.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>Es<wbr/>Signature</span></a></li>
+<li><a href="../modules/EsArg.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>Es<wbr/>Arg</span></a></li>
+<li><a href="../modules/EsClassInit.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>Es<wbr/>Class<wbr/>Init</span></a></li>
+<li><a href="../modules/EsImportInit.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>Es<wbr/>Import<wbr/>Init</span></a></li>
+<li><a href="../modules/EsMember.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>Es<wbr/>Member</span></a></li>
+<li><a href="../modules/EsSignature.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>Es<wbr/>Signature</span></a></li>
 <li><a href="../enums/EsArgKind.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-8"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-enum)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.45 16V7.24H14.49V8.224H10.518V10.936H14.07V11.908H10.518V15.016H14.49V16H9.45Z" fill="var(--color-text)"></path></g></svg><span>Es<wbr/>Arg<wbr/>Kind</span></a></li>
 <li><a href="../enums/EsBundleFormat.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8"></use></svg><span>Es<wbr/>Bundle<wbr/>Format</span></a></li>
 <li><a href="../enums/EsFunctionKind.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8"></use></svg><span>Es<wbr/>Function<wbr/>Kind</span></a></li>
@@ -86,7 +103,7 @@
 <li><a href="../classes/EsSignature-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Es<wbr/>Signature</span></a></li>
 <li><a href="../classes/EsSymbol.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Es<wbr/>Symbol</span></a></li>
 <li><a href="../classes/EsVarSymbol.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Es<wbr/>Var<wbr/>Symbol</span></a></li>
-<li><a href="../interfaces/EsArgInit.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Es<wbr/>Arg<wbr/>Init</span></a></li>
+<li><a href="../interfaces/EsArgInit.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>Es<wbr/>Arg<wbr/>Init</span></a></li>
 <li><a href="../interfaces/EsArgNaming.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Es<wbr/>Arg<wbr/>Naming</span></a></li>
 <li><a href="../interfaces/EsClassHandle.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Es<wbr/>Class<wbr/>Handle</span></a></li>
 <li><a href="../interfaces/EsClassNaming.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Es<wbr/>Class<wbr/>Naming</span></a></li>
@@ -142,18 +159,18 @@
 <li><a href="../types/EsEmissionResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Es<wbr/>Emission<wbr/>Result</span></a></li>
 <li><a href="../types/EsImportInit-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Es<wbr/>Import<wbr/>Init</span></a></li>
 <li><a href="../types/EsSnippet.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Es<wbr/>Snippet</span></a></li>
-<li><a href="../functions/esConst.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-64"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-function)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.39 16V7.24H14.55V8.224H10.446V11.128H14.238V12.112H10.47V16H9.39Z" fill="var(--color-text)"></path></g></svg><span>es<wbr/>Const</span></a></li>
-<li><a href="../functions/esEscapeString.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Escape<wbr/>String</span></a></li>
-<li><a href="../functions/esEvaluate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Evaluate</span></a></li>
-<li><a href="../functions/esGenerate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Generate</span></a></li>
-<li><a href="../functions/esImport.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Import</span></a></li>
-<li><a href="../functions/esImportClass.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Import<wbr/>Class</span></a></li>
-<li><a href="../functions/esImportFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Import<wbr/>Function</span></a></li>
-<li><a href="../functions/esMemberAccessor.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Member<wbr/>Accessor</span></a></li>
-<li><a href="../functions/esQuoteKey.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Quote<wbr/>Key</span></a></li>
-<li><a href="../functions/esSafeId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Safe<wbr/>Id</span></a></li>
-<li><a href="../functions/esStringLiteral.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>String<wbr/>Literal</span></a></li>
-<li><a href="../functions/esline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>esline</span></a></li></ul></nav></div></div></div>
+<li><a href="esConst.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-64"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-function)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.39 16V7.24H14.55V8.224H10.446V11.128H14.238V12.112H10.47V16H9.39Z" fill="var(--color-text)"></path></g></svg><span>es<wbr/>Const</span></a></li>
+<li><a href="esEscapeString.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Escape<wbr/>String</span></a></li>
+<li><a href="esEvaluate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Evaluate</span></a></li>
+<li><a href="esGenerate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Generate</span></a></li>
+<li><a href="esImport.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Import</span></a></li>
+<li><a href="esImportClass.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Import<wbr/>Class</span></a></li>
+<li><a href="esImportFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Import<wbr/>Function</span></a></li>
+<li><a href="esMemberAccessor.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Member<wbr/>Accessor</span></a></li>
+<li><a href="esQuoteKey.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Quote<wbr/>Key</span></a></li>
+<li><a href="esSafeId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>Safe<wbr/>Id</span></a></li>
+<li><a href="esStringLiteral.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>es<wbr/>String<wbr/>Literal</span></a></li>
+<li><a href="esline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>esline</span></a></li></ul></nav></div></div></div>
 <div class="tsd-generator">
 <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>
 <div class="overlay"></div></body></html>
