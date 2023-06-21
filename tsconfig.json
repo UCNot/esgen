@@ -4,8 +4,7 @@
     "exactOptionalPropertyTypes": true,
     "outDir": "target/js",
     "rootDir": "./src",
-    "typeRoots": ["node_modules/@types"],
-    "types": ["node"]
+    "types": []
   },
   "include": ["src/**/*.ts"]
 }

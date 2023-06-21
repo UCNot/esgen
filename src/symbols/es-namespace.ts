@@ -1,3 +1,4 @@
+import { whenNextEvent } from '@proc7ts/async';
 import { lazyValue } from '@proc7ts/primitives';
 import { EsComment } from '../code/es-comment.js';
 import { EsScope } from '../scopes/es-scope.js';
@@ -366,9 +367,7 @@ export class EsNamespace implements EsNamingHost {
     }
 
     // Try after all promises resolution.
-    await new Promise(resolve => {
-      setImmediate(resolve);
-    });
+    await whenNextEvent();
 
     return this.#getNaming(symbol, findNaming);
   }
