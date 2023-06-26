@@ -512,11 +512,8 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
       yield* baseClass.#publicMembersInDeclarationOrder(listed);
     }
 
-    for (const [member, entry] of this.#members) {
-      if (
-        (entry.isDeclared(), member.visibility === EsMemberVisibility.Public)
-        && !listed.has(member)
-      ) {
+    for (const member of this.#members.keys()) {
+      if (member.visibility === EsMemberVisibility.Public && !listed.has(member)) {
         listed.add(member);
         yield member;
       }
