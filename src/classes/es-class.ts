@@ -37,7 +37,7 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
   readonly #shared: EsClass$SharedState;
   #code?: EsCode;
   readonly #privateBody = new EsCode();
-  readonly #body = new EsCode();
+  readonly #memberBodies = new Map<EsAnyMember, EsCode>();
 
   readonly #names: EsNameRegistry;
   readonly #members = new Map<EsAnyMember, EsMemberEntry>();
@@ -285,9 +285,20 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
       this.#findPublicMember(member) ?? this.#addPublicMember(member);
 
     entry.declare(handle);
-    this.#body.write(declaration);
+    this.#memberBody(member).write(declaration);
 
     return entry;
+  }
+
+  #memberBody(member: EsAnyMember): EsCode {
+    let body = this.#memberBodies.get(member);
+
+    if (!body) {
+      body = new EsCode();
+      this.#memberBodies.set(member, body);
+    }
+
+    return body;
   }
 
   #addPublicMember<TMember extends EsMember<THandle>, THandle>(
@@ -479,9 +490,37 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
           },
           ' {',
         )
-        .indent(this.#privateBody, this.#body)
+        .indent(code => {
+          code.write(this.#privateBody).write(this.#memberBody(this.classConstructor));
+
+          const listed = new Set<EsAnyMember>();
+
+          for (const member of this.#publicMembersInDeclarationOrder(listed)) {
+            code.write(this.#memberBody(member));
+          }
+        })
         .write('}');
     }));
+  }
+
+  *#publicMembersInDeclarationOrder(listed: Set<EsAnyMember>): IterableIterator<EsAnyMember> {
+    listed.add(this.classConstructor);
+
+    const { baseClass } = this;
+
+    if (baseClass) {
+      yield* baseClass.#publicMembersInDeclarationOrder(listed);
+    }
+
+    for (const [member, entry] of this.#members) {
+      if (
+        (entry.isDeclared(), member.visibility === EsMemberVisibility.Public)
+        && !listed.has(member)
+      ) {
+        listed.add(member);
+        yield member;
+      }
+    }
   }
 
   toString(): string {

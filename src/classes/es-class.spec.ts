@@ -8,6 +8,7 @@ import { EsClass } from './es-class.js';
 import { esImportClass } from './es-import-class.js';
 import { EsMemberVisibility } from './es-member-visibility.js';
 import { EsMember, EsMemberRef } from './es-member.js';
+import { EsMethod } from './es-method.js';
 
 describe('EsClass', () => {
   let baseClass: EsClass;
@@ -60,7 +61,7 @@ new Test();
         ref,
       ]);
     });
-    it('declares override class member', () => {
+    it('declares overridden class member', () => {
       const member = new TestMember('test');
 
       expect(hostClass.findMember(member)).toBeUndefined();
@@ -291,7 +292,49 @@ new Test();
             value: () => esline`new ${cls}()`,
           }),
         ),
-      ).resolves.toBe(`class Test {\n}\nconst instance = new Test();\n`);
+      ).resolves.toBe(
+        `
+class Test {
+}
+const instance = new Test();
+`.trimStart(),
+      );
+    });
+    it('declares overridden members before own ones', async () => {
+      const baseClass = new EsClass<EsSignature.NoArgs>('Base', {});
+      const member1 = new EsMethod<EsSignature.NoArgs>('member1', { args: {} });
+
+      member1.declareIn(baseClass, {
+        body: () => esline`return 'inherited';`,
+      });
+
+      const cls = new EsClass<EsSignature.NoArgs>('Test', { baseClass });
+      const member2 = new EsMethod<EsSignature.NoArgs>('member2', { args: {} });
+
+      member2.declareIn(cls, {
+        body: () => esline`return 'own';`,
+      });
+      member1.declareIn(cls, {
+        body: () => esline`return 'overridden';`,
+      });
+
+      await expect(esGenerate(baseClass.declare(), cls.declare())).resolves.toBe(
+        `
+class Base {
+  member1() {
+    return 'inherited';
+  }
+}
+class Test extends Base {
+  member1() {
+    return 'overridden';
+  }
+  member2() {
+    return 'own';
+  }
+}
+`.trimStart(),
+      );
     });
   });
 
