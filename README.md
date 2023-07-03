@@ -157,7 +157,7 @@ print('Hello, World!');
 
 [classes]: #classes
 
-Classes represented `EsClass` instances.
+Classes represented by `EsClass` instances.
 
 Class may have a base class, constructor, and members.
 
