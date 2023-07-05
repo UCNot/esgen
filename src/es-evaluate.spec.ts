@@ -1,6 +1,8 @@
 import { describe, expect, it } from '@jest/globals';
+import { asis } from '@proc7ts/primitives';
 import { EsCode } from './code/es-code.js';
 import { esEvaluate } from './es-evaluate.js';
+import { EsEvaluationError } from './es-evaluation.error.js';
 import { EsBundleFormat } from './scopes/es-bundle-format.js';
 
 describe('esEvaluate', () => {
@@ -14,32 +16,15 @@ describe('esEvaluate', () => {
   });
 
   describe('on syntax error', () => {
-    it('throws by default', async () => {
-      await expect(esEvaluate('@')).rejects.toThrow(new SyntaxError('Invalid or unexpected token'));
-    });
-    it('reported to custom handler', async () => {
-      let reportedError: unknown;
-      let reportedIsSyntaxError: boolean | undefined;
-      let reportedText: string | undefined;
+    it('throws EsEvaluationError', async () => {
+      const error = (await esEvaluate('@').catch(asis)) as EsEvaluationError;
 
-      await expect(
-        esEvaluate(
-          {
-            onError(error, text, isSyntaxError) {
-              reportedError = error;
-              reportedIsSyntaxError = isSyntaxError;
-              reportedText = text;
-
-              return false;
-            },
-          },
-          '@',
-        ),
-      ).resolves.toBe(false);
-
-      expect(reportedError).toEqual(new SyntaxError('Invalid or unexpected token'));
-      expect(reportedIsSyntaxError).toBe(true);
-      expect(reportedText).toBe(
+      expect(error).toBeInstanceOf(EsEvaluationError);
+      expect(error.name).toBe('EsEvaluationError');
+      expect(error.message).toBe('Syntax error');
+      expect(error.cause).toEqual(new SyntaxError('Invalid or unexpected token'));
+      expect(error.isSyntaxError).toBe(true);
+      expect(error.evaluatedCode).toBe(
         `
 return (async () => {
   @
@@ -52,31 +37,14 @@ return (async () => {
 
   describe('on evaluation error', () => {
     it('throws by default', async () => {
-      await expect(esEvaluate(`throw new Error('!!!');`)).rejects.toThrow(new Error('!!!'));
-    });
-    it('reported to custom handler', async () => {
-      let reportedError: unknown;
-      let reportedIsSyntaxError: boolean | undefined;
-      let reportedText: string | undefined;
+      const error = (await esEvaluate(`throw new Error('!!!');`).catch(asis)) as EsEvaluationError;
 
-      await expect(
-        esEvaluate(
-          {
-            onError(error, text, isSyntaxError) {
-              reportedError = error;
-              reportedIsSyntaxError = isSyntaxError;
-              reportedText = text;
-
-              return false;
-            },
-          },
-          `throw new Error('!!!');`,
-        ),
-      ).resolves.toBe(false);
-
-      expect(reportedError).toEqual(new Error('!!!'));
-      expect(reportedIsSyntaxError).toBe(false);
-      expect(reportedText).toBe(
+      expect(error).toBeInstanceOf(EsEvaluationError);
+      expect(error.name).toBe('EsEvaluationError');
+      expect(error.message).toBe('Evaluation error');
+      expect(error.cause).toEqual(new Error('!!!'));
+      expect(error.isSyntaxError).toBe(false);
+      expect(error.evaluatedCode).toBe(
         `
 return (async () => {
   throw new Error('!!!');
