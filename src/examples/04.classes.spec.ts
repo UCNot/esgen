@@ -1,11 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { noop } from '@proc7ts/primitives';
 import { EsClass, EsField, EsMemberVisibility, EsMethod, esEvaluate, esline } from 'esgen';
 
 describe('Classes', () => {
   let logSpy: jest.SpiedFunction<(...args: unknown[]) => void>;
 
   beforeEach(() => {
-    logSpy = jest.spyOn(console, 'log');
+    logSpy = jest.spyOn(console, 'log').mockImplementation(noop);
   });
   afterEach(() => {
     logSpy.mockRestore();
