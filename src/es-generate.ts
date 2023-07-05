@@ -1,6 +1,6 @@
 import { EsSnippet } from './code/es-snippet.js';
 import { EsDeclarations } from './declarations/es-declarations.js';
-import { generateEsCode } from './es-generate.impl.js';
+import { generateEsCode, prepareEsGeneration } from './es-generate.impl.js';
 import { EsBundleFormat } from './scopes/es-bundle-format.js';
 import { EsBundle } from './scopes/es-bundle.js';
 import { EsScopeSetup } from './scopes/es-scope-setup.js';
@@ -29,7 +29,9 @@ export function esGenerate(...snippets: EsSnippet[]): Promise<string>;
 export async function esGenerate(
   ...args: [EsGenerationOptions, ...EsSnippet[]] | EsSnippet[]
 ): Promise<string> {
-  return await generateEsCode(undefined, ...args);
+  const [options, snippets] = prepareEsGeneration({}, ...args);
+
+  return await generateEsCode(options, snippets);
 }
 
 /**

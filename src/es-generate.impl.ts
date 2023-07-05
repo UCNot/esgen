@@ -6,22 +6,22 @@ import { EsGenerationOptions } from './es-generate.js';
 import { EsBundleFormat } from './scopes/es-bundle-format.js';
 import { EsBundle } from './scopes/es-bundle.js';
 
-export async function generateEsCode(
-  defaults: EsGenerationOptions | undefined,
-  snippetOrOptions?: EsGenerationOptions | EsSnippet,
+export function prepareEsGeneration<TOptions extends EsGenerationOptions>(
+  defaults: TOptions,
+  snippetOrOptions?: TOptions | EsSnippet,
   ...restSnippets: EsSnippet[]
-): Promise<string> {
-  let snippets: EsSnippet[];
-  let options: EsGenerationOptions | undefined;
-
+): [options: TOptions, snippets: EsSnippet[]] {
   if (isEsSnippet(snippetOrOptions)) {
-    options = defaults;
-    snippets = [snippetOrOptions, ...restSnippets];
-  } else {
-    options = { ...defaults, ...snippetOrOptions };
-    snippets = restSnippets;
+    return [defaults, [snippetOrOptions, ...restSnippets]];
   }
 
+  return [{ ...defaults, ...snippetOrOptions }, restSnippets];
+}
+
+export async function generateEsCode(
+  options: EsGenerationOptions,
+  snippets: readonly EsSnippet[],
+): Promise<string> {
   const bundle = new EsBundle(options);
   const { printer } = bundle.span(
     new EsCode().write(

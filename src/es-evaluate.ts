@@ -1,6 +1,6 @@
 import { EsOutput } from './code/es-output.js';
 import { EsSnippet } from './code/es-snippet.js';
-import { generateEsCode } from './es-generate.impl.js';
+import { generateEsCode, prepareEsGeneration } from './es-generate.impl.js';
 import { EsGenerationOptions } from './es-generate.js';
 import { EsBundleFormat } from './scopes/es-bundle-format.js';
 
@@ -28,14 +28,28 @@ export function esEvaluate(...snippets: EsSnippet[]): Promise<unknown>;
 
 export async function esEvaluate(
   ...args: [EsEvaluationOptions, ...EsSnippet[]] | EsSnippet[]
-): Promise<string> {
-  const iife = await generateEsCode({ format: EsBundleFormat.IIFE }, ...args);
+): Promise<unknown> {
+  const [options, snippets] = prepareEsGeneration<EsEvaluationOptions>(
+    { format: EsBundleFormat.IIFE },
+    ...args,
+  );
+  const { onError = onEsEvaluationError } = options;
+  const iife = await generateEsCode(options, snippets);
   const text = await new EsOutput().line(out => out.print('return ', iife, ';')).asText();
+  let factory: () => Promise<unknown>;
 
-  // eslint-disable-next-line @typescript-eslint/no-implied-eval
-  const factory = Function(text);
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    factory = new Function(text) as () => Promise<unknown>;
+  } catch (error) {
+    return onError(error, text, true);
+  }
 
-  return await factory();
+  try {
+    return await factory();
+  } catch (error) {
+    return onError(error, text, false);
+  }
 }
 
 /**
@@ -48,4 +62,23 @@ export interface EsEvaluationOptions extends EsGenerationOptions {
    * The only supported value is {@link EsBundleFormat.IIFE IIFE}.
    */
   readonly format?: EsBundleFormat.IIFE | undefined;
+
+  /**
+   * Function to call on evaluation failure.
+   *
+   * @param error - Error thrown.
+   * @param text - Evaluated source code.
+   * @param isSyntaxError - Whether the error throw is a syntax error. `false` on error thrown during evaluation.
+   *
+   * @returns Evaluation result to return on error.
+   *
+   * @defaultValue Re-throws the `error`.
+   */
+  readonly onError?:
+    | ((this: void, error: unknown, text: string, isSyntaxError: boolean) => unknown)
+    | undefined;
+}
+
+function onEsEvaluationError(error: unknown, _text: string, _isSyntaxError: boolean): never {
+  throw error;
 }
