@@ -55,6 +55,15 @@ describe('EsCode', () => {
         new TypeError(`Can not insert code fragment into itself`),
       );
     });
+    it('executes code builder at most once', async () => {
+      code.write(code => {
+        code.write('test();');
+      });
+
+      await expect(esGenerate(code)).resolves.toBe('test();\n');
+      await expect(esGenerate(code)).resolves.toBe('test();\n');
+      await expect(esGenerate(code)).resolves.toBe('test();\n');
+    });
   });
 
   describe('line', () => {

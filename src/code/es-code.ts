@@ -56,10 +56,10 @@ export class EsCode implements EsEmitter {
 
   #addSnippet(snippet: EsSnippet): void {
     if (typeof snippet === 'function') {
-      const code = new EsCode(this);
-
       this.#addEmitter({
-        async emit(scope: EsScope): Promise<EsPrinter> {
+        emit: async (scope: EsScope): Promise<EsPrinter> => {
+          const code = new EsCode(this);
+
           await snippet(code, scope);
 
           return code.emit(scope);
