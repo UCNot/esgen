@@ -51,7 +51,7 @@
     "typescript": "~5.1.6"
   },
   "scripts": {
-    "all": "run-z +z build,lint,test",
+    "all": "run-z +z build lint,test",
     "build": "run-z +z --then build-z",
     "ci:all": "run-z all +test/--ci/--runInBand",
     "clean": "run-z +z --then clean-z",
@@ -59,7 +59,7 @@
     "doc:publish": "run-z doc --then gh-pages --dist target/typedoc --dotfiles",
     "format": "run-z +z --then prettier-eslint --write --include-dot-files \"src/**/*.*\" \"*.{js,cjs,json,md}\"",
     "lint": "run-z +z --then eslint .",
-    "test": "run-z +z env:NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" --then test-z",
-    "z": "run-z +cmd:build-z,+cmd:typedoc +cmd:eslint,+cmd:test-z"
+    "test": "run-z +z build env:NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" --then test-z",
+    "z": "run-z +cmd:build-z,+cmd:typedoc,+cmd:eslint"
   }
 }
