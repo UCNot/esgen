@@ -1,6 +1,6 @@
 {
   "name": "esgen",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "ECMAScript generator",
   "keywords": [
     "codegen"
