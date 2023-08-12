@@ -14,10 +14,24 @@ export abstract class EsMember<out THandle = void> {
   readonly #requestedName: string;
   readonly #visibility: EsMemberVisibility;
 
-  constructor(requestedName: string, init?: EsMemberInit);
+  /**
+   * Constructs class member.
+   *
+   * @param requestedName - Requested member name.
+   *
+   * May start with `#`. In this case, if {@link EsMemberInit#visibility visibility} is either unspecified or
+   * {@link EsMemberVisibility#Private private}, the leading `#` is automatically removed.
+   *
+   * @param init - Member initialization options.
+   */
   constructor(requestedName: string, init?: EsMemberInit) {
-    this.#requestedName = requestedName;
-    this.#visibility = init?.visibility ?? EsMemberVisibility.Public;
+    if (init?.visibility !== EsMemberVisibility.Public && requestedName.startsWith('#')) {
+      this.#requestedName = requestedName.slice(1);
+      this.#visibility = EsMemberVisibility.Private;
+    } else {
+      this.#requestedName = requestedName;
+      this.#visibility = init?.visibility ?? EsMemberVisibility.Public;
+    }
   }
 
   /**
@@ -166,7 +180,8 @@ export interface EsMemberInit {
   /**
    * Member visibility, either `public` or `private`
    *
-   * @defaultValue {@link EsMemberVisibility#Public Public} by default.
+   * @defaultValue {@link EsMemberVisibility#Public Public}, unless requested member name starts with `#`, in which case
+   * defaults to {@link EsMemberVisibility#Private private}
    */
   readonly visibility?: EsMemberVisibility;
 }

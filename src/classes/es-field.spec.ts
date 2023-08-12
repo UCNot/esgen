@@ -6,6 +6,7 @@ import { EsSignature } from '../functions/es-signature.js';
 import { EsVarSymbol } from '../symbols/es-var.symbol.js';
 import { EsClass } from './es-class.js';
 import { EsField } from './es-field.js';
+import { EsMemberVisibility } from './es-member-visibility.js';
 
 describe('EsField', () => {
   let hostClass: EsClass<EsSignature.NoArgs>;
@@ -43,6 +44,27 @@ describe('EsField', () => {
     const result = new Test();
 
     expect(result).toEqual({ test: 5 });
+  });
+
+  describe('visibility', () => {
+    it('is private by default with name starting with "#"', () => {
+      const field = new EsField('#test');
+
+      expect(field.visibility).toBe(EsMemberVisibility.Private);
+      expect(field.requestedName).toBe('test');
+    });
+    it('is explicitly private with name starting with "#"', () => {
+      const field = new EsField('#test', { visibility: EsMemberVisibility.Private });
+
+      expect(field.visibility).toBe(EsMemberVisibility.Private);
+      expect(field.requestedName).toBe('test');
+    });
+    it('is explicitly public with name starting with "#"', () => {
+      const field = new EsField('#test', { visibility: EsMemberVisibility.Public });
+
+      expect(field.visibility).toBe(EsMemberVisibility.Public);
+      expect(field.requestedName).toBe('#test');
+    });
   });
 
   describe('handle', () => {
