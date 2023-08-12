@@ -164,11 +164,11 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
  */
 export interface EsSymbolInit<out TNaming extends EsNaming = EsNaming> {
   /**
-   * Whether the symbol is {@link EsMember#unique} unique.
+   * Whether the symbol is {@link EsSymbol#isUnique} unique or not.
    *
    * Non-unique symbols may be named multiple times in unrelated namespaces.
    *
-   * An {@link declare auto-declared} symbol is always unique.
+   * This option is ignored when {@link declare} one is set, as a {@link declare auto-declared} symbol is always unique.
    *
    * @defaultValue `true`
    */
