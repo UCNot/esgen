@@ -37,7 +37,7 @@ export class EsImportSymbol<
   ) {
     const { as = importName, createNaming = asis as EsImportInit.Namer<TNaming> } = init;
 
-    super(as, init);
+    super(as, { ...init, unique: true });
 
     this.#importName = importName;
     this.#from = from;
@@ -110,7 +110,7 @@ export namespace EsImportInit {
    * @typeParam TNaming - Import naming type.
    */
   export interface Default<out TNaming extends EsNaming = EsNaming>
-    extends Omit<EsSymbolInit, 'declare'> {
+    extends Omit<EsSymbolInit, 'unique' | 'declare'> {
     /**
      * Requested symbol name.
      *

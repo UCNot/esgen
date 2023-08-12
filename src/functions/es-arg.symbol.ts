@@ -23,7 +23,7 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming> {
    * @param init - Argument initialization options.
    */
   constructor(signature: EsSignature, requestedName: string, init: EsArgInit) {
-    super(requestedName, init);
+    super(requestedName, { ...init, unique: false });
 
     const { position, kind = EsArgKind.Required } = init;
 
@@ -71,13 +71,6 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming> {
    */
   get kind(): EsArgKind {
     return this.#kind;
-  }
-
-  /**
-   * @returns `false`, as multiple functions may have the same signature with the same set of argument symbols.
-   */
-  override isUnique(): boolean {
-    return false;
   }
 
   #declareArgName(): Exclude<EsArg.Declaration['declare'], undefined> {
@@ -160,7 +153,7 @@ export enum EsArgKind {
 /**
  * Definition of function argument.
  */
-export type EsArg = Omit<EsSymbolInit, 'declare'>;
+export type EsArg = Omit<EsSymbolInit, 'unique' | 'declare'>;
 
 export namespace EsArg {
   /**

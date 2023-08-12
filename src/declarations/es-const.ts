@@ -58,7 +58,7 @@ export function esConst(key: string, initializer: string, init: EsConstInit = {}
  */
 
 export interface EsConstInit
-  extends Omit<EsSymbolInit, 'declare'>,
+  extends Omit<EsSymbolInit, 'unique' | 'declare'>,
     Omit<EsDeclarationPolicy, 'at' | 'as'> {
   /**
    * Where to place the constant declaration.

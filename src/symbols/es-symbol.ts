@@ -19,6 +19,7 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
   implements EsReference<TNaming>, EsEmitter {
 
   readonly #requestedName: string;
+  readonly #unique: boolean;
   readonly #declare: EsDeclarationPolicy<TNaming> | undefined;
   readonly #comment: EsComment;
 
@@ -31,8 +32,9 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
   constructor(requestedName: string, init: EsSymbolInit<TNaming> = {}) {
     this.#requestedName = esSafeId(requestedName);
 
-    const { declare, comment } = init;
+    const { unique = true, declare, comment } = init;
 
+    this.#unique = declare ? true : unique;
     this.#declare = declare;
     this.#comment = EsComment.from(comment);
   }
@@ -68,7 +70,7 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
    * @returns `true` by default.
    */
   isUnique(): boolean {
-    return true;
+    return this.#unique;
   }
 
   /**
@@ -161,6 +163,17 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
  * @typeParam TNaming - Type of symbol naming.
  */
 export interface EsSymbolInit<out TNaming extends EsNaming = EsNaming> {
+  /**
+   * Whether the symbol is {@link EsMember#unique} unique.
+   *
+   * Non-unique symbols may be named multiple times in unrelated namespaces.
+   *
+   * An {@link declare auto-declared} symbol is always unique.
+   *
+   * @defaultValue `true`
+   */
+  readonly unique?: boolean | undefined;
+
   /**
    * Automatic symbol declaration policy.
    *
