@@ -13,6 +13,12 @@ import {
  */
 export class EsVarSymbol extends EsSymbol {
 
+  /**
+   * Constructs variable symbol.
+   *
+   * @param requestedName - Requested symbol name. Will be converted to {@link esSafeId ECMAScript-safe} identifier.
+   * @param init - Initialization options.
+   */
   constructor(requestedName: string, init: EsVarInit = {}) {
     const { declare } = init;
 
@@ -43,6 +49,39 @@ export class EsVarSymbol extends EsSymbol {
       as: context => this.#declare(context, request, as),
       at: as === EsVarKind.Var ? esFunctionOrBundle : undefined,
     });
+  }
+
+  /**
+   * Declares {@link EsVarKind.Const constant}.
+   *
+   * @param request - Variable declaration request.
+   *
+   * @returns Variable declaration statement.
+   */
+  const(request?: Omit<EsVarDeclarationRequest, 'as'>): EsSnippet {
+    return this.declare({ ...request, as: EsVarKind.Const });
+  }
+
+  /**
+   * Declares variable with {@link EsVarKind.Let `let`} keyword.
+   *
+   * @param request - Variable declaration request.
+   *
+   * @returns Variable declaration statement.
+   */
+  let(request?: Omit<EsVarDeclarationRequest, 'as'>): EsSnippet {
+    return this.declare({ ...request, as: EsVarKind.Let });
+  }
+
+  /**
+   * Declares variable with {@link EsVarKind.Let `var`} keyword.
+   *
+   * @param request - Variable declaration request.
+   *
+   * @returns Variable declaration statement.
+   */
+  var(request?: Omit<EsVarDeclarationRequest, 'as'>): EsSnippet {
+    return this.declare({ ...request, as: EsVarKind.Var });
   }
 
   #declare(

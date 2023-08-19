@@ -44,4 +44,37 @@ describe('EsVarSymbol', () => {
       await expect(esGenerate(symbol.declare({ as: EsVarKind.Var }))).resolves.toBe('var test;\n');
     });
   });
+
+  describe('const', () => {
+    it('declares constant', async () => {
+      const symbol = new EsVarSymbol('test');
+
+      await expect(esGenerate(symbol.const())).resolves.toBe('const test;\n');
+      await expect(esGenerate(symbol.const({ value: () => '10 + 3' }))).resolves.toBe(
+        'const test = 10 + 3;\n',
+      );
+    });
+  });
+
+  describe('let', () => {
+    it('declares variable with `let` keyword', async () => {
+      const symbol = new EsVarSymbol('test');
+
+      await expect(esGenerate(symbol.let())).resolves.toBe('let test;\n');
+      await expect(esGenerate(symbol.let({ value: () => '10 + 3' }))).resolves.toBe(
+        'let test = 10 + 3;\n',
+      );
+    });
+  });
+
+  describe('var', () => {
+    it('declares variable with `var` keyword', async () => {
+      const symbol = new EsVarSymbol('test');
+
+      await expect(esGenerate(symbol.var())).resolves.toBe('var test;\n');
+      await expect(esGenerate(symbol.var({ value: () => '10 + 3' }))).resolves.toBe(
+        'var test = 10 + 3;\n',
+      );
+    });
+  });
 });
