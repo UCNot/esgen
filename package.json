@@ -5,7 +5,7 @@
   "keywords": [
     "codegen"
   ],
-  "homepage": "https://github.com/run-z/esgen",
+  "homepage": "https://github.com/UCNot/esgen",
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com:run-z/esgen.git"
@@ -13,7 +13,7 @@
   "license": "MIT",
   "author": "Ruslan Lopatin <ruslan.lopatin@gmail.com>",
   "bugs": {
-    "url": "https://github.com/run-z/esgen/issues"
+    "url": "https://github.com/UCNot/esgen/issues"
   },
   "type": "module",
   "types": "./dist/esgen.d.ts",
