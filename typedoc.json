@@ -1,9 +1,7 @@
 {
   "entryPoints": ["src/mod.ts"],
   "excludePrivate": true,
-  "name": "ECMAScript Generator",
+  "name": "esgen",
   "out": "./target/typedoc",
-  "compilerOptions": {
-    "module": 7 /* ES2022 */
-  }
+  "sort": ["static-first", "visibility", "enum-value-ascending", "alphabetical", "kind"]
 }
