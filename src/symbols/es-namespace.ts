@@ -31,7 +31,7 @@ export class EsNamespace implements EsNamingHost {
     {
       enclosing,
       comment = enclosing
-        ? `${enclosing}/${++enclosing.#nestedSeq}`
+        ? `${enclosing}/${enclosing.#nextId()}`
         : `Namespace #${++EsNamespace$seq}`,
     }: EsNamespaceInit = {},
   ) {
@@ -47,6 +47,10 @@ export class EsNamespace implements EsNamingHost {
     }
 
     this.#comment = EsComment.from(comment);
+  }
+
+  #nextId(): number {
+    return ++this.#nestedSeq;
   }
 
   /**
