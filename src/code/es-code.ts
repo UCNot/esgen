@@ -175,7 +175,7 @@ export class EsCode implements EsEmitter {
     }
 
     return this.write((code, scope) => {
-      code.write(new EsCode().write(builder!).emit(scope.nest(init)));
+      code.write(new EsCode().write(builder).emit(scope.nest(init)));
     });
   }
 

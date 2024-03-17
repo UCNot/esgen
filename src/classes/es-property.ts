@@ -47,7 +47,7 @@ export class EsProperty extends EsMember<EsPropertyHandle> {
         code
           .write(`get ${ref.key}() {`)
           .scope({ kind: EsScopeKind.Function }, code => {
-            code.indent(get!(ref, hostClass));
+            code.indent(get(ref, hostClass));
           })
           .write('}');
       }
@@ -57,7 +57,7 @@ export class EsProperty extends EsMember<EsPropertyHandle> {
           .scope({ kind: EsScopeKind.Function }, (code, { ns }) => {
             const value = ns.addSymbol(new EsVarSymbol('value'), asis);
 
-            code.write().indent(set!(value, ref, hostClass));
+            code.write().indent(set(value, ref, hostClass));
           })
           .write('}');
       }
