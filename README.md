@@ -25,7 +25,7 @@ See [API Documentation] for the details.
 [quality-img]: https://app.codacy.com/project/badge/Grade/9a2766f185d84c6a8fa7ade820fc18a7
 [quality-link]: https://app.codacy.com/gh/UCNot/esgen/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
 [coverage-img]: https://app.codacy.com/project/badge/Coverage/9a2766f185d84c6a8fa7ade820fc18a7
-[coverage-link]: https://www.codacy.com/gh/UCNot/esgen/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_Coverage
+[coverage-link]: https://app.codacy.com/gh/UCNot/esgen/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_Coverage
 [github-image]: https://img.shields.io/static/v1?logo=github&label=GitHub&message=project&color=informational
 [github-url]: https://github.com/UCNot/esgen
 [api-docs-image]: https://img.shields.io/static/v1?logo=typescript&label=API&message=docs&color=informational
