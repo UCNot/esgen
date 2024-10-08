@@ -2,6 +2,9 @@
   "extends": "@run-z/project-config/tsconfig.lib.json",
   "compilerOptions": {
     "exactOptionalPropertyTypes": true,
+    "paths": {
+      "esgen": ["./src/mod.ts"]
+    },
     "outDir": "target/js",
     "rootDir": "./src",
     "types": []
