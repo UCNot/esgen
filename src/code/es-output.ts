@@ -4,7 +4,6 @@ import { collectLines } from '../impl/collect-lines.js';
  * Code output collects {@link print printed} code. The printed code can be {@link asText() serialized} then.
  */
 export class EsOutput implements EsPrinter {
-
   #indent = '';
   #nl = '\n';
   readonly #records: EsPrintRecord[] = [];
@@ -196,7 +195,6 @@ export class EsOutput implements EsPrinter {
 
     return lines.join('');
   }
-
 }
 
 /**

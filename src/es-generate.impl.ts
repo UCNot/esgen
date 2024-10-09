@@ -69,8 +69,8 @@ function printIIFE(content: EsPrinter): EsPrinter {
 
 function isEsSnippet(value: EsGenerationOptions | EsSnippet | undefined): value is EsSnippet {
   return (
-    typeof value === 'string'
-    || typeof value === 'function'
-    || (mayHaveProperties(value) && ('emit' in value || 'printTo' in value))
+    typeof value === 'string' ||
+    typeof value === 'function' ||
+    (mayHaveProperties(value) && ('emit' in value || 'printTo' in value))
   );
 }

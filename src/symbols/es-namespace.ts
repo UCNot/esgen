@@ -9,7 +9,6 @@ import { EsNaming, EsReference, EsResolution, EsSymbol } from './es-symbol.js';
  * Namespace used to resolve naming conflicts.
  */
 export class EsNamespace implements EsNamingHost {
-
   readonly #scope: EsScope;
   readonly #enclosing: EsNamespace | undefined;
   readonly #shared: EsNamespace$SharedState;
@@ -391,7 +390,6 @@ export class EsNamespace implements EsNamingHost {
   toString(): string {
     return this.comment.toString();
   }
-
 }
 
 /**

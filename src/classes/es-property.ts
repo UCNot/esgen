@@ -12,7 +12,6 @@ import { EsMember, EsMemberRef } from './es-member.js';
  * Class property representation.
  */
 export class EsProperty extends EsMember<EsPropertyHandle> {
-
   /**
    * Declares this property in the given class.
    *
@@ -73,7 +72,6 @@ export class EsProperty extends EsMember<EsPropertyHandle> {
   #notWritable(_target: EsSnippet, _value: EsSnippet): never {
     throw new TypeError(`${this} is not writable`);
   }
-
 }
 
 /**

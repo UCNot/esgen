@@ -12,7 +12,6 @@ import { EsMember, EsMemberInit, EsMemberRef } from './es-member.js';
  * @typeParam TArgs - Type of method arguments definition.
  */
 export class EsMethod<out TArgs extends EsSignature.Args> extends EsMember<EsMethodHandle<TArgs>> {
-
   readonly #signature: EsSignature<TArgs>;
 
   /**
@@ -56,7 +55,8 @@ export class EsMethod<out TArgs extends EsSignature.Args> extends EsMember<EsMet
   declareIn(hostClass: EsClass, { args, body }: EsMethodDeclaration<TArgs>): EsMethodHandle<TArgs> {
     const handle: EsMethodHandle<TArgs> = {
       method: this,
-      call: (target, args: EsSignature.ValuesOf<TArgs>) => esline`${target}${ref.accessor}${this.signature.call(args)}`,
+      call: (target, args: EsSignature.ValuesOf<TArgs>) =>
+        esline`${target}${ref.accessor}${this.signature.call(args)}`,
     };
     const ref = hostClass.addMember(this, handle, code => {
       code.scope({ kind: EsScopeKind.Function, ns: { comment: `[${this}]` } }, code => {
@@ -77,7 +77,6 @@ export class EsMethod<out TArgs extends EsSignature.Args> extends EsMember<EsMet
   } = {}): string {
     return `${accessor}${this.signature}`;
   }
-
 }
 
 /**

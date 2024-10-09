@@ -16,8 +16,8 @@ import { EsNamespace } from './es-namespace.js';
  * @typeParam TNaming - Type of symbol naming.
  */
 export class EsSymbol<out TNaming extends EsNaming = EsNaming>
-  implements EsReference<TNaming>, EsEmitter {
-
+  implements EsReference<TNaming>, EsEmitter
+{
   readonly #requestedName: string;
   readonly #unique: boolean;
   readonly #declare: EsDeclarationPolicy<TNaming> | undefined;
@@ -94,8 +94,8 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
 
   #autoDeclareIn(ns: EsNamespace, policy: EsDeclarationPolicy<TNaming>): TNaming {
     return (
-      ns.findSymbol(this)
-      ?? ns.addSymbol(this, naming => ns.scope.bundle.declarations.declareSymbol(this, naming, policy))
+      ns.findSymbol(this) ??
+      ns.addSymbol(this, naming => ns.scope.bundle.declarations.declareSymbol(this, naming, policy))
     );
   }
 
@@ -154,7 +154,6 @@ export class EsSymbol<out TNaming extends EsNaming = EsNaming>
 
     return comment.appendTo(requestedName, '[Symbol]');
   }
-
 }
 
 /**

@@ -28,8 +28,8 @@ import { EsAnyMember, EsMember, EsMemberRef } from './es-member.js';
  * @typeParam TSymbol - Type of class symbol.
  */
 export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
-  implements EsReference<EsClassNaming<TArgs>>, EsEmitter {
-
+  implements EsReference<EsClassNaming<TArgs>>, EsEmitter
+{
   readonly #symbol: EsSymbol<EsClassNaming<TArgs>>;
   readonly #baseClass: EsClass | undefined;
   readonly #classConstructor: EsConstructor<TArgs>;
@@ -525,7 +525,6 @@ export class EsClass<out TArgs extends EsSignature.Args = EsSignature.Args>
 
     return comment.appendTo(requestedName, '[Class]');
   }
-
 }
 
 /**
@@ -679,7 +678,6 @@ class EsMemberEntry<
   out TMember extends EsMember<THandle> = EsAnyMember,
   out THandle = EsMember.HandleOf<TMember>,
 > {
-
   readonly #hostClass: EsClass;
   readonly #member: TMember;
   readonly #name: string;
@@ -734,7 +732,6 @@ class EsMemberEntry<
       getHandle: this.getHandle,
     };
   }
-
 }
 
 interface EsClass$SharedState {

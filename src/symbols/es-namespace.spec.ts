@@ -345,9 +345,7 @@ describe('EsNamespace', () => {
 });
 
 class TestSymbol extends EsSymbol {
-
   declareIn({ ns }: EsNamingHost): EsNaming {
     return ns.addSymbol(this, asis);
   }
-
 }

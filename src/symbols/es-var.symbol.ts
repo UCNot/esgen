@@ -12,7 +12,6 @@ import {
  * Variable symbol.
  */
 export class EsVarSymbol extends EsSymbol {
-
   /**
    * Constructs variable symbol.
    *
@@ -26,10 +25,11 @@ export class EsVarSymbol extends EsSymbol {
       ...init,
       declare: declare && {
         ...declare,
-        as: context => this.#declare(
+        as: context =>
+          this.#declare(
             context,
             declare,
-            declare.as ?? declare.value ? EsVarKind.Const : EsVarKind.Var,
+            (declare.as ?? declare.value) ? EsVarKind.Const : EsVarKind.Var,
           ),
       },
     });
@@ -106,7 +106,6 @@ export class EsVarSymbol extends EsSymbol {
       context.naming,
     ];
   }
-
 }
 
 /**

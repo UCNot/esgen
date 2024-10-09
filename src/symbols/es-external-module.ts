@@ -7,7 +7,6 @@ import { EsModule } from './es-module.js';
  * Module instances are identified by their name and cached.
  */
 export class EsExternalModule extends EsModule {
-
   /**
    * Finds previously created external module with the given name, or creates one if not created yet.
    *
@@ -53,7 +52,6 @@ export class EsExternalModule extends EsModule {
   override get moduleName(): string {
     return this.#moduleName;
   }
-
 }
 
 const EsExternalModule$cache = new Map<string, EsExternalModule>();

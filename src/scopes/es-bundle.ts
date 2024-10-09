@@ -17,7 +17,6 @@ import { EsScopedValueKey } from './es-scoped-value-key.js';
  * (i.e. module, file, etc.).
  */
 export class EsBundle implements EsScope {
-
   readonly #state: [EsScope$State];
   readonly #store: EsScope$Store<EsBundle>;
   readonly #format: EsBundleFormat;
@@ -106,7 +105,9 @@ export class EsBundle implements EsScope {
   }
 
   nest(init?: EsScopeInit): EsScope {
-    return new NestedEsScope(this, this.#state, init, scope => this.ns.nest(scope, { ...init?.ns }));
+    return new NestedEsScope(this, this.#state, init, scope =>
+      this.ns.nest(scope, { ...init?.ns }),
+    );
   }
 
   span(...emitters: EsEmitter[]): EsEmissionSpan {
@@ -129,7 +130,6 @@ export class EsBundle implements EsScope {
 
     return this;
   }
-
 }
 
 /**
@@ -138,7 +138,6 @@ export class EsBundle implements EsScope {
 export type EsBundleInit = EsGenerationOptions;
 
 class NestedEsScope implements EsScope {
-
   readonly #bundle: EsBundle;
   readonly #enclosing: EsScope;
   readonly #state: [EsScope$State];
@@ -230,11 +229,9 @@ class NestedEsScope implements EsScope {
   async whenDone(): Promise<void> {
     await this.bundle.whenDone();
   }
-
 }
 
 class EsScope$Store<out TScope extends EsScope> {
-
   readonly #scope: TScope;
   readonly #values = new Map<EsScopedValueKey<unknown>, () => unknown>();
 
@@ -269,7 +266,6 @@ class EsScope$Store<out TScope extends EsScope> {
 
     return factory();
   }
-
 }
 
 interface EsScope$State {
@@ -280,7 +276,6 @@ interface EsScope$State {
 }
 
 class EsScope$ActiveState implements EsScope$State {
-
   readonly #done = new PromiseResolver();
   readonly #resolver = new EveryPromiseResolver<unknown>(this.#done.whenDone());
   readonly whenDone: () => Promise<void>;
@@ -334,11 +329,9 @@ class EsScope$ActiveState implements EsScope$State {
   done(): void {
     this.#done.resolve();
   }
-
 }
 
 class EsScope$EmittedState implements EsScope$State {
-
   constructor(readonly whenDone: () => Promise<void>) {}
 
   isActive(): boolean {
@@ -352,5 +345,4 @@ class EsScope$EmittedState implements EsScope$State {
   done(): void {
     // Do nothing.
   }
-
 }

@@ -2,7 +2,6 @@
  * Name registry used to {@link reserveName reserve names} in order to make them unique.
  */
 export class EsNameRegistry {
-
   readonly #enclosing: EsNameRegistry | undefined;
   readonly #names = new Map<string, EsReservedNames>();
 
@@ -112,7 +111,6 @@ export class EsNameRegistry {
   nest(): EsNameRegistry {
     return new EsNameRegistry(this);
   }
-
 }
 
 interface EsReservedNames {

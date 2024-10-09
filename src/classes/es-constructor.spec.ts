@@ -73,8 +73,8 @@ new Test(1);
 
     expect(() => hostClass.getHandle()).toThrow(
       new ReferenceError(
-        'constructor(test?) of Test /* [Class] */ can not accept arguments from '
-          + 'base constructor(test) of Base /* [Class] */',
+        'constructor(test?) of Test /* [Class] */ can not accept arguments from ' +
+          'base constructor(test) of Base /* [Class] */',
       ),
     );
   });

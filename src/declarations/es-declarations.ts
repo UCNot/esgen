@@ -10,7 +10,6 @@ import { EsDeclarationPolicy, EsNaming, EsReference, EsSymbol } from '../symbols
  * Collection of bundle declarations.
  */
 export class EsDeclarations {
-
   readonly #bundle: EsBundle;
   readonly #snippets = new Map<EsSymbol, EsDeclSnippet>();
   readonly #content = lazyValue(() => this.#build());
@@ -212,7 +211,6 @@ export class EsDeclarations {
       }
     }
   }
-
 }
 
 interface EsDeclarations$Content {
@@ -221,7 +219,6 @@ interface EsDeclarations$Content {
 }
 
 class EsDeclSnippet<out TNaming extends EsNaming = EsNaming> {
-
   readonly #symbol: EsSymbol<TNaming>;
   readonly #exported: boolean;
   readonly naming: TNaming;
@@ -287,7 +284,6 @@ class EsDeclSnippet<out TNaming extends EsNaming = EsNaming> {
   #refer({ symbol }: EsReference): void {
     this.#refs.add(symbol);
   }
-
 }
 
 interface EsEmittedDecl {

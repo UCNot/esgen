@@ -13,7 +13,6 @@ import { EsMember, EsMemberInit, EsMemberRef } from './es-member.js';
 export class EsConstructor<out TArgs extends EsSignature.Args = EsSignature.Args> extends EsMember<
   EsClassHandle<TArgs>
 > {
-
   /**
    * Creates no-args constructor from the given `input`.
    *
@@ -208,7 +207,6 @@ export class EsConstructor<out TArgs extends EsSignature.Args = EsSignature.Args
   override toString(): string {
     return `constructor${this.signature}`;
   }
-
 }
 
 /**

@@ -22,8 +22,8 @@ import { EsSignature } from './es-signature.js';
  */
 export class EsFunction<out TArgs extends EsSignature.Args>
   extends EsCallable<TArgs>
-  implements EsReference<EsFunctionNaming<TArgs>>, EsEmitter {
-
+  implements EsReference<EsFunctionNaming<TArgs>>, EsEmitter
+{
   readonly #symbol: EsSymbol<EsFunctionNaming<TArgs>>;
 
   /**
@@ -182,7 +182,6 @@ export class EsFunction<out TArgs extends EsSignature.Args>
 
     return comment.appendTo(`${requestedName}${signature}`);
   }
-
 }
 
 /**

@@ -8,7 +8,6 @@ import { EsSignature } from './es-signature.js';
  * @typeParam TArgs - Type of function arguments definition.
  */
 export class EsCallable<out TArgs extends EsSignature.Args> {
-
   readonly #signature: EsSignature<TArgs>;
 
   /**
@@ -124,7 +123,6 @@ export class EsCallable<out TArgs extends EsSignature.Args> {
       );
     };
   }
-
 }
 
 /**

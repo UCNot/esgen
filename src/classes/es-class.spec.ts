@@ -346,9 +346,7 @@ class Test extends Base {
 });
 
 class TestMember extends EsMember<EsClass> {
-
   declareIn(hostClass: EsClass): EsMemberRef<TestMember, EsClass> {
     return hostClass.addMember(this, hostClass, EsCode.none);
   }
-
 }

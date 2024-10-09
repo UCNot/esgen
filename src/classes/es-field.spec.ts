@@ -87,11 +87,11 @@ describe('EsField', () => {
             .line(handle.set(instance, esline`${handle.get(instance)} + 1`), `;`);
         }),
       ).resolves.toBe(
-        `export class Test {\n`
-          + `  test = 2 + 3;\n`
-          + '}\n'
-          + `const instance = new Test();\n`
-          + `instance.test = instance.test + 1;\n`,
+        `export class Test {\n` +
+          `  test = 2 + 3;\n` +
+          '}\n' +
+          `const instance = new Test();\n` +
+          `instance.test = instance.test + 1;\n`,
       );
     });
   });

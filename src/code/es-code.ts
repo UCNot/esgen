@@ -10,7 +10,6 @@ import { EsBuilder, EsSnippet } from './es-snippet.js';
  * When {@link line inline}, the written code snippets placed without new lines between them.
  */
 export class EsCode implements EsEmitter {
-
   /**
    * Empty code snippet.
    */
@@ -211,7 +210,6 @@ export class EsCode implements EsEmitter {
 
     return span.printer;
   }
-
 }
 
 function isEsPrinter(snippet: EsSnippet): snippet is EsEmitter {
@@ -223,7 +221,6 @@ function EsCode$none(_code: EsCode): void {
 }
 
 class EsCode$Record implements EsEmitter {
-
   readonly #record: EsPrinter | string;
 
   constructor(record: EsPrinter | string) {
@@ -233,11 +230,9 @@ class EsCode$Record implements EsEmitter {
   emit(): string | EsPrinter {
     return this.#record;
   }
-
 }
 
 class EsCode$NewLine$ implements EsEmitter {
-
   emit(): this {
     return this;
   }
@@ -245,13 +240,11 @@ class EsCode$NewLine$ implements EsEmitter {
   printTo(lines: EsOutput): void {
     lines.print();
   }
-
 }
 
 const EsCode$NewLine = /*#__PURE__*/ new EsCode$NewLine$();
 
 class EsCode$Line implements EsEmitter {
-
   readonly #code: EsCode;
 
   constructor(code: EsCode) {
@@ -267,11 +260,9 @@ class EsCode$Line implements EsEmitter {
       },
     };
   }
-
 }
 
 class EsCode$Indented implements EsEmitter {
-
   readonly #code: EsCode;
   readonly #indent: string | undefined;
 
@@ -289,5 +280,4 @@ class EsCode$Indented implements EsEmitter {
       },
     };
   }
-
 }

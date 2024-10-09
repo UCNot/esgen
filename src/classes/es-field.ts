@@ -7,7 +7,6 @@ import { EsMember, EsMemberRef } from './es-member.js';
  * Class field representation.
  */
 export class EsField extends EsMember<EsFieldHandle> {
-
   /**
    * Declares this field in the given class.
    *
@@ -32,7 +31,6 @@ export class EsField extends EsMember<EsFieldHandle> {
 
     return handle;
   }
-
 }
 
 /**

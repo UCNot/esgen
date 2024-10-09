@@ -10,7 +10,6 @@ import { EsNaming } from './es-symbol.js';
  * Declared at bundle level.
  */
 export class EsImports implements EsEmitter {
-
   readonly #imports = new Map<unknown, EsModuleImports>();
   readonly #bundle: EsBundle;
 
@@ -75,5 +74,4 @@ export class EsImports implements EsEmitter {
       },
     };
   }
-
 }

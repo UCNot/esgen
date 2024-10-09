@@ -20,7 +20,6 @@ describe('EsModule', () => {
 });
 
 class TestModule extends EsModule {
-
   readonly #moduleName: string;
 
   constructor(moduleName: string) {
@@ -31,5 +30,4 @@ class TestModule extends EsModule {
   override get moduleName(): string {
     return this.#moduleName;
   }
-
 }

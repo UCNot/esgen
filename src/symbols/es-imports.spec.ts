@@ -60,10 +60,10 @@ describe('EsImports', () => {
           code.line(test1, `(1);`).line(test2, `(2);`);
         }),
       ).resolves.toBe(
-        `import { test } from 'test-module1';\n`
-          + `import { test as test$0 } from 'test-module2';\n`
-          + `test(1);\n`
-          + `test$0(2);\n`,
+        `import { test } from 'test-module1';\n` +
+          `import { test as test$0 } from 'test-module2';\n` +
+          `test(1);\n` +
+          `test$0(2);\n`,
       );
     });
     it('joins imports from the same module', async () => {
@@ -87,10 +87,10 @@ describe('EsImports', () => {
           code.line(test, `();`);
         }),
       ).resolves.toBe(
-        `(async () => {\n`
-          + `  const { test } = await import('test-module');\n`
-          + `  test();\n`
-          + `})()\n`,
+        `(async () => {\n` +
+          `  const { test } = await import('test-module');\n` +
+          `  test();\n` +
+          `})()\n`,
       );
     });
     it('does not duplicate imports', async () => {
@@ -109,11 +109,11 @@ describe('EsImports', () => {
           },
         ),
       ).resolves.toBe(
-        `(async () => {\n`
-          + `  const { test } = await import('test-module');\n`
-          + `  test(1);\n`
-          + `  test(2);\n`
-          + `})()\n`,
+        `(async () => {\n` +
+          `  const { test } = await import('test-module');\n` +
+          `  test(1);\n` +
+          `  test(2);\n` +
+          `})()\n`,
       );
     });
     it('renames imported symbol', async () => {
@@ -124,10 +124,10 @@ describe('EsImports', () => {
           code.line(test, `();`);
         }),
       ).resolves.toBe(
-        `(async () => {\n`
-          + `  const { test: myTest } = await import('test-module');\n`
-          + `  myTest();\n`
-          + `})()\n`,
+        `(async () => {\n` +
+          `  const { test: myTest } = await import('test-module');\n` +
+          `  myTest();\n` +
+          `})()\n`,
       );
     });
     it('resolves conflicts', async () => {
@@ -139,12 +139,12 @@ describe('EsImports', () => {
           code.line(test1, `(1);`).line(test2, `(2);`);
         }),
       ).resolves.toBe(
-        `(async () => {\n`
-          + `  const { test } = await import('test-module1');\n`
-          + `  const { test: test$0 } = await import('test-module2');\n`
-          + `  test(1);\n`
-          + `  test$0(2);\n`
-          + `})()\n`,
+        `(async () => {\n` +
+          `  const { test } = await import('test-module1');\n` +
+          `  const { test: test$0 } = await import('test-module2');\n` +
+          `  test(1);\n` +
+          `  test$0(2);\n` +
+          `})()\n`,
       );
     });
     it('joins imports from the same module', async () => {
@@ -156,14 +156,14 @@ describe('EsImports', () => {
           code.line(test1, `();`).line(test2, `();`);
         }),
       ).resolves.toBe(
-        `(async () => {\n`
-          + `  const {\n`
-          + `    test1,\n`
-          + `    test2,\n`
-          + `  } = await import('test-module');\n`
-          + `  test1();\n`
-          + `  test2();\n`
-          + `})()\n`,
+        `(async () => {\n` +
+          `  const {\n` +
+          `    test1,\n` +
+          `    test2,\n` +
+          `  } = await import('test-module');\n` +
+          `  test1();\n` +
+          `  test2();\n` +
+          `})()\n`,
       );
     });
   });

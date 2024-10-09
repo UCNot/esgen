@@ -92,10 +92,10 @@ test();
               .write(esline`${fn.call({ arg: '1', rest: ['2', '3'] })};`);
           }),
         ).resolves.toBe(
-          `function test(arg, ...rest) {\n`
-            + `  return [arg, ...rest];\n`
-            + `}\n`
-            + `test(1, 2, 3);\n`,
+          `function test(arg, ...rest) {\n` +
+            `  return [arg, ...rest];\n` +
+            `}\n` +
+            `test(1, 2, 3);\n`,
         );
       });
       it('declares async function', async () => {
@@ -113,10 +113,10 @@ test();
               .write(esline`${fn.call({ arg: '1', rest: ['2', '3'] })};`);
           }),
         ).resolves.toBe(
-          `async function test(arg, ...rest) {\n`
-            + `  return [arg, ...rest];\n`
-            + `}\n`
-            + `test(1, 2, 3);\n`,
+          `async function test(arg, ...rest) {\n` +
+            `  return [arg, ...rest];\n` +
+            `}\n` +
+            `test(1, 2, 3);\n`,
         );
       });
       it('declares const lambda', async () => {
@@ -134,10 +134,10 @@ test();
               .write(esline`${fn.call({ arg: '1', rest: ['2', '3'] })};`);
           }),
         ).resolves.toBe(
-          `const test = (arg, ...rest) => {\n`
-            + `  return [arg, ...rest];\n`
-            + `};\n`
-            + `test(1, 2, 3);\n`,
+          `const test = (arg, ...rest) => {\n` +
+            `  return [arg, ...rest];\n` +
+            `};\n` +
+            `test(1, 2, 3);\n`,
         );
       });
       it('declares lambda variable', async () => {
@@ -155,10 +155,10 @@ test();
               .write(esline`${fn.call({ arg: '1', rest: ['2', '3'] })};`);
           }),
         ).resolves.toBe(
-          `var test = (arg, ...rest) => {\n`
-            + `  return [arg, ...rest];\n`
-            + `};\n`
-            + `test(1, 2, 3);\n`,
+          `var test = (arg, ...rest) => {\n` +
+            `  return [arg, ...rest];\n` +
+            `};\n` +
+            `test(1, 2, 3);\n`,
         );
       });
     });

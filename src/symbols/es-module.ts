@@ -9,7 +9,6 @@ import { EsNaming } from './es-symbol.js';
  * Module is a source of {@link EsImportSymbol imported symbols}.
  */
 export abstract class EsModule {
-
   /**
    * Unique module identifier.
    *
@@ -153,7 +152,6 @@ export abstract class EsModule {
   toString(): string {
     return `Module ${jsStringLiteral(this.moduleName, '"')}`;
   }
-
 }
 
 /**

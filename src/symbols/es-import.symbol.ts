@@ -12,7 +12,6 @@ import { EsNaming, EsResolution, EsSymbol, EsSymbolInit } from './es-symbol.js';
 export class EsImportSymbol<
   out TNaming extends EsNaming = EsImportNaming,
 > extends EsSymbol<TNaming> {
-
   readonly #from: EsModule;
   readonly #importName: string;
   readonly #createNaming: EsImportInit.Namer<TNaming>;
@@ -91,7 +90,6 @@ export class EsImportSymbol<
 
     return comment.appendTo(requestedName, `[from ${jsStringLiteral(this.from.moduleName, '"')}]`);
   }
-
 }
 
 /**

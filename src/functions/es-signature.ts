@@ -13,8 +13,8 @@ import { EsArg, EsArgKind, EsArgSymbol } from './es-arg.symbol.js';
  * @typeParam TArgs - Type of arguments definition.
  */
 export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
-  implements Iterable<EsArgSymbol> {
-
+  implements Iterable<EsArgSymbol>
+{
   /**
    * Creates signature from the given `input`.
    *
@@ -302,14 +302,13 @@ export class EsSignature<out TArgs extends EsSignature.Args = EsSignature.Args>
 
   toString(): string {
     return (
-      `(`
-      + Object.values<EsArgSymbol>(this.args)
+      `(` +
+      Object.values<EsArgSymbol>(this.args)
         .map(({ argKey, comment }) => comment.appendTo(argKey))
-        .join(', ')
-      + ')'
+        .join(', ') +
+      ')'
     );
   }
-
 }
 
 export namespace EsSignature {
@@ -363,11 +362,12 @@ export namespace EsSignature {
    *
    * @typeParam TArgs - Type of arguments definition.
    */
-  export type RequiredKeyOf<TArgs extends Args> = TArgs extends Args<infer TKey>
-    ? TKey extends `${string}?` | `...${string}`
-      ? never
-      : TKey
-    : never;
+  export type RequiredKeyOf<TArgs extends Args> =
+    TArgs extends Args<infer TKey>
+      ? TKey extends `${string}?` | `...${string}`
+        ? never
+        : TKey
+      : never;
 
   /**
    * {@link EsArgKind.Optional Optional} argument {@link EsArg.Key keys} extracted from signature arguments
@@ -375,11 +375,12 @@ export namespace EsSignature {
    *
    * @typeParam TArgs - Type of arguments definition.
    */
-  export type OptionalKeyOf<TArgs extends Args> = TArgs extends Args<infer TKey>
-    ? TKey extends `${infer TOptionalKey}?`
-      ? TOptionalKey
-      : never
-    : never;
+  export type OptionalKeyOf<TArgs extends Args> =
+    TArgs extends Args<infer TKey>
+      ? TKey extends `${infer TOptionalKey}?`
+        ? TOptionalKey
+        : never
+      : never;
 
   /**
    * {@link EsArgKind.VarArg Vararg} argument {@link EsArg.Key keys} extracted from signature arguments
@@ -387,11 +388,12 @@ export namespace EsSignature {
    *
    * @typeParam TArgs - Type of arguments definition.
    */
-  export type VarArgKeyOf<TArgs extends Args> = TArgs extends Args<infer TKey>
-    ? TKey extends `...${infer TVarArgKey}`
-      ? TVarArgKey
-      : never
-    : never;
+  export type VarArgKeyOf<TArgs extends Args> =
+    TArgs extends Args<infer TKey>
+      ? TKey extends `...${infer TVarArgKey}`
+        ? TVarArgKey
+        : never
+      : never;
 
   /**
    * Argument {@link EsArg.NameOf names} extracted from signature arguments {@link EsSignature.Args definition}.

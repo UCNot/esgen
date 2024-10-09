@@ -54,10 +54,12 @@ describe('EsOutput', () => {
       await expect(
         output
           .print('{')
-          .indent(out => out
+          .indent(out =>
+            out
               .print('{')
               .indent(out => out.line(out => out.print('foo();', 'bar();')))
-              .print('}'))
+              .print('}'),
+          )
           .print('}')
           .asText(),
       ).resolves.toBe('{\n  {\n    foo();bar();\n  }\n}\n');
@@ -87,10 +89,12 @@ describe('EsOutput', () => {
       await expect(
         output
           .print('{')
-          .indent(out => out
+          .indent(out =>
+            out
               .print('{')
               .indent(out => out.print('foo();', 'bar();'), '/* indent */ ')
-              .print('}'))
+              .print('}'),
+          )
           .print('}')
           .asText(),
       ).resolves.toBe('{\n  {\n  /* indent */ foo();\n  /* indent */ bar();\n  }\n}\n');

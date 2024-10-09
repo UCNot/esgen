@@ -4,7 +4,6 @@ import { EsOutput, EsPrinter } from './es-output.js';
  * Code comment. Either multi-line or single-line.
  */
 export class EsComment implements EsPrinter {
-
   /**
    * Empty comment. I.e. comment with {@link lineCount zero lines}.
    */
@@ -110,12 +109,11 @@ export class EsComment implements EsPrinter {
     }
 
     return (
-      (prefix ? `/* ${prefix}\n` : `/*\n`)
-      + this.#lines.map(line => (line ? `   ${line}\n` : '\n')).join('')
-      + '*/'
+      (prefix ? `/* ${prefix}\n` : `/*\n`) +
+      this.#lines.map(line => (line ? `   ${line}\n` : '\n')).join('') +
+      '*/'
     );
   }
-
 }
 
 const EsComment$empty = /*#__PURE__*/ new EsComment();

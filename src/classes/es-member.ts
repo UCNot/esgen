@@ -10,7 +10,6 @@ import { EsMemberVisibility } from './es-member-visibility.js';
  * @typeParam THandle - Type of member handle.
  */
 export abstract class EsMember<out THandle = void> {
-
   readonly #requestedName: string;
   readonly #visibility: EsMemberVisibility;
 
@@ -94,7 +93,6 @@ export abstract class EsMember<out THandle = void> {
   } = {}): string {
     return accessor;
   }
-
 }
 
 export interface EsMember<out THandle = void> {
@@ -117,9 +115,8 @@ export namespace EsMember {
    *
    * @typeParam TMember - Member type.
    */
-  export type HandleOf<TMember extends EsAnyMember> = TMember extends EsMember<infer THandle>
-    ? THandle
-    : never;
+  export type HandleOf<TMember extends EsAnyMember> =
+    TMember extends EsMember<infer THandle> ? THandle : never;
 }
 
 /**

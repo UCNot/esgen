@@ -10,7 +10,6 @@ import { EsSignature } from './es-signature.js';
  * Declared by {@link EsSignature#args function signature} typically.
  */
 export class EsArgSymbol extends EsSymbol<EsArgNaming> {
-
   readonly #signature: EsSignature;
   readonly #position: number;
   readonly #kind: EsArgKind;
@@ -119,7 +118,6 @@ export class EsArgSymbol extends EsSymbol<EsArgNaming> {
 
     return comment.appendTo(argKey, `[Arg #${this.position}]`);
   }
-
 }
 
 /**
@@ -186,8 +184,8 @@ export namespace EsArg {
   export type NameOf<TKey extends Key> = TKey extends `${infer TName}?`
     ? TName
     : TKey extends `...${infer TName}`
-    ? TName
-    : TKey;
+      ? TName
+      : TKey;
 }
 
 /**

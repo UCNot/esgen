@@ -2,7 +2,6 @@
  * Generated code {@link esEvaluate evaluation} error.
  */
 export class EsEvaluationError extends Error {
-
   readonly #evaluatedCode: string;
   readonly #isSyntaxError: boolean;
 
@@ -35,7 +34,6 @@ export class EsEvaluationError extends Error {
   get isSyntaxError(): boolean {
     return this.#isSyntaxError;
   }
-
 }
 
 /**
